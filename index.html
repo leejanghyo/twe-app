@@ -437,6 +437,14 @@
       .gacha .g-actions .btn { min-height: 50px; font-size: 16px; }
     }
 
+    .ver-tag { font-size: 10px; color: #b9b0a8; user-select: none; -webkit-user-select: none; cursor: default; white-space: nowrap; }
+    #verTop { margin-left: 6px; }
+    #verTag { text-align: center; font-size: 11px; margin-top: 28px; margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
+    .upd-banner {
+      position: fixed; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 60;
+      background: var(--accent); color: #fff; font-weight: 700; font-size: 15px; text-align: center;
+      padding: 12px 14px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.25); cursor: pointer;
+    }
     .toast {
       position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-120px);
       background: var(--ok); color: #fff; padding: 12px 26px; border-radius: 999px; font-weight: 700;
@@ -461,7 +469,7 @@
     <header>
       <h1>今天吃什麼</h1>
       <div class="head-right">
-        <span class="who" id="whoBox"></span>
+        <span class="who" id="whoBox"></span><span class="ver-tag" id="verTop"></span>
         <button class="cal-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
       </div>
     </header>
@@ -512,7 +520,7 @@
           <span>正在煩惱今天吃什麼…</span><span>正在翻找附近的美食…</span><span>問問肚子想吃什麼…</span><span>熱騰騰的菜單快好了…</span><span>扭蛋機暖機中…</span>
         </div>
       </div></div>
-    <div id="verTag" style="text-align:center;font-size:11px;color:#b9b0a8;margin-top:28px;user-select:none;-webkit-user-select:none">v2026.11.17-c</div>
+    <div id="verTag" class="ver-tag"></div>
   </div>
 
   <div class="bar" id="bar">
@@ -648,6 +656,7 @@
     </div>
   </div>
 
+  <div class="upd-banner" id="updBanner" style="display:none" role="button">有新版本，點一下更新</div>
   <div class="toast" id="toast"></div>
 
 <script>
@@ -1274,6 +1283,33 @@
 
   var pendingBootstrapCb = null;
 
+  // ===== 앱 버전 표시 + 새 버전 확인 =====
+  // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
+  // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
+  // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
+  var APP_VERSION = '2026.11.17-d';
+  $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
+  var latestVersion = '', lastVerCheck = 0;
+  function checkVersion_(force) {
+    var now = Date.now();
+    if (!force && now - lastVerCheck < 20000) return;
+    lastVerCheck = now;
+    fetch('version.json?t=' + now, { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.version && j.version !== APP_VERSION) { latestVersion = String(j.version); $('updBanner').style.display = 'block'; }
+      })
+      .catch(function () { /* 확인 실패는 조용히 무시 */ });
+  }
+  $('updBanner').addEventListener('click', function () {
+    // 주소에 ?v=새버전 을 붙여 캐시된 옛 index.html을 피해 다시 연다. 토큰은 localStorage에 그대로 남는다.
+    var u = new URL(location.href);
+    u.searchParams.set('v', latestVersion || String(Date.now()));
+    location.replace(u.toString());
+  });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') checkVersion_(); });
+  checkVersion_(true);
+
   // ===== 진단: 화면 맨 아래 버전 글자를 5번 연속 누르면 로그인 저장 상태를 보여 준다 (토큰은 앞 4자만) =====
   (function () {
     var taps = 0, timer = null;
@@ -1289,15 +1325,18 @@
       $('diagText').textContent =
         '토큰: ' + (tok ? '저장됨 (' + tok.slice(0, 4) + '…)' : '없음') + '\n' +
         '저장 위치: localStorage ' + (ls ? '있음' : '없음') + ' (' + lsOk + ') / 쿠키 ' + (ck ? '있음' : '없음') + '\n' +
+        '앱 버전: ' + APP_VERSION + '\n' +
         '마지막 신원 확인: ' + last + '\n' +
         'standalone(홈화면 앱): ' + (standalone ? '예' : '아니오') + '\n' +
         '현재 화면 신원: ' + (token ? '확인됨' : '미확인') + '\n' +
         '주소: ' + location.pathname;
       $('diagModal').style.display = 'flex';
     }
-    $('verTag').addEventListener('click', function () {
-      taps++; clearTimeout(timer); timer = setTimeout(function () { taps = 0; }, 2500);
-      if (taps >= 5) { taps = 0; show(); }
+    Array.prototype.forEach.call(document.querySelectorAll('.ver-tag'), function (el) {
+      el.addEventListener('click', function () {
+        taps++; clearTimeout(timer); timer = setTimeout(function () { taps = 0; }, 2500);
+        if (taps >= 5) { taps = 0; show(); }
+      });
     });
     $('diagClose').addEventListener('click', function () { $('diagModal').style.display = 'none'; });
   })();
