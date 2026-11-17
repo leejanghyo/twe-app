@@ -712,7 +712,7 @@
         setTabsBusy(false);
         $('main').innerHTML = '<div class="closed">載入失敗<small>' + esc(e.message) + '</small></div>';
       })
-      .getAppData(document.body.dataset.day || '', slot || '');
+      .getAppData(document.body.dataset.day || '', slot || '', token);
   }
 
   function setTabsBusy(b) {
@@ -768,7 +768,7 @@
         ? VARIETY_NUDGE_PHRASES[Math.floor(Math.random() * VARIETY_NUDGE_PHRASES.length)].replace('%s', cat)
         : null;
       renderVarietyBanner();
-    }).withFailureHandler(function () { /* 넛지는 꾸밈 기능이라 실패해도 조용히 무시 */ }).getVarietyNudge();
+    }).withFailureHandler(function () { /* 넛지는 꾸밈 기능이라 실패해도 조용히 무시 */ }).getVarietyNudge(token);
   }
 
   // 一起決定 결과·대기 화면이면 그것을, 아니면 固定/推薦 목록을 그린다
@@ -1003,7 +1003,7 @@
         $('promoAdd').disabled = false;
         toast(e.message || '加入失敗', true);
       })
-      .addToFixedMenu(name);
+      .addToFixedMenu(name, token);
   });
 
   // ===== 推薦 탭 다양성 넛지 (최근 연속으로 같은 分類/類型을 먹었으면 살짝 알려줌) =====
