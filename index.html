@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="今天又吃什麼">
+  <meta name="theme-color" content="#e0662f">
+  <title>今天又吃什麼</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root {
+      --bg: #fbf7f2; --card: #fff; --ink: #2b2420; --muted: #8a7f77;
+      --accent: #e0662f; --accent-soft: #fde9dd; --line: #eadfd5; --ok: #2f9e6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 120px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 28px; }
+    .today { color: var(--muted); font-size: 15px; }
+    .slot-badge {
+      display: inline-block; margin-left: 6px; padding: 2px 10px; border-radius: 999px;
+      background: var(--accent); color: #fff; font-weight: 700;
+    }
+    .slot-badge.off { background: #b9b0a8; }
+    .test-flag { font-size: 12px; color: #b44; margin-left: 6px; }
+    .tabs { display: inline-flex; margin-top: 14px; background: var(--line); border-radius: 999px; padding: 4px; }
+    .tabs button {
+      border: 0; background: transparent; font: inherit; font-weight: 700; font-size: 16px;
+      padding: 6px 26px; border-radius: 999px; cursor: pointer; color: var(--muted);
+    }
+    .tabs button.active { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .tabs button:disabled { cursor: default; }
+    .now-hint { font-size: 13px; color: var(--muted); margin-left: 10px; }
+    section { margin-top: 26px; }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    h2 { margin: 0; font-size: 19px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .card {
+      background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 12px;
+      cursor: pointer; transition: border-color .15s, transform .1s; text-align: left; font: inherit; color: inherit;
+    }
+    .card:hover { transform: translateY(-1px); }
+    .card.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .card .name { font-weight: 700; font-size: 16px; }
+    .card .meta { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; }
+    .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+    .card a { color: var(--accent); }
+    .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--line); margin-bottom: 6px; }
+    .empty { color: var(--muted); font-size: 14px; }
+    .promo {
+      margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: #fff6d6; border: 1px solid #f0dc9a;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px;
+    }
+    .promo .promo-text { flex: 1 1 220px; }
+    .promo button { border: 0; border-radius: 8px; padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; }
+    .promo .p-add { background: var(--accent); color: #fff; }
+    .promo .p-later { background: transparent; color: var(--muted); }
+    .promo button:disabled { opacity: .5; cursor: default; }
+    .variety-banner {
+      margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
+      display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink);
+    }
+    .variety-banner span { flex: 1; }
+    .variety-banner button {
+      flex: 0 0 auto; border: 0; background: transparent; color: var(--muted); font-size: 18px; line-height: 1;
+      cursor: pointer; padding: 2px 4px;
+    }
+    /* 固定菜單: 分類 4개씩 한 줄(4열), 각 열은 分類명 + 카드 세로 나열. 좁으면 2열 → 1열 */
+    .cat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 12px; align-items: start; }
+    .cat-stack { display: flex; flex-direction: column; gap: 8px; }
+    .cat-stack .card { width: 100%; }
+    .card .place { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; }
+    h3.cat-title { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: .05em; }
+    button.btn {
+      border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer;
+    }
+    .btn-gacha { background: #2b2420; color: #fff; }
+    .btn-confirm { background: var(--accent); color: #fff; font-size: 18px; padding: 12px 34px; }
+    .btn:disabled { opacity: .4; cursor: default; }
+    .closed { margin-top: 60px; text-align: center; font-size: 22px; font-weight: 700; }
+    .closed small { display: block; margin-top: 8px; font-size: 14px; color: var(--muted); font-weight: 400; }
+    .loading { margin-top: 40px; color: var(--muted); text-align: center; }
+
+    /* ===== 로딩 캐릭터 (SVG + CSS 애니메이션만 사용, 외부 파일 없음) ===== */
+    .ld { display: flex; flex-direction: column; align-items: center; margin-top: min(12vh, 80px); text-align: center; }
+    .ld-svg { width: min(180px, 46vw); height: auto; overflow: visible; }
+    .ld-char { transform-box: fill-box; transform-origin: 50% 100%; animation: ldBounce 1.1s ease-in-out infinite; }
+    .ld-shadow { transform-box: fill-box; transform-origin: center; animation: ldShadow 1.1s ease-in-out infinite; }
+    .ld-eye { transform-box: fill-box; transform-origin: center; animation: ldBlink 3.2s infinite; }
+    .ld-smile { animation: ldSmile 4s infinite; }
+    .ld-open { opacity: 0; animation: ldOpen 4s infinite; }
+    .ld-steam circle { transform-box: fill-box; transform-origin: center; opacity: 0; animation: ldSteam 2.4s ease-out infinite; }
+    .ld-steam circle:nth-child(2) { animation-delay: .8s; }
+    .ld-steam circle:nth-child(3) { animation-delay: 1.6s; }
+    .ld-msgs { position: relative; width: 100%; height: 26px; margin-top: 16px; }
+    .ld-msgs span {
+      position: absolute; left: 0; right: 0; opacity: 0; color: var(--muted); font-weight: 600; font-size: 15px;
+      animation: ldMsg 10s infinite;
+    }
+    .ld-msgs span:nth-child(2) { animation-delay: 2s; }
+    .ld-msgs span:nth-child(3) { animation-delay: 4s; }
+    .ld-msgs span:nth-child(4) { animation-delay: 6s; }
+    .ld-msgs span:nth-child(5) { animation-delay: 8s; }
+    @keyframes ldBounce {
+      0%, 100% { transform: translateY(0) scale(1.05, .93); }
+      50%      { transform: translateY(-20px) scale(.97, 1.04); }
+    }
+    @keyframes ldShadow { 0%, 100% { transform: scale(1); opacity: .16; } 50% { transform: scale(.72); opacity: .08; } }
+    @keyframes ldBlink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.1); } }
+    @keyframes ldSmile { 0%, 60% { opacity: 1; } 62%, 86% { opacity: 0; } 88%, 100% { opacity: 1; } }
+    @keyframes ldOpen  { 0%, 60% { opacity: 0; } 62%, 86% { opacity: 1; } 88%, 100% { opacity: 0; } }
+    @keyframes ldSteam {
+      0%   { opacity: 0;   transform: translateY(16px) scale(.6); }
+      25%  { opacity: .8; }
+      100% { opacity: 0;   transform: translateY(-26px) scale(1.25); }
+    }
+    @keyframes ldMsg {
+      0%   { opacity: 0; transform: translateY(5px); }
+      4%   { opacity: 1; transform: translateY(0); }
+      16%  { opacity: 1; transform: translateY(0); }
+      20%  { opacity: 0; transform: translateY(-5px); }
+      100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .ld-char, .ld-shadow { animation: none; } }
+
+    /* 하단 확정 바 */
+    .bar {
+      position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line);
+      padding: 12px 16px; display: none;
+    }
+    .bar-inner { max-width: 760px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .bar .picked { flex: 1 1 180px; min-width: 0; }
+    .bar .picked b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar .picked span { color: var(--muted); font-size: 13px; }
+    .bar input { flex: 1 1 160px; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+
+    /* 가챠 화면 */
+    .gacha {
+      position: fixed; inset: 0; background: rgba(43,36,32,.88); display: none;
+      align-items: center; justify-content: center; flex-direction: column; color: #fff; z-index: 10; padding: 16px;
+    }
+    .capsule {
+      width: min(320px, 90vw); min-height: 150px; border-radius: 22px; background: #fff; color: var(--ink);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .capsule .g-name { font-size: 24px; font-weight: 800; }
+    .capsule .g-type { margin-top: 6px; color: var(--muted); }
+    .capsule.spinning { animation: shake .12s infinite; }
+    .capsule.done { animation: pop .4s ease-out; border: 4px solid var(--accent); }
+    @keyframes shake { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+    @keyframes pop { 0% { transform: scale(.8); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .gacha .g-actions { margin-top: 22px; display: flex; gap: 10px; }
+    .gacha .g-actions button { background: #fff; color: var(--ink); }
+    .gacha .g-actions .btn-confirm { background: var(--accent); color: #fff; font-size: 16px; padding: 10px 18px; }
+
+    /* 사용자 표시 / 一起決定 */
+    .head-right { display: flex; align-items: center; gap: 4px; }
+    .who { font-size: 14px; color: var(--muted); white-space: nowrap; }
+    .who a { color: var(--accent); cursor: pointer; text-decoration: underline; white-space: nowrap; margin-left: 4px; }
+    .who .nick-tap {
+      cursor: pointer; color: var(--ink); font-weight: 700; border-bottom: 1px dashed var(--muted); padding-bottom: 1px;
+    }
+    .who .nick-tap:active { opacity: .7; }
+    .nick-box input {
+      width: 100%; margin-top: 4px; padding: 12px; font: inherit; font-size: 18px; text-align: center;
+      border: 2px solid var(--line); border-radius: 10px;
+    }
+    .nick-box input:focus { outline: none; border-color: var(--accent); }
+    .nick-box .nick-guide { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+    .nick-banner {
+      margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px;
+    }
+    .nick-banner span { flex: 1 1 200px; }
+    .nick-banner button { border: 0; border-radius: 8px; padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; background: var(--accent); color: #fff; }
+    .nick-box .nick-err { min-height: 20px; margin-top: 6px; color: #c0392b; font-size: 13px; }
+    .nick-box .nick-actions { display: flex; gap: 8px; }
+    .nick-box .nick-actions button { margin-top: 4px; font-size: 16px; padding: 12px; }
+    .nick-box .n-cancel { background: var(--line); color: var(--ink); }
+    .nick-box .n-save { background: var(--accent); color: #fff; }
+    .id-switch { margin-top: 14px; font-size: 13px; text-align: center; }
+    .id-switch a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+    #claimPin, #loginPin { margin-top: 10px; letter-spacing: 6px; text-align: center; font-size: 20px; }
+    .fixed-box { width: min(360px, 100%); text-align: left; }
+    .fixed-box h2 { text-align: center; }
+    .fixed-box input, .fixed-box select {
+      width: 100%; margin-top: 10px; padding: 11px; font: inherit; font-size: 16px;
+      border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink);
+    }
+    .fixed-box input#fxName { text-align: left; font-size: 17px; }
+    .fixed-box select:focus, .fixed-box input:focus { outline: none; border-color: var(--accent); }
+    .fx-label { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .fx-days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .fx-days label {
+      display: flex; align-items: center; gap: 4px; padding: 6px 10px; border: 2px solid var(--line);
+      border-radius: 999px; font-size: 14px; cursor: pointer; user-select: none;
+    }
+    .fx-days input { width: auto; margin: 0; }
+    .fx-note { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .fx-delete {
+      display: block; width: 100%; margin-top: 10px; background: transparent; color: #c0392b;
+      border: 2px solid #f0c9c3; font-size: 14px; padding: 10px;
+    }
+    .add-fixed-wrap { display: flex; justify-content: center; margin-top: 10px; }
+    #secRec { position: relative; }
+    .rec-load-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 3; display: flex; align-items: center; justify-content: center; }
+    .rec-load-overlay .ld { margin-top: 0; }
+    .add-fixed-fab {
+      width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--accent); color: #fff;
+      font-size: 26px; line-height: 1; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 3px 10px rgba(224,102,47,.35); padding: 0;
+    }
+    .add-fixed-fab:active { transform: scale(.95); }
+    .card-wrap { position: relative; }
+    .card-edit {
+      position: absolute; top: 8px; right: 8px; z-index: 2; border: 0; background: rgba(255,255,255,.9);
+      border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--muted); box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    }
+    .card-edit svg { width: 14px; height: 14px; }
+    .card-wrap .card { width: 100%; }
+    .history-box { width: min(420px, 100%); max-height: 80vh; display: flex; flex-direction: column; padding-bottom: 16px; }
+    .hist-hint { text-align: center; font-size: 12px; color: var(--accent); margin: 2px 0 0; min-height: 15px; }
+    .hist-dots { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 6px 0 2px; flex: 0 0 auto; }
+    .hist-dot { width: 10px; height: 10px; padding: 0; border: 2px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; }
+    .hist-dot.active { width: 28px; border-radius: 999px; background: var(--accent); border-color: var(--accent); }
+    .hist-slides {
+      display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; flex: 1 1 auto; min-height: 0;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-top: 8px;
+      padding: 0 7%;
+    }
+    .hist-slides::-webkit-scrollbar { display: none; }
+    .hist-slide {
+      flex: 0 0 86%; scroll-snap-align: center; overflow-y: auto; padding: 12px 10px; text-align: left;
+      background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+    }
+    .hist-slide h3 { margin: 0 0 4px; font-size: 14px; color: var(--muted); }
+    .history-list { text-align: left; }
+    .history-day { margin-bottom: 14px; }
+    .history-day h4 { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+    .history-row { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .history-row .h-slot { flex: 0 0 auto; font-weight: 700; color: var(--accent); }
+    .history-row .h-menu { flex: 1; }
+    .history-row .h-method { flex: 0 0 auto; font-size: 12px; color: var(--muted); }
+    .history-empty { text-align: center; color: var(--muted); padding: 30px 0; }
+    .summary-box { text-align: left; }
+    .summary-box h3 { margin: 0 0 10px; font-size: 15px; }
+    .summary-box .sum-sub { color: var(--muted); font-size: 12px; margin: -6px 0 10px; }
+    .summary-box .sum-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+    .summary-box .sum-label { flex: 0 0 56px; color: var(--muted); }
+    .summary-box .sum-bar-wrap { flex: 1; background: var(--line); border-radius: 999px; height: 10px; overflow: hidden; }
+    .summary-box .sum-bar { height: 100%; background: var(--accent); border-radius: 999px; }
+    .summary-box .sum-count { flex: 0 0 auto; font-weight: 700; font-size: 12px; min-width: 20px; text-align: right; }
+    .summary-box .sum-top { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .summary-box .sum-top span {
+      background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700;
+    }
+    .summary-box .sum-section-title { font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+    .summary-box .sum-empty { color: var(--muted); font-size: 13px; padding: 6px 0 10px; }
+    .cal-btn {
+      border: 0; background: var(--line); cursor: pointer; margin-left: 4px;
+      color: var(--ink); border-radius: 50%; width: 34px; height: 34px; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-btn:active { background: var(--accent-soft); }
+    .cal-btn svg { width: 18px; height: 18px; }
+    #tabBar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 0; }
+    .btn-joint { margin-left: auto; margin-top: 14px; background: #fff; color: var(--accent); border: 2px solid var(--accent) !important; }
+    .btn-joint.on { background: var(--accent); color: #fff; }
+    .joint-hint { display: block; font-size: 11px; font-weight: 400; }
+
+    /* 共選: 고르는 중인 카드에 체크 표시 */
+    .picking .card { position: relative; padding-right: 34px; }
+    .picking .card::after {
+      content: ''; position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
+      border: 2px solid var(--line); border-radius: 5px; background: #fff;
+    }
+    .picking .card.checked { border-color: var(--accent); background: var(--accent-soft); }
+    .picking .card.checked::after { content: '✓'; border-color: var(--accent); background: var(--accent); color: #fff;
+      font-size: 13px; font-weight: 800; line-height: 18px; text-align: center; }
+    .any-btn { display: block; width: 100%; margin: 0 0 14px; padding: 14px 16px; border: 2px dashed var(--accent); border-radius: 14px;
+      background: var(--accent-soft); color: var(--accent); font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .joint-panel { margin-top: 26px; background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 20px; }
+    .joint-panel .ld { margin-top: 10px; }
+    .joint-panel .ld-svg { width: min(130px, 34vw); }
+    .joint-panel h2 { margin-bottom: 8px; }
+    .joint-panel .sub { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .joint-panel .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .joint-panel .btn-plain { background: var(--line); color: var(--ink); }
+    .joint-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .joint-lists .col { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+    .joint-lists .col b { display: block; margin-bottom: 4px; }
+    .joint-lists li { margin: 2px 0; }
+    .joint-lists ul { margin: 0; padding-left: 18px; }
+    .joint-lists .hit { color: var(--accent); font-weight: 700; }
+    .dots::after { content: ''; animation: dots 1.5s steps(4) infinite; }
+    @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+    /* 누구세요? */
+    .who-modal {
+      position: fixed; inset: 0; background: rgba(43,36,32,.6); display: none; z-index: 30;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .who-box { background: #fff; border-radius: 18px; padding: 24px; width: min(320px, 100%); text-align: center; }
+    .who-box h2 { margin-bottom: 16px; }
+    .who-box button { display: block; width: 100%; margin-top: 10px; font-size: 18px; padding: 14px; }
+    .who-box .w-jang { background: var(--accent); color: #fff; }
+    .who-box .w-onni { background: #2b2420; color: #fff; }
+
+
+    /* ===== 모바일 전용 구조 (배달앱 패턴): 세그먼트 탭 + 分類 칩 + 큰 카드 ===== */
+    .m-only { display: none; }
+    .seg { display: none; }
+    .card { -webkit-tap-highlight-color: transparent; }
+    .card:active { transform: scale(.99); }
+    .note-toggle { display: none; }
+    .seg-dot { display: none; }
+    @media (max-width: 720px) {
+      :root { --seg-h: 64px; }
+      .wrap { padding: 14px 14px 170px; }
+      h1 { font-size: 24px; }
+      .today { font-size: 14px; }
+
+      /* 午/晚 탭: 가로 꽉 차게 */
+      #tabBar { display: block; }
+      .tabs { display: flex; width: 100%; margin-top: 12px; }
+      .tabs button { flex: 1; padding: 11px 0; font-size: 17px; }
+      .now-hint { display: block; margin: 6px 0 0 4px; }
+      #jointBtn { display: none !important; }   /* 모바일은 세그먼트의 「一起決定」 탭을 쓴다 */
+
+      /* 세그먼트 탭: 스크롤해도 위에 붙어 있음. 固定/推薦/扭蛋은 한 줄, 一起決定은 그 아래 전체 폭 한 줄 */
+      .seg.ready {
+        display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; z-index: 6;
+        background: var(--bg); padding: 10px 0 8px; margin-top: 4px;
+      }
+      .seg-row { display: flex; gap: 6px; }
+      .seg button {
+        position: relative; flex: 1; border: 0; border-radius: 12px; padding: 12px 0; font: inherit;
+        font-size: 15px; font-weight: 700; background: var(--line); color: var(--muted); cursor: pointer;
+        -webkit-tap-highlight-color: transparent; white-space: nowrap;
+      }
+      .seg-joint-btn { width: 100%; }
+      .seg button.active { background: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(224,102,47,.35); }
+      .seg-dot { position: absolute; top: 6px; right: 8px; width: 9px; height: 9px; border-radius: 50%; background: #e0372f; border: 2px solid var(--bg); }
+      .seg-dot.on { display: block; }
+
+      /* 탭별 표시: 한 번에 한 화면만 */
+      section { margin-top: 10px; }
+      #main .sec-head { display: none; }
+      #main.picking .sec-head { display: flex; }
+      #main.picking .sec-head .btn-gacha { display: none; }
+      #main.seg-fixed #secRec, #main.seg-fixed #secGacha, #main.seg-fixed #secJointLoad,
+      #main.seg-rec #secFixed, #main.seg-rec #secGacha, #main.seg-rec #secJointLoad,
+      #main.seg-gacha #secFixed, #main.seg-gacha #secRec, #main.seg-gacha #secJointLoad,
+      #main.seg-joint #secGacha { display: none; }
+      #main.seg-gacha #secGacha { display: block; }
+      #main.seg-joint:not(.picking) #secFixed, #main.seg-joint:not(.picking) #secRec { display: none; }
+      #main.seg-joint:not(.picking) #secJointLoad { display: block; }
+
+      /* 分類 칩 (가로 스크롤) */
+      .chips {
+        display: flex; gap: 8px; overflow-x: auto; position: sticky; top: var(--seg-h); z-index: 5;
+        background: var(--bg); padding: 6px 0 10px; margin-bottom: 4px;
+        scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      }
+      .chips::-webkit-scrollbar { display: none; }
+      .chip {
+        flex: 0 0 auto; border: 2px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px;
+        padding: 8px 16px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+      /* 固定菜單: 分類를 세로로, 카드는 한 줄에 하나 */
+      .cat-grid { grid-template-columns: 1fr; gap: 18px; }
+      /* 마지막 分類도 칩을 눌렀을 때 맨 위까지 올라올 수 있게 아래 여백을 확보 */
+      /* 一起決定(picking)에서는 칩이 없어서 이 여백이 필요 없고, 있으면 推薦菜單이 안 보이는 것처럼 느껴짐 */
+      /* 마지막 分類를 칩으로 눌러도 맨 위까지 스크롤되도록 보이지 않는 여백(카드/+버튼 뒤에 둬서 버튼 위치엔 영향 없음) */
+      .chip-scroll-pad { min-height: calc(100vh - var(--seg-h) - 150px); }
+      .cat { scroll-margin-top: calc(var(--seg-h) + 58px); }
+      h3.cat-title { font-size: 16px; color: var(--ink); margin-bottom: 10px; }
+      .cat-stack { gap: 10px; }
+      .grid { grid-template-columns: 1fr; gap: 10px; }
+
+      /* 더 큰 터치 영역 + 모바일 글자 크기 */
+      .card { min-height: 64px; padding: 14px 16px; border-radius: 14px; }
+      .card .name { font-size: 18px; }
+      .card .place, .card .meta { font-size: 14px; margin-top: 5px; }
+      .tag { font-size: 13px; padding: 2px 10px; }
+      .picking .card { padding-right: 52px; }
+      .picking .card::after { top: 50%; right: 14px; width: 24px; height: 24px; margin-top: -12px; border-radius: 7px; }
+      .picking .card.checked::after { font-size: 16px; line-height: 20px; }
+
+      /* 扭蛋 탭 */
+      .gacha-card { background: #fff; border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
+      .gc-emoji { font-size: 56px; line-height: 1; }
+      .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; }
+      .gacha-card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+      .gc-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 18px; }
+      .gc-types .tag { margin-bottom: 0; }
+      .gacha-card .btn-gacha { width: 100%; min-height: 58px; font-size: 19px; border-radius: 16px; }
+      #secJointLoad { text-align: center; padding: 10px 0; }
+      #secJointLoad .ld { margin-top: 6vh; }
+
+      /* 一起決定 패널 */
+      .joint-panel { margin-top: 6px; padding: 18px; }
+      .joint-lists { grid-template-columns: 1fr; }
+      .joint-panel .actions .btn { min-height: 48px; }
+
+      /* 하단 확정 바: 엄지로 누르기 편하게 (큰 버튼 + 備註는 접어 둠) */
+      .bar { padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 14px rgba(43,36,32,.08); }
+      .bar-inner { gap: 10px; }
+      .bar .picked { order: 1; flex: 1 1 0; }
+      .bar .picked b { font-size: 17px; }
+      .note-toggle {
+        display: block; order: 2; border: 0; background: var(--line); color: var(--ink); border-radius: 12px;
+        min-height: 54px; padding: 0 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+      }
+      .bar .btn-confirm { order: 3; min-height: 54px; min-width: 112px; font-size: 19px; border-radius: 14px; padding: 0 22px; }
+      #bar input { order: 4; flex: 1 1 100%; display: none; font-size: 16px; padding: 12px; }
+      #bar.note-open input { display: block; }
+      #jbar .btn { min-height: 54px; border-radius: 14px; font-size: 17px; }
+      #jbar #jCancel { order: 2; }
+      #jbar #jSubmit { order: 3; }
+      #jbar .btn-confirm { min-width: 104px; }
+
+      /* 扭蛋 오버레이 버튼도 크게 */
+      .gacha .g-actions { flex-wrap: wrap; justify-content: center; }
+      .gacha .g-actions .btn { min-height: 50px; font-size: 16px; }
+    }
+
+    .toast {
+      position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-120px);
+      background: var(--ok); color: #fff; padding: 12px 26px; border-radius: 999px; font-weight: 700;
+      transition: transform .3s; z-index: 20;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.err { background: #c0392b; }
+  </style>
+</head>
+<body data-day="" data-slot="" data-who="">
+  <script>
+    // GAS 템플릿이 하던 일: URL ?day=&slot=&who= 를 읽어 body에 심는다 (기존 코드가 body.dataset을 읽는다)
+    (function () {
+      var p = new URLSearchParams(location.search), b = document.body;
+      b.dataset.day = p.get('day') || '';
+      b.dataset.slot = p.get('slot') || '';
+      var w = p.get('who') || '';
+      b.dataset.who = (w === 'jang' || w === 'onni' || w === 'clinic') ? w : '';
+    })();
+  </script>
+  <div class="wrap">
+    <header>
+      <h1>今天吃什麼</h1>
+      <div class="head-right">
+        <span class="who" id="whoBox"></span>
+        <button class="cal-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+      </div>
+    </header>
+    <div class="today" id="today"></div>
+    <div class="promo" id="promo" style="display:none">
+      <span class="promo-text" id="promoText"></span>
+      <button class="p-add" id="promoAdd">加入固定菜單</button>
+      <button class="p-later" id="promoLater">之後再說</button>
+    </div>
+    <div class="nick-banner" id="nickBanner" style="display:none">
+      <span id="nickBannerText">👋 歡迎！請先為自己取個暱稱，另一位會看到這個名字。</span>
+      <button id="nickBannerBtn">設定暱稱</button>
+    </div>
+    <div id="tabBar" style="display:none">
+      <div class="tabs"><button data-slot="午">午餐</button><button data-slot="晚">晚餐</button></div>
+      <span class="now-hint" id="nowHint"></span>
+      <button class="btn btn-joint" id="jointBtn">一起決定</button>
+    </div>
+    <nav class="seg" id="segBar" aria-label="功能">
+      <div class="seg-row">
+        <button data-seg="fixed">固定</button>
+        <button data-seg="rec">推薦</button>
+        <button data-seg="gacha">扭蛋</button>
+      </div>
+      <button class="seg-joint-btn" data-seg="joint" id="segJoint">一起決定<i class="seg-dot" id="segDot"></i></button>
+    </nav>
+    <div id="main"><div class="ld" role="status" aria-live="polite">
+        <svg class="ld-svg" viewBox="0 0 200 210" aria-hidden="true">
+          <defs><clipPath id="ldBody"><path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z"/></clipPath></defs>
+          <ellipse class="ld-shadow" cx="100" cy="194" rx="54" ry="8" fill="#2b2420"/>
+          <g class="ld-steam" fill="#d8cfc6">
+            <circle cx="76" cy="30" r="6"/><circle cx="100" cy="22" r="8"/><circle cx="126" cy="31" r="5"/>
+          </g>
+          <g class="ld-char">
+            <path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z" fill="#fffdf8"/>
+            <g clip-path="url(#ldBody)"><rect x="66" y="142" width="68" height="46" rx="8" fill="#33403a"/></g>
+            <path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z" fill="none" stroke="#3b2f2a" stroke-width="4" stroke-linejoin="round"/>
+            <g stroke="#e6dccf" stroke-width="3" stroke-linecap="round"><path d="M92 62l5 3"/><path d="M114 70l5 2"/><path d="M78 132l5 2"/><path d="M122 130l5-2"/></g>
+            <ellipse cx="72" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity=".75"/>
+            <ellipse cx="128" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity=".75"/>
+            <ellipse class="ld-eye" cx="84" cy="96" rx="5.5" ry="7.5" fill="#3b2f2a"/>
+            <ellipse class="ld-eye" cx="116" cy="96" rx="5.5" ry="7.5" fill="#3b2f2a"/>
+            <path class="ld-smile" d="M91 107Q100 117 109 107" fill="none" stroke="#3b2f2a" stroke-width="3.5" stroke-linecap="round"/>
+            <g class="ld-open"><ellipse cx="100" cy="111" rx="6.5" ry="7.5" fill="#7a2f2a"/><ellipse cx="100" cy="115" rx="3.5" ry="2.5" fill="#ff8f86"/></g>
+          </g>
+        </svg>
+        <div class="ld-msgs">
+          <span>正在煩惱今天吃什麼…</span><span>正在翻找附近的美食…</span><span>問問肚子想吃什麼…</span><span>熱騰騰的菜單快好了…</span><span>扭蛋機暖機中…</span>
+        </div>
+      </div></div>
+  </div>
+
+  <div class="bar" id="bar">
+    <div class="bar-inner">
+      <div class="picked"><b id="pickedName"></b><span id="pickedMethod"></span></div>
+      <button class="note-toggle" id="noteToggle" type="button">＋備註</button>
+      <input id="note" placeholder="備註（選填）" maxlength="100">
+      <button class="btn btn-confirm" id="confirmBtn">確定</button>
+    </div>
+  </div>
+
+  <div class="gacha" id="gacha">
+    <div class="capsule" id="capsule"><div class="g-name" id="gName"></div><div class="g-type" id="gType"></div></div>
+    <div class="g-actions" id="gActions" style="visibility:hidden">
+      <button class="btn" id="gRetry">再抽一次</button>
+      <button class="btn" id="gClose">返回</button>
+      <button class="btn btn-confirm" id="gPick">就吃這個</button>
+    </div>
+  </div>
+
+  <div class="bar" id="jbar">
+    <div class="bar-inner">
+      <div class="picked"><b id="jPickedNames"></b><span id="jPickedCount"></span></div>
+      <button class="btn btn-plain" id="jCancel" style="background:var(--line)">取消</button>
+      <button class="btn btn-confirm" id="jSubmit">送出</button>
+    </div>
+  </div>
+
+  <div class="who-modal" id="claimModal">
+    <div class="who-box nick-box">
+      <h2>取個暱稱吧</h2>
+      <div class="nick-guide">幫自己取個暱稱，就可以開始使用「今天吃什麼」囉！</div>
+      <input id="claimInput" maxlength="10" placeholder="例如：小明" autocomplete="off">
+      <div class="nick-guide" style="margin-top:12px">設定4位數PIN碼，換手機時用來找回帳號</div>
+      <input id="claimPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數字" autocomplete="off">
+      <div class="nick-err" id="claimErr"></div>
+      <div class="nick-actions">
+        <button class="btn n-save" id="claimSave" style="width:100%">開始使用</button>
+      </div>
+      <div class="id-switch"><a id="toLoginLink">已經有帳號？用暱稱＋PIN登入</a></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="loginModal">
+    <div class="who-box nick-box">
+      <h2>用暱稱＋PIN登入</h2>
+      <div class="nick-guide">換了手機、或找不到之前的帳號時，用當初設定的暱稱和PIN碼找回來。</div>
+      <input id="loginNick" maxlength="10" placeholder="你的暱稱" autocomplete="off">
+      <input id="loginPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數PIN碼" autocomplete="off" style="margin-top:10px">
+      <div class="nick-err" id="loginErr"></div>
+      <div class="nick-actions">
+        <button class="btn n-save" id="loginSave" style="width:100%">登入</button>
+      </div>
+      <div class="id-switch"><a id="toClaimLink">還沒有帳號？取個暱稱開始使用</a></div>
+    </div>
+  </div>
+
+
+  <div class="who-modal" id="nickModal">
+    <div class="who-box nick-box">
+      <h2 id="nickTitle">修改暱稱</h2>
+      <div class="nick-guide" id="nickGuide">取一個你喜歡的暱稱，另一位會在畫面上看到它。</div>
+      <input id="nickInput" maxlength="10" placeholder="例如：小明" autocomplete="off">
+      <div class="nick-err" id="nickErr"></div>
+      <div class="nick-actions">
+        <button class="btn n-cancel" id="nickCancel">取消</button>
+        <button class="btn n-save" id="nickSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="fixedModal">
+    <div class="who-box nick-box fixed-box">
+      <h2 id="fxTitle">新增固定菜單</h2>
+      <input id="fxName" maxlength="40" placeholder="名稱，例如：牛肉麵" autocomplete="off">
+      <select id="fxCategory"></select>
+      <select id="fxSlot">
+        <option value="">不限（每餐）</option>
+        <option value="午">午餐限定</option>
+        <option value="晚">晚餐限定</option>
+      </select>
+      <div class="fx-label">固定星期</div>
+      <div class="fx-days" id="fxDays">
+        <label><input type="checkbox" id="fxEveryday" checked> 每日</label>
+        <label><input type="checkbox" value="一"> 一</label>
+        <label><input type="checkbox" value="二"> 二</label>
+        <label><input type="checkbox" value="三"> 三</label>
+        <label><input type="checkbox" value="四"> 四</label>
+        <label><input type="checkbox" value="五"> 五</label>
+        <label><input type="checkbox" value="六"> 六</label>
+        <label><input type="checkbox" value="日"> 日</label>
+      </div>
+      <div class="fx-note">照片連結之後會更新加入，這次先不設定。</div>
+      <div class="nick-err" id="fxErr"></div>
+      <div class="nick-actions">
+        <button class="btn n-cancel" id="fxCancel">取消</button>
+        <button class="btn n-save" id="fxSave">新增</button>
+      </div>
+      <button class="btn fx-delete" id="fxDelete" style="display:none">刪除這項固定菜單</button>
+    </div>
+  </div>
+
+  <div class="who-modal" id="historyModal">
+    <div class="who-box nick-box history-box">
+      <h2>食物紀錄</h2>
+      <div class="hist-hint" id="histHint">← 滑動查看本月摘要 →</div>
+      <div class="hist-dots" id="histDots">
+        <button class="hist-dot active" type="button" data-slide="0" aria-label="本週美食紀錄"></button>
+        <button class="hist-dot" type="button" data-slide="1" aria-label="本月摘要"></button>
+      </div>
+      <div class="hist-slides" id="histSlides">
+        <div class="hist-slide" id="slideHistory">
+          <h3>本週美食紀錄</h3>
+          <div class="history-list" id="historyList"></div>
+        </div>
+        <div class="hist-slide" id="slideSummary">
+          <div class="summary-box" id="summaryBox"></div>
+        </div>
+      </div>
+      <div class="nick-actions">
+        <button class="btn n-cancel" id="historyClose">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+
+  // ===== GAS 데이터 API 호출 (google.script.run 과 같은 모양) =====
+  // 이 파일에서 서버 주소는 아래 한 곳에만 둔다. 비밀값은 없다(주소만; 인증은 서버의 토큰 검사).
+  var CONFIG = { API_URL: 'https://script.google.com/macros/s/AKfycbzGFBPWChDqnWjOxScd4nokTNvxaQvdHm3M8yzeR6EUvnx-NrTCrsCzKJ9V3bhyl76p/exec' };
+  var api = (function () {
+    function make(onOk, onFail) {
+      return new Proxy({}, {
+        get: function (_, name) {
+          if (name === 'withSuccessHandler') return function (fn) { return make(fn, onFail); };
+          if (name === 'withFailureHandler') return function (fn) { return make(onOk, fn); };
+          return function () {
+            var args = Array.prototype.slice.call(arguments);
+            // text/plain 으로 보내 브라우저 사전검사(OPTIONS)를 피한다
+            fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                    body: JSON.stringify({ action: String(name), args: args }), redirect: 'follow' })
+              .then(function (r) { return r.json(); })
+              .then(function (j) { return { j: j }; }, function () { return { e: '連線失敗，請稍後再試' }; })
+              .then(function (res) {   // 핸들러는 fetch 체인 밖에서 호출 (핸들러 예외가 실패로 오인되지 않도록)
+                if (res.j && res.j.ok) { if (onOk) onOk(res.j.data); }
+                else if (onFail) onFail(new Error(res.e || (res.j && res.j.error) || '發生錯誤'));
+              });
+          };
+        }
+      });
+    }
+    return make(null, null);
+  })();
+
+  var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], selection: null, gachaResult: null, busy: false,
+                varietyNudgeText: null };
+  var $ = function (id) { return document.getElementById(id); };
+  var LOADER_HTML = $('main').innerHTML;   // 로딩 캐릭터 마크업 (탭 전환 때 재사용)
+  var LOADER_SVG = LOADER_HTML.slice(LOADER_HTML.indexOf('<svg'), LOADER_HTML.indexOf('</svg>') + 6);
+  var LOADER_MSGS = ['正在煩惱今天吃什麼…', '正在翻找附近的美食…', '問問肚子想吃什麼…', '熱騰騰的菜單快好了…', '扭蛋機暖機中…'];
+  var JOINT_WAIT_MSGS = ['「我都可以」是最強大的陷阱…', '隨便你，絕對不是隨便說說的…', '對方正在天人交戰，稍等一下～'];
+  // 一起決定 버튼을 눌러서 상대 상태를 불러오는 동안(secJointLoad)
+  var JOINT_CLICK_MSGS = ['都可以不是真的都可以，不要再說隨便', '正在把兩人的菜單偷偷湊在一起…', '誰先選、誰先贏，手刀點下去！', '猜猜對方現在想吃什麼…'];
+  // 推薦 탭을 눌렀을 때(美食資料庫 기반 추천) — 오늘은 뭐가 맛있을지 앞을 내다보는 느낌
+  var recommendLoadingPhrases = ['今天會遇到什麼好吃的呢…', '讓老天爺幫你選一家吧…', '附近的隱藏版美食正在現身…', '偷看美食資料庫的口袋名單中…'];
+  // 캘린더 아이콘(食物紀錄) 모달을 눌렀을 때 — 지난 기록을 돌아보는 느낌
+  var historyLoadingPhrases = ['看看這週吃了什麼美食～', '翻翻看最近都吃了些什麼…', '把吃過的菜單一道道攤開來…', '回顧美食足跡中…'];
+  // 午/晚 切換 탭을 눌렀을 때
+  var SWITCH_MSGS = ['幫你把餐廳換個場景…', '肚子正在重新設定時區…', '午餐晚餐大風吹，換你了！'];
+  function loaderHtml(msgs) {
+    return '<div class="ld" role="status" aria-live="polite">' + LOADER_SVG +
+      '<div class="ld-msgs">' + msgs.map(function (m) { return '<span>' + esc(m) + '</span>'; }).join('') + '</div></div>';
+  }
+  var segment = 'fixed';                   // 모바일 세그먼트 탭: fixed | rec | gacha | joint
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
+
+  function toast(msg, isErr) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isErr ? ' err' : '');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.className = 'toast' + (isErr ? ' err' : ''); }, 2200);
+  }
+
+  function load(slot) {
+    setTabsBusy(true);
+    api
+      .withSuccessHandler(function (d) { setTabsBusy(false); render(d); })
+      .withFailureHandler(function (e) {
+        setTabsBusy(false);
+        $('main').innerHTML = '<div class="closed">載入失敗<small>' + esc(e.message) + '</small></div>';
+      })
+      .getAppData(document.body.dataset.day || '', slot || '');
+  }
+
+  function setTabsBusy(b) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) { t.disabled = b; });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
+    t.addEventListener('click', function () {
+      if (state.ctx && state.ctx.slot === t.dataset.slot) return;
+      exitJoint(true);
+      clearSelection();
+      $('main').innerHTML = loaderHtml(SWITCH_MSGS);
+      load(t.dataset.slot);
+    });
+  });
+
+  function clearSelection() {
+    state.selection = null;
+    $('bar').style.display = 'none';
+  }
+
+  function render(data) {
+    state.ctx = data.ctx; state.fixed = data.fixed; state.recommended = data.recommended;
+    state.fixedCategories = data.fixedCategories || [];
+    if (data.nicknames) applyNicknames(data.nicknames, true);
+    renderPromo(data.promotionCandidates || []);
+    var c = data.ctx;
+    $('today').innerHTML = esc(c.date) + '（星期' + esc(c.weekday) + '）' +
+      (c.closed ? '' : '<span class="slot-badge' + (c.isMealTime ? '' : ' off') + '">' + esc(c.slot) + '</span>') +
+      (c.isOverride ? '<span class="test-flag">測試模式</span>' : '');
+
+    $('segBar').classList.toggle('ready', !c.closed);
+    if (c.closed) {
+      $('tabBar').style.display = 'none';
+      $('main').innerHTML = '<div class="closed">本診所今日公休</div>';
+      return;
+    }
+
+    $('tabBar').style.display = 'block';
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
+      t.classList.toggle('active', t.dataset.slot === c.slot);
+    });
+    $('nowHint').textContent = c.isMealTime ? '' : '（預先查看）';
+    state.varietyNudgeText = null;
+    renderMain();
+    refreshJointHint();
+    fetchVarietyNudge();
+  }
+
+  function fetchVarietyNudge() {
+    api.withSuccessHandler(function (cat) {
+      state.varietyNudgeText = cat
+        ? VARIETY_NUDGE_PHRASES[Math.floor(Math.random() * VARIETY_NUDGE_PHRASES.length)].replace('%s', cat)
+        : null;
+      renderVarietyBanner();
+    }).withFailureHandler(function () { /* 넛지는 꾸밈 기능이라 실패해도 조용히 무시 */ }).getVarietyNudge();
+  }
+
+  // 一起決定 결과·대기 화면이면 그것을, 아니면 固定/推薦 목록을 그린다
+  // 一起決定 중엔 그날 그 끼니의 고정 推薦 세트(joint.recommended)를, 평소엔 매번 랜덤인 state.recommended를 쓴다
+  function recList() { return (joint.mode === 'pick' && joint.recommended) ? joint.recommended : state.recommended; }
+
+  function renderMain() {
+    updateJointBtn();
+    applySeg();
+    if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') {
+      renderJointPanel();
+      return;
+    }
+    var rec = recList();
+    var html = '';
+    if (joint.mode === 'pick') html += '<button class="any-btn" id="anyBtn" type="button">我都可以，交給你決定</button>';
+    html += '<section id="secFixed"><div class="sec-head"><h2>固定菜單</h2></div>';
+    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">今天這個時段沒有固定菜單</div>';
+    if (joint.mode !== 'pick') {
+      html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
+      if (state.fixed.length) html += '<div class="chip-scroll-pad" aria-hidden="true"></div>';
+    }
+    html += '</section>';
+
+    html += '<section id="secRec"><div class="sec-head"><h2>推薦菜單</h2>' +
+      '<button class="btn btn-gacha" id="gachaBtn"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>' +
+      '<div id="varietyBanner"></div>';
+    html += rec.length ? '<div class="grid">' + rec.map(function (r, i) {
+      var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
+      return '<button class="card" data-kind="rec" data-i="' + i + '">' +
+        '<span class="tag">' + esc(r.type) + '</span>' +
+        '<div class="name">' + esc(r.name) + '</div>' +
+        '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
+        (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
+    }).join('') + '</div>' : '<div class="empty">美食資料庫目前沒有資料</div>';
+    html += '</section>';
+
+    // 모바일 전용: 扭蛋 탭 · 一起決定 불러오는 중
+    var types = [];
+    rec.forEach(function (x) { if (types.indexOf(x.type) < 0) types.push(x.type); });
+    html += '<section id="secGacha" class="m-only"><div class="gacha-card"><div class="gc-emoji">🎲</div>' +
+      '<h2>不知道吃什麼？</h2><p>' + (rec.length ? '交給扭蛋決定，從今天的推薦裡隨機抽一個！' : '美食資料庫目前沒有資料') + '</p>' +
+      '<div class="gc-types">' + types.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
+      '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div></section>';
+    html += '<section id="secJointLoad" class="m-only">' + loaderHtml(JOINT_CLICK_MSGS) + '</section>';
+
+    $('main').innerHTML = html;
+    applySeg();
+    setupChips();
+    renderVarietyBanner();
+
+    Array.prototype.forEach.call(document.querySelectorAll('.card'), function (el) {
+      var i = Number(el.dataset.i);
+      var name = el.dataset.kind === 'fixed' ? state.fixed[i].name : rec[i].name;
+      if (joint.mode === 'pick' && joint.picks.indexOf(name) >= 0) el.classList.add('checked');
+      el.addEventListener('click', function (ev) {
+        if (ev.target.tagName === 'A') return;
+        if (joint.mode === 'pick') { toggleJointPick(name, el); return; }
+        if (el.dataset.kind === 'fixed') select({ method: '固定', menu: state.fixed[i].name, note: '' }, el);
+        else select({ method: '推薦', menu: rec[i].name, note: recNote(rec[i]) }, el);
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.card-edit'), function (el) {
+      el.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var id = el.dataset.fixid;
+        var item = state.fixed.filter(function (m) { return m.id === id; })[0];
+        if (item) openFixedEdit(item);
+      });
+    });
+    if ($('anyBtn')) $('anyBtn').addEventListener('click', function () { submitJoint([], true); });
+    if ($('addFixedBtn')) $('addFixedBtn').addEventListener('click', function () { openFixedAdd(); });
+    if ($('gachaBtn')) $('gachaBtn').addEventListener('click', openGacha);
+    if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
+  }
+
+  // ===== 모바일 세그먼트 탭 (固定 / 推薦 / 扭蛋 / 一起決定) =====
+  // 표시 전환은 CSS(#main.seg-*)가 담당. PC에서는 세그먼트 바가 숨겨져서 아무 영향이 없다.
+  function applySeg() {
+    var seg = joint.mode ? 'joint' : segment;
+    var m = $('main');
+    m.className = 'seg-' + seg + (joint.mode === 'pick' ? ' picking' : '');
+    Array.prototype.forEach.call(document.querySelectorAll('#segBar button'), function (b) {
+      b.classList.toggle('active', b.dataset.seg === seg);
+    });
+    document.documentElement.style.setProperty('--seg-h', ($('segBar').offsetHeight || 64) + 'px');
+  }
+
+  function scrollToContentTop() {
+    var top = $('tabBar').offsetTop + $('tabBar').offsetHeight;
+    if (window.scrollY > top) window.scrollTo(0, top);
+  }
+
+  function setSegment(s) {
+    if (!state.ctx || state.ctx.closed) return;
+    if (s === 'joint') {
+      if (!isLegacy()) return;   // 一起決定은 舊who(jang/onni)가 있는 신원만 — 세그먼트도 숨겨져 있음
+      if (joint.mode) { segment = 'joint'; applySeg(); return; }
+      segment = 'joint'; applySeg(); scrollToContentTop();
+      startJoint();
+      return;
+    }
+    var wasJoint = !!joint.mode || segment === 'joint';
+    var showRecLoader = s === 'rec' && segment !== 'rec' && !wasJoint;
+    segment = s;
+    if (joint.mode) exitJoint(true);
+    if (wasJoint) renderMain(); else applySeg();
+    if (showRecLoader) flashRecLoader();
+    scrollToContentTop();
+  }
+
+  // 推薦 탭을 눌렀을 때 아주 잠깐 전용 로딩 문구를 보여준다 (이미 불러온 데이터 위에 살짝 덮는 연출, 카드는 그대로 유지)
+  function flashRecLoader() {
+    var sec = $('secRec');
+    if (!sec) return;
+    var ov = document.createElement('div');
+    ov.className = 'rec-load-overlay';
+    ov.innerHTML = loaderHtml(recommendLoadingPhrases);
+    sec.appendChild(ov);
+    setTimeout(function () { ov.remove(); }, 550);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#segBar button'), function (b) {
+    b.addEventListener('click', function () { setSegment(b.dataset.seg); });
+  });
+
+  // ===== 分類 칩: 누르면 그 分類로 이동, 스크롤하면 현재 分類 칩이 강조됨 =====
+  function setupChips() {
+    var bar = $('chips');
+    if (!bar) return;
+    Array.prototype.forEach.call(bar.querySelectorAll('.chip'), function (chip) {
+      chip.addEventListener('click', function () {
+        chipLockUntil = Date.now() + 800;   // 이동하는 동안 스크롤 감지가 칩 강조를 덮어쓰지 않게
+        var cat = $('cat-' + chip.dataset.cat);
+        if (cat) cat.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        markChip(Number(chip.dataset.cat));
+      });
+    });
+    markChip(0);
+  }
+
+  function markChip(idx) {
+    var bar = $('chips');
+    if (!bar) return;
+    Array.prototype.forEach.call(bar.querySelectorAll('.chip'), function (c) {
+      var on = Number(c.dataset.cat) === idx;
+      c.classList.toggle('active', on);
+      if (on && bar.scrollTo) bar.scrollTo({ left: c.offsetLeft - (bar.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });
+    });
+  }
+
+  var chipTick = false, chipLockUntil = 0;
+  window.addEventListener('scroll', function () {
+    if (Date.now() < chipLockUntil) { chipLockUntil = Date.now() + 150; return; }   // 칩으로 이동 중이면 멈출 때까지 대기
+    if (chipTick || !$('chips') || !$('secFixed') || $('secFixed').offsetParent === null) return;
+    chipTick = true;
+    requestAnimationFrame(function () {
+      chipTick = false;
+      var line = $('segBar').offsetHeight + 70, cur = 0;
+      Array.prototype.forEach.call(document.querySelectorAll('.cat'), function (cat, i) {
+        if (cat.getBoundingClientRect().top <= line) cur = i;
+      });
+      if (!$('chips').querySelector('.chip.active') || Number($('chips').querySelector('.chip.active').dataset.cat) !== cur) markChip(cur);
+    });
+  }, { passive: true });
+
+  // 固定菜單을 分類별로 묶는다. 순서는 시트에 分類가 처음 나온 순서, 메뉴가 없는 分類는 숨김.
+  function renderFixedGroups() {
+    var order = state.fixedCategories.slice();
+    var groups = {};
+    var editable = joint.mode !== 'pick';
+    state.fixed.forEach(function (m, i) {
+      if (order.indexOf(m.category) < 0) order.push(m.category);
+      var card = '<button class="card" data-kind="fixed" data-i="' + i + '">' +
+        (safeUrl(m.photo) ? '<img src="' + esc(m.photo) + '" alt="">' : '') +
+        fixedCardBody(m.name) + '</button>';
+      var pencil = (editable && m.id) ? '<button class="card-edit" type="button" data-fixid="' + esc(m.id) + '" title="編輯" aria-label="編輯">' + PENCIL_SVG + '</button>' : '';
+      (groups[m.category] = groups[m.category] || []).push('<div class="card-wrap">' + card + pencil + '</div>');
+    });
+    var shown = order.filter(function (c) { return groups[c]; });
+    var chips = shown.length > 1 ? '<div class="chips m-only" id="chips">' + shown.map(function (c, i) {
+      return '<button class="chip" type="button" data-cat="' + i + '">' + esc(c) + '</button>';
+    }).join('') + '</div>' : '';
+    return chips + '<div class="cat-grid">' + shown.map(function (c, i) {
+      return '<div class="cat" id="cat-' + i + '"><h3 class="cat-title">' + esc(c) + '</h3><div class="cat-stack">' + groups[c].join('') + '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  // 「음식명(식당명)」이면 음식명은 크게, 식당명은 아래 작은 글씨로. 괄호가 없으면 음식명만.
+  // (紀錄에는 名稱 원문 그대로 저장된다)
+  function fixedCardBody(name) {
+    var m = /^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/.exec(name);
+    if (!m) return '<div class="name">' + esc(name) + '</div>';
+    return '<div class="name">' + esc(m[1]) + '</div><div class="place">' + esc(m[2]) + '</div>';
+  }
+
+  // ===== 固定菜單 승격 제안 배너 (가장 많이 먹은 1개만) =====
+  var promoDismissed = {};   // 이번 화면에서 닫은 것 (서버 기록 없음)
+  var promoCurrent = null;
+
+  function renderPromo(cands) {
+    promoCurrent = cands.filter(function (c) { return !promoDismissed[c.name]; })[0] || null;
+    if (!promoCurrent) { $('promo').style.display = 'none'; return; }
+    $('promoText').textContent = '最近常吃：' + promoCurrent.name +
+      '（28天內 ' + promoCurrent.count + ' 次）— 要加入固定菜單嗎？';
+    $('promoAdd').disabled = false;
+    $('promo').style.display = 'flex';
+  }
+
+  $('promoLater').addEventListener('click', function () {
+    if (promoCurrent) promoDismissed[promoCurrent.name] = true;
+    $('promo').style.display = 'none';
+  });
+
+  $('promoAdd').addEventListener('click', function () {
+    if (!promoCurrent) return;
+    var name = promoCurrent.name;
+    $('promoAdd').disabled = true;
+    api
+      .withSuccessHandler(function () {
+        promoDismissed[name] = true;
+        $('promo').style.display = 'none';
+        toast('已加入固定菜單！');
+        // 새 메뉴가 其他 分類에 바로 보이도록 고정메뉴만 갱신 (추천은 그대로)
+        state.fixed = state.fixed.concat([{ name: name, category: '其他', photo: '' }]);
+        if (state.fixedCategories.indexOf('其他') < 0) state.fixedCategories.push('其他');
+        clearSelection();
+        render({ ctx: state.ctx, fixed: state.fixed, fixedCategories: state.fixedCategories,
+                 recommended: state.recommended, promotionCandidates: [] });
+      })
+      .withFailureHandler(function (e) {
+        $('promoAdd').disabled = false;
+        toast(e.message || '加入失敗', true);
+      })
+      .addToFixedMenu(name);
+  });
+
+  // ===== 推薦 탭 다양성 넛지 (최근 연속으로 같은 分類/類型을 먹었으면 살짝 알려줌) =====
+  var VARIETY_NUDGE_PHRASES = [
+    '最近連吃了%s類～今天換個口味吧？',
+    '%s吃了好幾次囉，要不要試試別的？',
+    '肚子說想念%s以外的滋味了…'
+  ];
+  var varietyNudgeDismissed = {};   // key: date|slot — 닫으면 그 끼니 동안 다시 안 뜸
+  function varietyNudgeKey() { return state.ctx ? (state.ctx.date + '|' + state.ctx.slot) : ''; }
+
+  function renderVarietyBanner() {
+    var box = $('varietyBanner');
+    if (!box) return;   // 一起決定 결과 화면 등 推薦 그리드가 없을 때
+    if (!state.varietyNudgeText || varietyNudgeDismissed[varietyNudgeKey()]) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="variety-banner">' +
+      '<span>' + esc(state.varietyNudgeText) + '</span>' +
+      '<button type="button" id="varietyClose" aria-label="關閉">×</button></div>';
+    var btn = $('varietyClose');
+    if (btn) btn.addEventListener('click', function () {
+      varietyNudgeDismissed[varietyNudgeKey()] = true;
+      box.innerHTML = '';
+    });
+  }
+
+  function recNote(r) { return [r.type, r.address].filter(Boolean).join(' / '); }
+
+  function select(sel, el) {
+    state.selection = sel;
+    Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
+    if (el) el.classList.add('selected');
+    $('pickedName').textContent = sel.menu;
+    $('pickedMethod').textContent = '選擇方式：' + sel.method;
+    $('note').value = '';
+    $('bar').classList.remove('note-open');   // 모바일: 備註는 접어 둔다
+    $('bar').style.display = 'block';
+  }
+
+  $('noteToggle').addEventListener('click', function () {
+    var open = $('bar').classList.toggle('note-open');
+    if (open) $('note').focus();
+  });
+
+  // ===== 扭蛋 =====
+  function openGacha() {
+    if (!state.recommended.length || joint.mode === 'pick') return;
+    resetGacha();
+    state.gachaList = state.recommended;
+    state.gachaMode = 'rec';
+    $('gacha').style.display = 'flex';
+    spin();
+  }
+
+  function spin() {
+    var list = state.gachaList;
+    var cap = $('capsule');
+    var finalIdx = state.gachaForce != null ? state.gachaForce : Math.floor(Math.random() * list.length);
+    var steps = 18 + Math.floor(Math.random() * 6);
+    // 마지막 칸이 finalIdx에 떨어지도록 시작 위치를 맞춘다
+    var idx = ((finalIdx - steps) % list.length + list.length) % list.length;
+    var n = 0, delay = 60;
+    $('gActions').style.visibility = 'hidden';
+    cap.className = 'capsule spinning';
+
+    (function tick() {
+      idx = (idx + 1) % list.length; n++;
+      $('gName').textContent = list[idx].name;
+      $('gType').textContent = list[idx].type;
+      if (n < steps) {
+        delay = n > steps - 6 ? delay * 1.35 : delay;
+        setTimeout(tick, delay);
+      } else {
+        state.gachaResult = list[idx];
+        cap.className = 'capsule done';
+        $('gActions').style.visibility = 'visible';
+      }
+    })();
+  }
+
+  function resetGacha() { state.gachaForce = null; $('gRetry').style.display = ''; }
+  $('gRetry').addEventListener('click', spin);
+  $('gClose').addEventListener('click', function () { $('gacha').style.display = 'none'; });
+  $('gPick').addEventListener('click', function () {
+    var r = state.gachaResult;
+    $('gacha').style.display = 'none';
+    if (state.gachaMode === 'joint') {
+      var st = joint.status, k = st ? jointKind(st) : 'both';
+      select({ method: '共選', menu: r.name, note: k === 'both' ? '共選扭蛋' : jointNote(k) }, document.querySelector('.joint-panel .card'));
+      return;
+    }
+    var idx = state.recommended.indexOf(r);
+    var el = document.querySelector('.card[data-kind="rec"][data-i="' + idx + '"]');
+    select({ method: '扭蛋', menu: r.name, note: recNote(r) }, el);
+  });
+
+  // ===== 確定 =====
+  $('confirmBtn').addEventListener('click', function () {
+    if (!state.selection || state.busy) return;
+    var s = state.selection;
+    var extra = $('note').value.trim();
+    var prevStatus = joint.status;
+    var cardEl = document.querySelector('.card.selected');
+    // 낙관적 UI: 서버 응답을 기다리지 않고 먼저 화면을 바꾼다
+    state.busy = true;
+    toast('已記錄！');
+    clearSelection();
+    Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
+    if (s.method === '共選') exitJoint();   // 共選 행은 서버에서 지워짐 → 일반 화면으로
+    api
+      .withSuccessHandler(function () { state.busy = false; })
+      .withFailureHandler(function (e) {
+        state.busy = false;
+        // 실패 → 화면을 되돌리고 에러 표시
+        if (s.method === '共選' && prevStatus) { applyStatus(prevStatus, true); startPoll(); }
+        select(s, document.querySelector('.joint-panel .card') || cardEl);
+        $('note').value = extra;
+        toast(e.message || '記錄失敗', true);
+      })
+      .confirmChoice({
+        token: token,
+        slot: state.ctx.slot,
+        method: s.method,
+        menu: s.menu,
+        note: [s.note, extra].filter(Boolean).join(' / '),
+        jointDate: state.ctx.date
+      });
+  });
+
+  // ===== 사용자 식별 (토큰 기반) =====
+  // 예전엔 ?who=jang/onni/clinic 만 알면 누구나 흉내 낼 수 있었다. 이제 기기마다 추측 불가능한
+  // 權杖(token)을 서버에서 발급받아 localStorage에 저장하고, 이후 모든 본인 확인은 그 token으로 한다.
+  // who(jang/onni/clinic/'')는 여전히 화면 로직(一起決定 가능 여부 등) 내부 표기로만 쓴다.
+  var WHO_NAME = { jang: '', onni: '' };
+  var TEMP_NAME = { jang: '選手1', onni: '選手2' };
+  function nameOf(w) {
+    if (w === 'clinic') return clinicName || '使用者';
+    if (w === 'jang' || w === 'onni') return WHO_NAME[w] || TEMP_NAME[w];
+    return myIdentityNick || '朋友';   // 舊who 없는 일반 사용자(닉네임만으로 시작한 사람)
+  }
+  var who = '';
+  var token = '';
+  var myIdentityNick = '';   // who==='' 인 일반 사용자의 닉네임 (使用者 시트 기준)
+
+  // localStorage가 막혀 있으면(일부 iOS 홈 화면 앱 등) 쿠키로 최대한 버텨본다 — 두 군데 다 막히면
+  // 신원이 매번 날아갈 수 있다는 안내만 한 번 띄운다(완벽한 해결책은 아님, best-effort).
+  function cookieGet_(k) {
+    try {
+      var m = document.cookie.match(new RegExp('(?:^|; )' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    } catch (e) { return ''; }
+  }
+  function cookieSet_(k, v) {
+    try { document.cookie = k + '=' + encodeURIComponent(v) + ';max-age=31536000;path=/'; } catch (e) {}
+  }
+  function lsGet(k) {
+    try { var v = localStorage.getItem(k); if (v) return v; } catch (e) {}
+    return cookieGet_(k);
+  }
+  function lsSet(k, v) {
+    var ok = false;
+    try { localStorage.setItem(k, v); ok = localStorage.getItem(k) === v; } catch (e) {}
+    cookieSet_(k, v);
+    if (!ok && !cookieGet_(k)) storageUnavailable = true;
+  }
+  var storageUnavailable = false;
+  var TOKEN_KEY = 'ttwhat.token';
+
+  // 'clinic' = 진료실 PC용 표시 전용 식별자 (?who=clinic).
+  //  - 이름은 이 브라우저 localStorage에만 저장 (使用者·暱稱設定 시트·다른 기기와 공유 안 함)
+  //  - 一起決定(共選)에는 참여하지 않음. 固定/推薦/扭蛋 確定은 그대로 동작
+  var CLINIC_KEY = 'ttwhat.clinicName';
+  var clinicName = lsGet(CLINIC_KEY);
+  function isClinic() { return who === 'clinic'; }
+  function isLegacy() { return who === 'jang' || who === 'onni'; }   // 一起決定은 이 두 신원만 가능
+  function myNick() {
+    if (isClinic()) return clinicName;
+    if (isLegacy()) return WHO_NAME[who];
+    return myIdentityNick;
+  }
+
+  /**
+   * 신원을 확보한다: ① 이 기기에 저장된 token이 있으면 그대로 확인, ② 없고 URL에 ?who=가 있으면
+   * 그 舊who로 1회 발급(기존 링크 호환), ③ 둘 다 없으면 "取個暱稱吧" 화면에서 새로 만든다.
+   * 끝나면 cb()를 부른다 — load()는 신원이 정해진 뒤에만 시작한다.
+   */
+  function bootstrapIdentity(cb) {
+    var saved = lsGet(TOKEN_KEY);
+    if (saved) {
+      api
+        .withSuccessHandler(function (me) { applyIdentity(saved, me); cb(); })
+        .withFailureHandler(function () { lsSet(TOKEN_KEY, ''); bootstrapIdentity(cb); })   // 토큰이 더 이상 유효하지 않음 → 새로
+        .getMyIdentity(saved);
+      return;
+    }
+    var fromUrl = document.body.dataset.who;
+    if (fromUrl === 'jang' || fromUrl === 'onni' || fromUrl === 'clinic') {
+      api
+        .withSuccessHandler(function (me) { applyIdentity(me.token, me); cb(); })
+        .withFailureHandler(function (e) {
+          var msg = (e && e.message) || '';
+          if (msg.indexOf('PIN') >= 0) {   // PIN 전환이 끝난 舊who 링크 → 暱稱＋PIN 로그인 화면으로
+            pendingBootstrapCb = cb;
+            $('loginErr').textContent = '請用暱稱＋PIN登入';
+            $('loginModal').style.display = 'flex';
+            setTimeout(function () { $('loginNick').focus(); }, 0);
+          } else toast(msg || '身份確認失敗', true);
+        })
+        .resolveLegacyWho(fromUrl);
+      return;
+    }
+    $('claimModal').style.display = 'flex';
+    setTimeout(function () { $('claimInput').focus(); }, 0);
+    // claimSave 클릭 시 claimIdentity(cb) 호출 (아래 이벤트 핸들러에서 cb를 기억해 둔다)
+    pendingBootstrapCb = cb;
+  }
+
+  function applyIdentity(tok, me) {
+    token = tok; lsSet(TOKEN_KEY, tok);
+    who = me.oldWho || '';
+    if (isLegacy()) WHO_NAME[who] = me.nickname || '';
+    else if (!isClinic()) myIdentityNick = me.nickname || '';
+  }
+
+  var pendingBootstrapCb = null;
+
+  function finishIdentity(me) {
+    var cb = pendingBootstrapCb; pendingBootstrapCb = null;
+    applyIdentity(me.token, me);
+    if (cb) cb(); else { renderMain(); refreshJointHint(); }   // 로그인/가입 화면을 나중에 다시 열었을 때도 반영
+  }
+
+  function claimIdentity() {
+    var v = $('claimInput').value.trim();
+    var len = Array.from(v).length;
+    var pin = $('claimPin').value.trim();
+    if (!len) { $('claimErr').textContent = '暱稱不可空白'; return; }
+    if (len > 10) { $('claimErr').textContent = '暱稱最多 10 個字'; return; }
+    if (!/^\d{4}$/.test(pin)) { $('claimErr').textContent = 'PIN 碼請輸入 4 位數字'; return; }
+    $('claimSave').disabled = true;
+    api
+      .withSuccessHandler(function (me) {
+        $('claimSave').disabled = false;
+        $('claimModal').style.display = 'none';
+        finishIdentity(me);
+      })
+      .withFailureHandler(function (e) { $('claimSave').disabled = false; $('claimErr').textContent = e.message || '建立失敗'; })
+      .claimNickname(v, pin);
+  }
+  $('claimSave').addEventListener('click', claimIdentity);
+  $('claimInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) $('claimPin').focus();
+  });
+  $('claimPin').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) claimIdentity();
+  });
+
+  function loginIdentity() {
+    var nick = $('loginNick').value.trim();
+    var pin = $('loginPin').value.trim();
+    if (!nick) { $('loginErr').textContent = '請輸入暱稱'; return; }
+    if (!/^\d{4}$/.test(pin)) { $('loginErr').textContent = 'PIN 碼請輸入 4 位數字'; return; }
+    $('loginSave').disabled = true;
+    api
+      .withSuccessHandler(function (me) {
+        $('loginSave').disabled = false;
+        $('loginModal').style.display = 'none';
+        toast('登入成功！');
+        finishIdentity(me);
+      })
+      .withFailureHandler(function (e) { $('loginSave').disabled = false; $('loginErr').textContent = e.message || '登入失敗'; })
+      .loginWithPin(nick, pin);
+  }
+  $('loginSave').addEventListener('click', loginIdentity);
+  $('loginNick').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) $('loginPin').focus();
+  });
+  $('loginPin').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) loginIdentity();
+  });
+
+  // 取個暱稱吧 ↔ 用暱稱＋PIN登入 전환 (가입 전에만 뜨는 화면이라 pendingBootstrapCb는 그대로 들고 간다)
+  $('toLoginLink').addEventListener('click', function () {
+    $('claimModal').style.display = 'none';
+    $('loginErr').textContent = ''; $('loginNick').value = ''; $('loginPin').value = '';
+    $('loginModal').style.display = 'flex';
+    setTimeout(function () { $('loginNick').focus(); }, 0);
+  });
+  $('toClaimLink').addEventListener('click', function () {
+    $('loginModal').style.display = 'none';
+    $('claimErr').textContent = '';
+    $('claimModal').style.display = 'flex';
+    setTimeout(function () { $('claimInput').focus(); }, 0);
+  });
+
+  // ===== 暱稱 =====
+  // 서버에서 받은 닉네임 반영. 바뀐 게 있으면 머리말·대기/결과 화면·누구세요 버튼을 다시 그린다.
+  function applyNicknames(n, quiet) {
+    if (!n || (n.jang === WHO_NAME.jang && n.onni === WHO_NAME.onni)) return;
+    WHO_NAME = { jang: n.jang || '', onni: n.onni || '' };
+    if (quiet) return;          // render() 도중이면 거기서 다시 그린다
+    updateJointBtn();
+    if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') {
+      var keep = state.selection;   // 확정 바는 그대로 둔다
+      renderJointPanel();
+      if (keep) state.selection = keep;
+    }
+  }
+
+  var PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/>' +
+    '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+
+  function openNickEditor() {
+    if (!token) return;   // 신원 확보 전엔 열리지 않음 (bootstrapIdentity가 먼저 끝난다)
+    $('nickInput').value = myNick();   // 아직 없으면 빈칸 → placeholder(例如：小明)가 보인다
+    $('nickTitle').textContent = isClinic() ? (myNick() ? '修改名字' : '請問現在是哪位？') : (myNick() ? '修改暱稱' : '設定暱稱');
+    $('nickGuide').textContent = isClinic() ? '請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
+                                            : '取一個你喜歡的暱稱，另一位會在畫面上看到它。';
+    $('nickErr').textContent = '';
+    $('nickSave').disabled = false;
+    $('nickModal').style.display = 'flex';
+    setTimeout(function () { $('nickInput').focus(); $('nickInput').select(); }, 0);
+  }
+  function closeNickEditor() { $('nickModal').style.display = 'none'; }
+
+  function saveNick() {
+    var v = $('nickInput').value.trim();
+    var len = Array.from(v).length;
+    if (!len) { $('nickErr').textContent = '暱稱不可空白'; return; }
+    if (len > 10) { $('nickErr').textContent = '暱稱最多 10 個字'; return; }
+    if (isClinic()) {   // 진료실 PC: 서버에 저장하지 않고 이 브라우저에만 기억
+      clinicName = v; lsSet(CLINIC_KEY, v);
+      closeNickEditor(); updateJointBtn(); toast('名字已更新！');
+      return;
+    }
+    $('nickSave').disabled = true;
+    api
+      .withSuccessHandler(function (res) {
+        closeNickEditor();
+        if (isLegacy()) WHO_NAME[who] = res.nickname; else myIdentityNick = res.nickname;
+        updateJointBtn();
+        if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') renderJointPanel();
+        toast('暱稱已更新！');
+      })
+      .withFailureHandler(function (e) { $('nickSave').disabled = false; $('nickErr').textContent = e.message || '儲存失敗'; })
+      .setUserNickname(token, v);
+  }
+
+  $('nickBannerBtn').addEventListener('click', openNickEditor);
+  $('nickCancel').addEventListener('click', closeNickEditor);
+  $('nickSave').addEventListener('click', saveNick);
+  $('nickInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) saveNick();   // 중국어 입력 조합 중 Enter는 무시
+    if (e.key === 'Escape') closeNickEditor();
+  });
+
+  // ===== 固定菜單: 新增 / 修改 / 刪除 (같은 폼 재사용, fxEditId = null이면 新增) =====
+  var FIXED_CATS = ['麵', '速食', '炒飯', '便當', '日式定食', '冷凍庫・常備', '居酒屋',
+                     '熱炒', '早餐・輕食', '飲料・甜點', '鍋物・火鍋', '其他'];
+  var fxEditId = null;
+  (function initFixedCategorySelect() {
+    $('fxCategory').innerHTML = FIXED_CATS.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+  })();
+
+  function fxSetDays(days) {
+    var has = Array.isArray(days) && days.length > 0;
+    $('fxEveryday').checked = !has;
+    Array.prototype.forEach.call($('fxDays').querySelectorAll('input[value]'), function (c) {
+      c.checked = has && days.indexOf(c.value) >= 0;
+    });
+  }
+
+  function openFixedAdd() {
+    fxEditId = null;
+    $('fxTitle').textContent = '新增固定菜單';
+    $('fxName').value = '';
+    $('fxCategory').value = FIXED_CATS[0];
+    $('fxSlot').value = '';
+    fxSetDays([]);
+    $('fxErr').textContent = '';
+    $('fxSave').disabled = false;
+    $('fxSave').textContent = '新增';
+    $('fxDelete').style.display = 'none';
+    $('fixedModal').style.display = 'flex';
+    setTimeout(function () { $('fxName').focus(); }, 0);
+  }
+
+  function openFixedEdit(item) {
+    fxEditId = item.id;
+    $('fxTitle').textContent = '修改固定菜單';
+    $('fxName').value = item.name;
+    $('fxCategory').value = item.category;
+    $('fxSlot').value = item.slot || '';
+    fxSetDays(item.days || []);
+    $('fxErr').textContent = '';
+    $('fxSave').disabled = false;
+    $('fxSave').textContent = '儲存';
+    $('fxDelete').style.display = 'block';
+    $('fixedModal').style.display = 'flex';
+  }
+  function closeFixedAdd() { $('fixedModal').style.display = 'none'; }
+
+  // 「每日」와 특정 요일은 서로 배타적: 하나를 고르면 다른 쪽을 끈다
+  $('fxEveryday').addEventListener('change', function () {
+    if (this.checked) Array.prototype.forEach.call($('fxDays').querySelectorAll('input[value]'), function (c) { c.checked = false; });
+  });
+  Array.prototype.forEach.call($('fxDays').querySelectorAll('input[value]'), function (c) {
+    c.addEventListener('change', function () { if (this.checked) $('fxEveryday').checked = false; });
+  });
+
+  function saveFixedAdd() {
+    var name = $('fxName').value.trim();
+    if (!name) { $('fxErr').textContent = '名稱不可空白'; return; }
+    var days = $('fxEveryday').checked ? [] :
+      Array.prototype.filter.call($('fxDays').querySelectorAll('input[value]'), function (c) { return c.checked; })
+        .map(function (c) { return c.value; });
+    var payload = { token: token, name: name, category: $('fxCategory').value, slot: $('fxSlot').value, days: days };
+    $('fxSave').disabled = true;
+    var done = function () {
+      closeFixedAdd(); toast(fxEditId ? '已更新固定菜單！' : '已新增固定菜單！');
+      load(state.ctx ? state.ctx.slot : '');   // 캐시가 비워졌으니 새로 불러와서 바로 보이게
+    };
+    var fail = function (e) { $('fxSave').disabled = false; $('fxErr').textContent = e.message || '儲存失敗'; };
+    if (fxEditId) {
+      api.withSuccessHandler(done).withFailureHandler(fail).updateFixedMenuItem(fxEditId, payload);
+    } else {
+      api.withSuccessHandler(done).withFailureHandler(fail).addFixedMenuItem(payload);
+    }
+  }
+  $('fxCancel').addEventListener('click', closeFixedAdd);
+  $('fxSave').addEventListener('click', saveFixedAdd);
+  $('fxName').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) saveFixedAdd();
+    if (e.key === 'Escape') closeFixedAdd();
+  });
+  $('fxDelete').addEventListener('click', function () {
+    if (!fxEditId) return;
+    if (!confirm('確定要刪除這項固定菜單嗎？')) return;
+    $('fxDelete').disabled = true;
+    api
+      .withSuccessHandler(function () {
+        $('fxDelete').disabled = false;
+        closeFixedAdd(); toast('已刪除！');
+        load(state.ctx ? state.ctx.slot : '');
+      })
+      .withFailureHandler(function (e) { $('fxDelete').disabled = false; $('fxErr').textContent = e.message || '刪除失敗'; })
+      .deleteFixedMenuItem(fxEditId, token);
+  });
+
+  // ===== 食物紀錄 (날짜별 식사 기록 + 이번 달 요약, 좌우로 넘기는 카드 2장) =====
+  function openHistory() {
+    $('summaryBox').innerHTML = loaderHtml(historyLoadingPhrases);
+    $('historyList').innerHTML = '';
+    $('historyModal').style.display = 'flex';
+    $('histSlides').scrollLeft = 0;   // 열 때마다 本週美食紀錄부터 보여준다
+    setHistDot(0);
+    showHistHintOnce();
+    var today = state.ctx ? state.ctx.date : Utilities_today_();
+    var start = shiftDate_(today, -29);
+    var p = today.split('-').map(Number);
+    api
+      .withSuccessHandler(renderHistory)
+      .withFailureHandler(function (e) { $('historyList').innerHTML = '<div class="history-empty">載入失敗：' + esc(e.message || '') + '</div>'; })
+      .getMealHistory(start, today, token);
+    api
+      .withSuccessHandler(renderSummary)
+      .withFailureHandler(function (e) { $('summaryBox').innerHTML = '<div class="sum-empty">本月摘要載入失敗：' + esc(e.message || '') + '</div>'; })
+      .getMealSummary(p[0], p[1], token);
+  }
+  function renderSummary(s) {
+    if (!s || !s.total) { $('summaryBox').innerHTML = '<h3>本月摘要</h3><div class="sum-empty">這個月還沒有紀錄</div>'; return; }
+    var topHtml = s.topMenus.length ? '<div class="sum-top">' + s.topMenus.map(function (m, i) {
+      return '<span>' + (i + 1) + '. ' + esc(m.name) + ' ×' + m.count + '</span>';
+    }).join('') + '</div>' : '<div class="sum-empty">還沒有常吃的菜單</div>';
+
+    var catEntries = Object.keys(s.byCategory).sort(function (a, b) { return s.byCategory[b] - s.byCategory[a]; });
+    var maxCat = Math.max.apply(null, catEntries.map(function (k) { return s.byCategory[k]; }).concat([1]));
+    var catHtml = catEntries.map(function (k) {
+      var n = s.byCategory[k];
+      return '<div class="sum-row"><span class="sum-label">' + esc(k) + '</span>' +
+        '<span class="sum-bar-wrap"><span class="sum-bar" style="width:' + Math.round(n / maxCat * 100) + '%"></span></span>' +
+        '<span class="sum-count">' + n + '</span></div>';
+    }).join('');
+
+    var priceTotal = s.byPrice['$'] + s.byPrice['$$'] + s.byPrice['$$$'];
+    var priceHtml = priceTotal ? ['$', '$$', '$$$'].map(function (k) {
+      var n = s.byPrice[k];
+      if (!n) return '';
+      return '<div class="sum-row"><span class="sum-label">' + k + '</span>' +
+        '<span class="sum-bar-wrap"><span class="sum-bar" style="width:' + Math.round(n / priceTotal * 100) + '%"></span></span>' +
+        '<span class="sum-count">' + n + '</span></div>';
+    }).join('') : '<div class="sum-empty">這個月還沒有用推薦或扭蛋選過餐廳，暫時沒有價位可以統計</div>';
+
+    $('summaryBox').innerHTML =
+      '<h3>本月摘要</h3><div class="sum-sub">' + esc(s.from) + ' ～ ' + esc(s.to) + '，共 ' + s.total + ' 餐</div>' +
+      '<div class="sum-section-title">最常吃 TOP' + s.topMenus.length + '</div>' + topHtml +
+      '<div class="sum-section-title">分類分布</div>' + catHtml +
+      '<div class="sum-section-title">價位分布（僅供參考，非實際花費）</div>' + priceHtml;
+  }
+  function Utilities_today_() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function shiftDate_(dateStr, days) {
+    var p = dateStr.split('-').map(Number);
+    var d = new Date(p[0], p[1] - 1, p[2] + days);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function renderHistory(rows) {
+    if (!rows || !rows.length) { $('historyList').innerHTML = '<div class="history-empty">最近 30 天還沒有紀錄</div>'; return; }
+    var byDate = [], map = {};
+    rows.forEach(function (r) {
+      if (!map[r.date]) { map[r.date] = []; byDate.push(r.date); }
+      map[r.date].push(r);
+    });
+    $('historyList').innerHTML = byDate.map(function (d) {
+      return '<div class="history-day"><h4>' + esc(d) + '</h4>' + map[d].map(function (r) {
+        return '<div class="history-row"><span class="h-slot">' + esc(r.slot) + '</span>' +
+          '<span class="h-menu">' + esc(r.menu) + (r.note ? '<br><small style="color:var(--muted)">' + esc(r.note) + '</small>' : '') + '</span>' +
+          '<span class="h-method">' + esc(r.method) + '</span></div>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+  $('historyBtn').addEventListener('click', openHistory);
+  $('historyClose').addEventListener('click', function () { $('historyModal').style.display = 'none'; });
+
+  // 카드 슬라이드(가장자리 peek): 점 누르면 그 슬라이드로 가운데 정렬, 스와이프/스크롤하면 점이 따라 바뀐다
+  var HIST_SLIDES = $('histSlides').querySelectorAll('.hist-slide');
+  function setHistDot(i) {
+    Array.prototype.forEach.call($('histDots').querySelectorAll('.hist-dot'), function (d, j) {
+      d.classList.toggle('active', j === i);
+    });
+  }
+  function histActiveIndex() {
+    var wrap = $('histSlides'), mid = wrap.scrollLeft + wrap.clientWidth / 2;
+    var best = 0, bestDist = Infinity;
+    Array.prototype.forEach.call(HIST_SLIDES, function (s, i) {
+      var c = s.offsetLeft + s.offsetWidth / 2, d = Math.abs(c - mid);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    return best;
+  }
+  Array.prototype.forEach.call($('histDots').querySelectorAll('.hist-dot'), function (d) {
+    d.addEventListener('click', function () {
+      var i = Number(d.dataset.slide);
+      HIST_SLIDES[i].scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+      setHistDot(i);
+    });
+  });
+  $('histSlides').addEventListener('scroll', function () {
+    setHistDot(histActiveIndex());
+  }, { passive: true });
+
+  // "← 滑動查看" 안내 문구: 처음 두 번만 보여주고 이후엔 숨긴다
+  function showHistHintOnce() {
+    var n = Number(lsGet('ttwhat.histHintShown') || 0);
+    $('histHint').style.visibility = n < 2 ? 'visible' : 'hidden';
+    if (n < 2) lsSet('ttwhat.histHintShown', String(n + 1));
+  }
+
+  // ===== 一起決定 (共選) =====
+  // mode: null(평소) | 'pick'(체크 중) | 'wait'(상대 기다림) | 'result'(결과) | 'decided'(상대가 먼저 確定)
+  var joint = { mode: null, picks: [], status: null, timer: null, sig: '', recommended: null };
+  var POLL_MS = 5000;
+
+  function otherName() { return nameOf(who === 'jang' ? 'onni' : 'jang'); }
+
+  function updateJointBtn() {
+    var b = $('jointBtn');
+    b.classList.toggle('on', !!joint.mode);
+    var hint = joint.hint === 'mine' ? '已送出，查看結果' : joint.hint === 'other' ? otherName() + ' 已選好！' : '';
+    b.innerHTML = joint.mode ? '結束一起決定' : '一起決定' + (hint ? '<span class="joint-hint">' + esc(hint) + '</span>' : '');
+    var w = $('whoBox');
+    b.style.display = isLegacy() ? '' : 'none';   // 一起決定은 舊who(jang/onni)가 있는 신원만
+    $('segJoint').style.display = isLegacy() ? '' : 'none';
+    $('segDot').classList.toggle('on', joint.hint === 'other' && !joint.mode);   // 상대가 먼저 골랐음
+    $('nickBannerText').textContent = isClinic() ? '👋 請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
+                                                  : '👋 歡迎！請先為自己取個暱稱，另一位會看到這個名字。';
+    $('nickBanner').style.display = token && !myNick() ? 'flex' : 'none';   // 첫 실행 안내
+    // 연필 그림 대신 닉네임 텍스트를 탭하면 수정 모드로 들어간다
+    w.innerHTML = token ? '<span class="nick-tap" id="nickTap" role="button" tabindex="0" title="修改暱稱" aria-label="修改暱稱">' + esc(nameOf(who)) + '</span>' +
+      '' : '';
+    if ($('nickTap')) $('nickTap').onclick = openNickEditor;
+  }
+
+  // 평소 화면에서 상대가 이미 골랐는지 버튼에 살짝 표시
+  function refreshJointHint() {
+    if (!isLegacy() || joint.mode || !state.ctx || state.ctx.closed) return;
+    api.withSuccessHandler(function (st) {
+      if (joint.mode) return;
+      applyNicknames(st.nicknames, true);
+      joint.hint = st.mine ? 'mine' : st.other ? 'other' : '';
+      updateJointBtn();
+    }).getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
+  }
+
+  $('jointBtn').addEventListener('click', function () {
+    if (!isLegacy()) return;   // 一起決定은 舊who(jang/onni)가 있는 신원만 — 버튼도 숨겨져 있음
+    if (joint.mode) { exitJoint(); return; }
+    startJoint();
+  });
+
+  // 一起決定 시작: 이미 제출한 게 있으면 바로 대기/결과 화면, 없으면 체크 모드
+  function startJoint() {
+    clearSelection();
+    $('jointBtn').disabled = true;
+    api
+      .withSuccessHandler(function (st) {
+        $('jointBtn').disabled = false;
+        joint.recommended = st.recommended || [];
+        if (st.mine) { applyStatus(st); startPoll(); }
+        else { joint.mode = 'pick'; joint.picks = []; renderMain(); updateJointBar(); }
+      })
+      .withFailureHandler(function (e) {
+        $('jointBtn').disabled = false;
+        if (segment === 'joint') segment = 'fixed';
+        applySeg();
+        toast(e.message, true);
+      })
+      .getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
+  }
+
+  function toggleJointPick(name, el) {
+    var i = joint.picks.indexOf(name);
+    if (i >= 0) joint.picks.splice(i, 1);
+    else if (joint.picks.length >= 3) { toast('最多選 3 個', true); return; }
+    else joint.picks.push(name);
+    el.classList.toggle('checked', i < 0);
+    updateJointBar();
+  }
+
+  function updateJointBar() {
+    var n = joint.picks.length;
+    $('jPickedNames').textContent = n ? joint.picks.join('、') : '請勾選 1~3 個想吃的';
+    $('jPickedCount').textContent = '已選 ' + n + ' / 3';
+    $('jSubmit').disabled = n < 1 || n > 3;
+    $('jbar').style.display = joint.mode === 'pick' ? 'block' : 'none';
+  }
+
+  $('jCancel').addEventListener('click', function () {
+    // 이미 제출한 상태에서 '수정'하러 들어온 경우엔 대기 화면으로 돌아간다
+    if (joint.status && joint.status.mine) { applyStatus(joint.status, true); startPoll(); }
+    else exitJoint();
+  });
+
+  $('jSubmit').addEventListener('click', function () {
+    var n = joint.picks.length;
+    if (n < 1 || n > 3) return;
+    submitJoint(joint.picks.slice(), false);
+  });
+
+  // 낙관적 UI: 누르는 즉시 대기/결과 화면으로 바꾸고, 서버 응답으로 보정. 에러면 선택 화면으로 되돌린다.
+  function submitJoint(picks, any) {
+    var prevStatus = joint.status, prevPicks = joint.picks.slice();
+    var o = prevStatus && prevStatus.other ? prevStatus : null;
+    var otherAny = !!(o && o.otherAny);
+    var other = o ? o.other : null;
+    if (any && otherAny) { other = null; otherAny = false; }   // 둘 다 都可以 → 랜덤 결과는 서버가 정한다
+    var opt = { mine: any ? [] : picks, other: other, mineAny: !!any, otherAny: otherAny, anyPick: null,
+                otherWho: who === 'jang' ? 'onni' : 'jang', common: [], decided: '', nicknames: null };
+    if (!any && other && !otherAny) opt.common = picks.filter(function (m) { return other.indexOf(m) >= 0; });
+    applyStatus(opt, true);
+    api
+      .withSuccessHandler(function (st) { joint.recommended = st.recommended || joint.recommended; applyStatus(st, true); startPoll(); toast('已送出！'); })
+      .withFailureHandler(function (e) {
+        stopPoll(); clearSelection();
+        joint.mode = 'pick'; joint.picks = prevPicks; joint.status = prevStatus; joint.sig = '';
+        renderMain(); updateJointBar();
+        toast(e.message || '送出失敗', true);
+      })
+      .submitJointPickByToken(token, state.ctx.date, state.ctx.slot, picks, !!any);
+  }
+
+  function startPoll() {
+    stopPoll();
+    joint.timer = setInterval(function () {
+      if (!joint.mode || joint.mode === 'pick' || joint.mode === 'decided') return;
+      api.withSuccessHandler(function (st) {
+        joint.recommended = st.recommended || joint.recommended;
+        if (joint.mode && joint.mode !== 'pick') applyStatus(st);
+      }).getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
+    }, POLL_MS);
+  }
+  function stopPoll() { if (joint.timer) clearInterval(joint.timer); joint.timer = null; }
+
+  // 상태가 바뀐 경우에만 다시 그린다 (결과 화면에서 고른 카드가 5초마다 풀리지 않게)
+  function applyStatus(st, force) {
+    if (st.nicknames) applyNicknames(st.nicknames);
+    // 서버 응답은 키 순서가 매번 달라질 수 있어서 JSON.stringify(st)로 비교하면 안 된다
+    var sig = JSON.stringify([st.mine, st.other, st.decided, st.mineAny, st.otherAny, st.anyPick && st.anyPick.name]);
+    joint.status = st;
+    var mode = st.mine ? (st.other ? 'result' : 'wait') : (st.decided ? 'decided' : null);
+    if (!mode) { exitJoint(); return; }   // 누군가 행을 지웠다 → 평소 화면
+    if (!force && sig === joint.sig && mode === joint.mode) return;
+    joint.sig = sig;
+    joint.mode = mode;
+    $('jbar').style.display = 'none';
+    if (mode === 'decided') stopPoll();
+    // 상태가 바뀌면 이전 결과에서 고른 確定 바는 더 이상 맞지 않으므로 닫는다
+    if (state.selection && state.selection.method === '共選') clearSelection();
+    renderMain();
+    // 후보가 딱 하나면 바로 確定 바를 띄운다
+    if (mode === 'result') {
+      var k = jointKind(st), cands = jointCands(st);
+      if (cands.length === 1) select({ method: '共選', menu: cands[0], note: jointNote(k) }, document.querySelector('.joint-panel .card'));
+      // 둘 다 都可以: 처음 결과가 나왔을 때 한 번 扭蛋 연출
+      if (k === 'bothAny' && st.anyPick && joint.animSig !== st.anyPick.name + '|' + st.anyPick.type) {
+        joint.animSig = st.anyPick.name + '|' + st.anyPick.type;
+        playAnyGacha(st.anyPick);
+      }
+    }
+  }
+
+  function jointKind(st) {
+    return st.mineAny && st.otherAny ? 'bothAny' : st.mineAny ? 'meAny' : st.otherAny ? 'otherAny' : 'both';
+  }
+  function jointCands(st) {
+    var k = jointKind(st);
+    return k === 'bothAny' ? (st.anyPick ? [st.anyPick.name] : []) : k === 'meAny' ? st.other : k === 'otherAny' ? st.mine : st.common;
+  }
+  function jointNote(k) {
+    return k === 'bothAny' ? '兩人都說都可以（隨機）' : (k === 'meAny' || k === 'otherAny') ? '一方說都可以' : '兩人都選';
+  }
+  function playAnyGacha(pick) {
+    var list = shuffle(state.recommended.map(function (r) { return { name: r.name, type: r.type }; })
+      .filter(function (r) { return r.name !== pick.name; })).slice(0, 5);
+    list.push({ name: pick.name, type: pick.type });
+    resetGacha();
+    state.gachaList = list; state.gachaMode = 'joint'; state.gachaForce = list.length - 1;
+    $('gRetry').style.display = 'none';
+    $('gacha').style.display = 'flex';
+    spin();
+  }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  function exitJoint(silent) {
+    stopPoll();
+    var was = joint.mode;
+    if (segment === 'joint') segment = 'fixed';   // 모바일: 一起決定 탭을 떠남
+    joint.mode = null; joint.picks = []; joint.status = null; joint.sig = ''; joint.animSig = ''; joint.hint = ''; joint.recommended = null;
+    $('jbar').style.display = 'none';
+    if (state.selection && state.selection.method === '共選') clearSelection();
+    if (!silent && was && state.ctx && !state.ctx.closed) { renderMain(); refreshJointHint(); }
+  }
+
+  function listHtml(title, items, hits) {
+    return '<div class="col"><b>' + esc(title) + '</b><ul>' + (items || []).map(function (m) {
+      return '<li' + (hits.indexOf(m) >= 0 ? ' class="hit"' : '') + '>' + esc(m) + '</li>';
+    }).join('') + '</ul></div>';
+  }
+
+  function renderJointPanel() {
+    var st = joint.status, other = otherName(), html = '<div class="joint-panel">';
+    if (joint.mode === 'wait') {
+      html += '<h2>已送出</h2><div class="sub">' + (st.mineAny ? '你選了「我都可以」，交給 ' + esc(other) + ' 決定' : '你的選擇：' + esc(st.mine.join('、'))) + '</div>' +
+        '<div class="sub" style="margin-top:4px">等待 ' + esc(other) + ' 選擇中</div>' +
+        loaderHtml(JOINT_WAIT_MSGS) +
+        '<div class="actions"><button class="btn btn-plain" id="jEdit">修改選擇</button>' +
+        '<button class="btn btn-plain" id="jBack">先看菜單</button></div>';
+    } else if (joint.mode === 'decided') {
+      html += '<h2>' + esc(other) + ' 已確定！</h2><div class="sub">今天吃：<b>' + esc(st.decided) + '</b></div>' +
+        '<div class="actions"><button class="btn btn-plain" id="jBack">返回菜單</button></div>';
+    } else if (jointKind(st) !== 'both') {
+      var k = jointKind(st), cands = jointCands(st);
+      var head = k === 'bothAny' ? ['你們都說都可以！', '兩個人都說「我都可以」，幫你們隨機挑了這個：']
+        : k === 'meAny' ? [other + ' 有想吃的！', '你選了「我都可以」，就從 ' + other + ' 選的菜單裡決定吧']
+        : [other + ' 說「我都可以」', '交給你決定！從你選的菜單裡挑一個吧'];
+      html += '<h2>' + esc(head[0]) + '</h2><div class="sub">' + esc(cands.length ? head[1] : '美食資料庫目前沒有資料，請修改選擇') + '</div>' +
+        '<div class="grid" style="margin-top:12px">' + cands.map(function (m, i) {
+          return '<button class="card" data-common="' + i + '">' + fixedCardBody(m) + '</button>';
+        }).join('') + '</div>' +
+        '<div class="actions">' + (cands.length > 1 ? '<button class="btn btn-gacha" id="jGacha">扭蛋決定</button>' : '') +
+        (k === 'bothAny' && st.anyPick ? '<button class="btn btn-plain" id="jReplay">再看一次扭蛋</button>' : '') +
+        '<button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
+    } else if (st.common.length) {
+      html += '<h2>兩人都想吃 🎉</h2><div class="sub">點一下就可以確定</div>' +
+        '<div class="grid" style="margin-top:12px">' + st.common.map(function (m, i) {
+          return '<button class="card" data-common="' + i + '">' + fixedCardBody(m) + '</button>';
+        }).join('') + '</div>' +
+        '<div class="joint-lists">' + listHtml('我', st.mine, st.common) + listHtml(other, st.other, st.common) + '</div>' +
+        '<div class="actions"><button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
+    } else {
+      html += '<h2>沒有重疊</h2><div class="sub">兩個人選的都不一樣，交給扭蛋吧！</div>' +
+        '<div class="joint-lists">' + listHtml('我', st.mine, []) + listHtml(other, st.other, []) + '</div>' +
+        '<div class="actions"><button class="btn btn-gacha" id="jGacha">扭蛋決定</button>' +
+        '<button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
+    }
+    html += '</div>';
+    $('main').innerHTML = html;
+    $('main').classList.remove('picking');
+
+    Array.prototype.forEach.call(document.querySelectorAll('.joint-panel .card'), function (el) {
+      el.addEventListener('click', function () {
+        var kk = jointKind(st);
+        select({ method: '共選', menu: jointCands(st)[Number(el.dataset.common)], note: jointNote(kk) }, el);
+      });
+    });
+    if ($('jEdit')) $('jEdit').addEventListener('click', function () {
+      stopPoll(); clearSelection();
+      joint.mode = 'pick'; joint.picks = (st.mine || []).slice();
+      renderMain(); updateJointBar();
+    });
+    if ($('jBack')) $('jBack').addEventListener('click', function () { exitJoint(); });
+    if ($('jReplay')) $('jReplay').addEventListener('click', function () { playAnyGacha(st.anyPick); });
+    if ($('jGacha')) $('jGacha').addEventListener('click', function () {
+      var seen = {}, list = [];
+      var src = jointKind(st) === 'both' ? st.mine.concat(st.other) : jointCands(st);
+      src.forEach(function (m) {
+        if (seen[m]) return; seen[m] = true;
+        list.push({ name: m, type: jointKind(st) === 'meAny' ? other + ' 選的' : st.mine.indexOf(m) >= 0 ? '我選的' : other + ' 選的' });
+      });
+      resetGacha();
+      state.gachaList = list; state.gachaMode = 'joint';
+      $('gacha').style.display = 'flex';
+      spin();
+    });
+  }
+
+  bootstrapIdentity(function () {
+    // 진료실 PC 첫 접속: 이름이 없으면 한 번 입력받는다 (취소해도 상단 배너 버튼으로 언제든 입력 가능)
+    if (isClinic() && !clinicName) openNickEditor();
+    load(document.body.dataset.slot || '');
+    if (storageUnavailable) {
+      setTimeout(function () { toast('這台裝置可能無法保存登入資訊，重新整理後可能要重新登入', true); }, 1200);
+    }
+  });
+</script>
+</body>
+</html>
