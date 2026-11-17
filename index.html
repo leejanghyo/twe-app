@@ -512,6 +512,7 @@
           <span>正在煩惱今天吃什麼…</span><span>正在翻找附近的美食…</span><span>問問肚子想吃什麼…</span><span>熱騰騰的菜單快好了…</span><span>扭蛋機暖機中…</span>
         </div>
       </div></div>
+    <div id="verTag" style="text-align:center;font-size:11px;color:#b9b0a8;margin-top:28px;user-select:none;-webkit-user-select:none">v2026.11.17-c</div>
   </div>
 
   <div class="bar" id="bar">
@@ -542,33 +543,43 @@
 
   <div class="who-modal" id="claimModal">
     <div class="who-box nick-box">
-      <h2>取個暱稱吧</h2>
-      <div class="nick-guide">幫自己取個暱稱，就可以開始使用「今天吃什麼」囉！</div>
-      <input id="claimInput" maxlength="10" placeholder="例如：小明" autocomplete="off">
-      <div class="nick-guide" style="margin-top:12px">設定4位數PIN碼，換手機時用來找回帳號</div>
+      <h2>建立帳號</h2>
+      <div class="nick-guide">設定帳號與PIN碼，就可以開始使用「今天吃什麼」囉！帳號建立後無法修改。</div>
+      <input id="claimAccount" maxlength="16" placeholder="帳號（2~16字，不可含空白）" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <div class="nick-guide" style="margin-top:12px">設定4位數PIN碼，換手機時用帳號＋PIN碼找回來</div>
       <input id="claimPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數字" autocomplete="off">
+      <div class="nick-guide" style="margin-top:12px">暱稱是畫面上顯示的名字（選填，可重複、之後能改）</div>
+      <input id="claimInput" maxlength="10" placeholder="暱稱（選填，例如：小明）" autocomplete="off" style="margin-top:0">
       <div class="nick-err" id="claimErr"></div>
       <div class="nick-actions">
         <button class="btn n-save" id="claimSave" style="width:100%">開始使用</button>
       </div>
-      <div class="id-switch"><a id="toLoginLink">已經有帳號？用暱稱＋PIN登入</a></div>
+      <div class="id-switch"><a id="toLoginLink">已經有帳號？用帳號＋PIN登入</a></div>
     </div>
   </div>
 
   <div class="who-modal" id="loginModal">
     <div class="who-box nick-box">
-      <h2>用暱稱＋PIN登入</h2>
-      <div class="nick-guide">換了手機、或找不到之前的帳號時，用當初設定的暱稱和PIN碼找回來。</div>
-      <input id="loginNick" maxlength="10" placeholder="你的暱稱" autocomplete="off">
+      <h2>用帳號＋PIN登入</h2>
+      <div class="nick-guide">換了手機、或找不到之前的帳號時，用帳號和PIN碼登入。（登入請用帳號，不是暱稱）</div>
+      <input id="loginNick" maxlength="16" placeholder="你的帳號" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
       <input id="loginPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數PIN碼" autocomplete="off" style="margin-top:10px">
       <div class="nick-err" id="loginErr"></div>
       <div class="nick-actions">
         <button class="btn n-save" id="loginSave" style="width:100%">登入</button>
       </div>
-      <div class="id-switch"><a id="toClaimLink">還沒有帳號？取個暱稱開始使用</a></div>
+      <div class="id-switch"><a id="toClaimLink">還沒有帳號？建立帳號開始使用</a></div>
     </div>
   </div>
 
+
+  <div class="who-modal" id="diagModal">
+    <div class="who-box nick-box">
+      <h2>診斷資訊</h2>
+      <pre id="diagText" style="text-align:left;white-space:pre-wrap;word-break:break-all;font-size:13px;line-height:1.6;margin:0 0 8px"></pre>
+      <div class="nick-actions"><button class="btn n-save" id="diagClose" style="width:100%">關閉</button></div>
+    </div>
+  </div>
 
   <div class="who-modal" id="nickModal">
     <div class="who-box nick-box">
@@ -656,10 +667,14 @@
             fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                                     body: JSON.stringify({ action: String(name), args: args }), redirect: 'follow' })
               .then(function (r) { return r.json(); })
-              .then(function (j) { return { j: j }; }, function () { return { e: '連線失敗，請稍後再試' }; })
+              .then(function (j) { return { j: j }; }, function () { return { e: '連線失敗，請稍後再試', net: true }; })
               .then(function (res) {   // 핸들러는 fetch 체인 밖에서 호출 (핸들러 예외가 실패로 오인되지 않도록)
                 if (res.j && res.j.ok) { if (onOk) onOk(res.j.data); }
-                else if (onFail) onFail(new Error(res.e || (res.j && res.j.error) || '發生錯誤'));
+                else if (onFail) {
+                  var er = new Error(res.e || (res.j && res.j.error) || '發生錯誤');
+                  er.code = res.net ? 'NETWORK' : (res.j && res.j.code) || '';
+                  onFail(er);
+                }
               });
           };
         }
@@ -1189,12 +1204,35 @@
    * 그 舊who로 1회 발급(기존 링크 호환), ③ 둘 다 없으면 "取個暱稱吧" 화면에서 새로 만든다.
    * 끝나면 cb()를 부른다 — load()는 신원이 정해진 뒤에만 시작한다.
    */
-  function bootstrapIdentity(cb) {
+  // 신원 확인 결과 진단(마지막 결과를 localStorage에도 남겨, 앱을 껐다 켜도 원인을 볼 수 있다)
+  var DIAG_KEY = 'ttwhat.diag';
+  function setDiag_(text) {
+    try { localStorage.setItem(DIAG_KEY, JSON.stringify({ t: new Date().toLocaleString(), r: text })); } catch (e) {}
+  }
+  function isNoUser_(e) { return !!e && e.code === 'NO_USER'; }   // 서버가 "그 토큰의 사용자 없음"이라고 명확히 알려 준 경우만
+  var identityRetryCb = null;   // 재시도까지 실패했을 때, 앱이 다시 보이면 한 번 더 시도
+
+  function bootstrapIdentity(cb, attempt) {
+    attempt = attempt || 0;
     var saved = lsGet(TOKEN_KEY);
     if (saved) {
       api
-        .withSuccessHandler(function (me) { applyIdentity(saved, me); cb(); })
-        .withFailureHandler(function () { lsSet(TOKEN_KEY, ''); bootstrapIdentity(cb); })   // 토큰이 더 이상 유효하지 않음 → 새로
+        .withSuccessHandler(function (me) { identityRetryCb = null; setDiag_('OK (확인 성공' + (attempt ? ', 재시도 ' + attempt + '회째' : '') + ')'); applyIdentity(saved, me); cb(); })
+        .withFailureHandler(function (e) {
+          if (isNoUser_(e)) {   // 서버가 확실히 "없는 토큰"이라고 한 경우에만 지운다
+            setDiag_('NO_USER — 서버가 토큰의 사용자 없음이라고 응답, 토큰 삭제');
+            lsSet(TOKEN_KEY, ''); bootstrapIdentity(cb); return;
+          }
+          // 통신 실패·지연·기타 오류: 토큰은 그대로 두고 재시도
+          setDiag_('오류(토큰 유지): ' + ((e && e.message) || '?') + ' [시도 ' + (attempt + 1) + ']');
+          if (attempt < 2) {
+            toast('連線不穩，重試中…');
+            setTimeout(function () { bootstrapIdentity(cb, attempt + 1); }, 1500 * (attempt + 1));
+          } else {
+            identityRetryCb = cb;
+            toast('連線失敗，請稍後再開啟或重新整理', true);
+          }
+        })
         .getMyIdentity(saved);
       return;
     }
@@ -1206,7 +1244,7 @@
           var msg = (e && e.message) || '';
           if (msg.indexOf('PIN') >= 0) {   // PIN 전환이 끝난 舊who 링크 → 暱稱＋PIN 로그인 화면으로
             pendingBootstrapCb = cb;
-            $('loginErr').textContent = '請用暱稱＋PIN登入';
+            $('loginErr').textContent = '請用帳號＋PIN登入';
             $('loginModal').style.display = 'flex';
             setTimeout(function () { $('loginNick').focus(); }, 0);
           } else toast(msg || '身份確認失敗', true);
@@ -1215,7 +1253,7 @@
       return;
     }
     $('claimModal').style.display = 'flex';
-    setTimeout(function () { $('claimInput').focus(); }, 0);
+    setTimeout(function () { $('claimAccount').focus(); }, 0);
     // claimSave 클릭 시 claimIdentity(cb) 호출 (아래 이벤트 핸들러에서 cb를 기억해 둔다)
     pendingBootstrapCb = cb;
   }
@@ -1227,7 +1265,42 @@
     else if (!isClinic()) myIdentityNick = me.nickname || '';
   }
 
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && identityRetryCb) { var c = identityRetryCb; identityRetryCb = null; bootstrapIdentity(c); }
+  });
+  window.addEventListener('online', function () {
+    if (identityRetryCb) { var c = identityRetryCb; identityRetryCb = null; bootstrapIdentity(c); }
+  });
+
   var pendingBootstrapCb = null;
+
+  // ===== 진단: 화면 맨 아래 버전 글자를 5번 연속 누르면 로그인 저장 상태를 보여 준다 (토큰은 앞 4자만) =====
+  (function () {
+    var taps = 0, timer = null;
+    function ckHas() { return !!cookieGet_(TOKEN_KEY); }
+    function show() {
+      var ls = '', lsOk = '';
+      try { ls = localStorage.getItem(TOKEN_KEY) || ''; lsOk = 'OK'; } catch (e) { lsOk = '無法讀取'; }
+      var ck = cookieGet_(TOKEN_KEY);
+      var tok = ls || ck;
+      var last = '(없음)';
+      try { var d = JSON.parse(localStorage.getItem(DIAG_KEY) || 'null'); if (d) last = d.t + '\n' + d.r; } catch (e) {}
+      var standalone = (window.navigator.standalone === true) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+      $('diagText').textContent =
+        '토큰: ' + (tok ? '저장됨 (' + tok.slice(0, 4) + '…)' : '없음') + '\n' +
+        '저장 위치: localStorage ' + (ls ? '있음' : '없음') + ' (' + lsOk + ') / 쿠키 ' + (ck ? '있음' : '없음') + '\n' +
+        '마지막 신원 확인: ' + last + '\n' +
+        'standalone(홈화면 앱): ' + (standalone ? '예' : '아니오') + '\n' +
+        '현재 화면 신원: ' + (token ? '확인됨' : '미확인') + '\n' +
+        '주소: ' + location.pathname;
+      $('diagModal').style.display = 'flex';
+    }
+    $('verTag').addEventListener('click', function () {
+      taps++; clearTimeout(timer); timer = setTimeout(function () { taps = 0; }, 2500);
+      if (taps >= 5) { taps = 0; show(); }
+    });
+    $('diagClose').addEventListener('click', function () { $('diagModal').style.display = 'none'; });
+  })();
 
   function finishIdentity(me) {
     var cb = pendingBootstrapCb; pendingBootstrapCb = null;
@@ -1236,12 +1309,15 @@
   }
 
   function claimIdentity() {
-    var v = $('claimInput').value.trim();
-    var len = Array.from(v).length;
+    var acc = $('claimAccount').value.trim();
+    var accLen = Array.from(acc).length;
     var pin = $('claimPin').value.trim();
-    if (!len) { $('claimErr').textContent = '暱稱不可空白'; return; }
-    if (len > 10) { $('claimErr').textContent = '暱稱最多 10 個字'; return; }
+    var nick = $('claimInput').value.trim();
+    var nickLen = Array.from(nick).length;
+    if (/\s/.test(acc)) { $('claimErr').textContent = '帳號不可包含空白'; return; }
+    if (accLen < 2 || accLen > 16) { $('claimErr').textContent = '帳號需為 2~16 個字'; return; }
     if (!/^\d{4}$/.test(pin)) { $('claimErr').textContent = 'PIN 碼請輸入 4 位數字'; return; }
+    if (nickLen > 10) { $('claimErr').textContent = '暱稱最多 10 個字'; return; }
     $('claimSave').disabled = true;
     api
       .withSuccessHandler(function (me) {
@@ -1250,20 +1326,23 @@
         finishIdentity(me);
       })
       .withFailureHandler(function (e) { $('claimSave').disabled = false; $('claimErr').textContent = e.message || '建立失敗'; })
-      .claimNickname(v, pin);
+      .claimAccount(acc, pin, nick);
   }
   $('claimSave').addEventListener('click', claimIdentity);
-  $('claimInput').addEventListener('keydown', function (e) {
+  $('claimAccount').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.isComposing) $('claimPin').focus();
   });
   $('claimPin').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) $('claimInput').focus();
+  });
+  $('claimInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.isComposing) claimIdentity();
   });
 
   function loginIdentity() {
     var nick = $('loginNick').value.trim();
     var pin = $('loginPin').value.trim();
-    if (!nick) { $('loginErr').textContent = '請輸入暱稱'; return; }
+    if (!nick) { $('loginErr').textContent = '請輸入帳號'; return; }
     if (!/^\d{4}$/.test(pin)) { $('loginErr').textContent = 'PIN 碼請輸入 4 位數字'; return; }
     $('loginSave').disabled = true;
     api
@@ -1295,7 +1374,7 @@
     $('loginModal').style.display = 'none';
     $('claimErr').textContent = '';
     $('claimModal').style.display = 'flex';
-    setTimeout(function () { $('claimInput').focus(); }, 0);
+    setTimeout(function () { $('claimAccount').focus(); }, 0);
   });
 
   // ===== 暱稱 =====
@@ -1321,7 +1400,7 @@
     $('nickInput').value = myNick();   // 아직 없으면 빈칸 → placeholder(例如：小明)가 보인다
     $('nickTitle').textContent = isClinic() ? (myNick() ? '修改名字' : '請問現在是哪位？') : (myNick() ? '修改暱稱' : '設定暱稱');
     $('nickGuide').textContent = isClinic() ? '請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
-                                            : '取一個你喜歡的暱稱，另一位會在畫面上看到它。';
+                                            : '取一個你喜歡的暱稱，另一位會在畫面上看到它。暱稱只是顯示名稱，登入請用帳號。';
     $('nickErr').textContent = '';
     $('nickSave').disabled = false;
     $('nickModal').style.display = 'flex';
