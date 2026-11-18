@@ -175,6 +175,20 @@
     }
     .nick-box input:focus { outline: none; border-color: var(--accent); }
     .nick-box .nick-guide { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+    .grp-box { max-height: 86vh; overflow-y: auto; }
+    .grp-box h2, #invBody h2 { word-break: break-all; }
+    .grp-sub { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+    .grp-row { display: flex !important; justify-content: space-between; align-items: center; background: var(--accent-soft); color: var(--ink); font-size: 16px !important; }
+    .grp-row small { color: var(--muted); font-weight: 400; }
+    .grp-mems { margin: 4px 0 8px; text-align: left; }
+    .grp-mem { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 16px; }
+    .grp-x { border: 0; background: var(--line); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+    .who-box .grp-x { display: inline-block; width: auto; margin: 0; font-size: 13px; padding: 4px 10px; }
+    .who-box .grp-line { background: #06c755; color: #fff; }
+    .who-box .grp-leave { background: #fff; color: #c0392b; border: 1px solid #c0392b; font-size: 15px; }
+    .grp-owner { display: flex; gap: 8px; } .grp-owner .btn { flex: 1; font-size: 14px !important; padding: 10px 6px !important; }
+    .grp-soon { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .inv-line { font-size: 17px !important; color: var(--ink) !important; }
     .nick-banner {
       margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px;
@@ -470,6 +484,7 @@
       <h1>今天吃什麼</h1>
       <div class="head-right">
         <span class="who" id="whoBox"></span><span class="ver-tag" id="verTop"></span>
+        <button class="cal-btn" id="groupBtn" type="button" title="我的飯團" aria-label="我的飯團"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
         <button class="cal-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
       </div>
     </header>
@@ -580,6 +595,13 @@
     </div>
   </div>
 
+
+  <div class="who-modal" id="grpModal">
+    <div class="who-box nick-box grp-box" id="grpBody"></div>
+  </div>
+  <div class="who-modal" id="invModal">
+    <div class="who-box nick-box" id="invBody"></div>
+  </div>
 
   <div class="who-modal" id="diagModal">
     <div class="who-box nick-box">
@@ -1287,7 +1309,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.17-d';
+  var APP_VERSION = '2026.11.19-a';
   $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1940,10 +1962,184 @@
     });
   }
 
+  // ===== 飯團(소그룹) + LINE 초대 =====
+  // 초대 링크: https://leejanghyo.github.io/twe-app/?join=邀請碼  (코드는 서버가 만든 무작위 20자)
+  var JOIN_KEY = 'ttwhat.join';
+  var INVITE_BASE = 'https://leejanghyo.github.io/twe-app/?join=';
+  var pendingJoin = '';
+  (function () {
+    try {
+      var j = (new URLSearchParams(location.search).get('join') || '').replace(/[^0-9a-zA-Z]/g, '').slice(0, 64);
+      if (j) { pendingJoin = j; lsSet(JOIN_KEY, j); } else pendingJoin = lsGet(JOIN_KEY) || '';   // 가입/로그인 중 새로고침돼도 유지
+    } catch (e) {}
+  })();
+  function clearPendingJoin() {
+    pendingJoin = ''; lsSet(JOIN_KEY, '');
+    try {
+      var u = new URL(location.href); u.searchParams.delete('join');
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    } catch (e) {}
+  }
+
+  var grp = { detail: null };
+  function grpBody(html) { $('grpBody').innerHTML = html; }
+  function grpClose() { $('grpModal').style.display = 'none'; }
+  function grpOpen() { $('grpModal').style.display = 'flex'; viewGroupList(); }
+  function grpErr(e) { return '<div class="nick-err">' + esc((e && e.message) || '發生錯誤') + '</div>'; }
+  function grpLoading() { grpBody('<h2>我的飯團</h2><div class="grp-sub">載入中…</div>'); }
+
+  function viewGroupList() {
+    grpLoading();
+    api.withSuccessHandler(function (list) {
+      var rows = list.map(function (g) {
+        return '<button class="btn grp-row" data-act="detail" data-id="' + esc(g.id) + '"><span>' + esc(g.name) + '</span><small>' + g.count + ' / ' + g.max + ' 人</small></button>';
+      }).join('');
+      grpBody('<h2>我的飯團</h2>' +
+        (rows || '<div class="grp-sub">還沒有飯團。建立一個，邀請常一起吃飯的人吧！</div>') +
+        '<button class="btn n-save" data-act="create">＋ 建立飯團</button>' +
+        '<button class="btn n-cancel" data-act="close">關閉</button>');
+    }).withFailureHandler(function (e) {
+      grpBody('<h2>我的飯團</h2>' + grpErr(e) + '<button class="btn n-cancel" data-act="close">關閉</button>');
+    }).getMyGroups(token);
+  }
+
+  function viewCreate(msg) {
+    grpBody('<h2>建立飯團</h2><div class="nick-guide">幫飯團取個名字（最多 12 個字）。</div>' +
+      '<input id="grpName" maxlength="12" placeholder="例如：午餐小隊" autocomplete="off">' +
+      '<div class="nick-err" id="grpErr">' + esc(msg || '') + '</div>' +
+      '<div class="nick-actions"><button class="btn n-cancel" data-act="list">取消</button><button class="btn n-save" id="grpSave" data-act="create-save">建立</button></div>');
+    setTimeout(function () { var i = $('grpName'); if (i) i.focus(); }, 0);
+  }
+
+  function viewDetail(id) {
+    grpBody('<h2>飯團</h2><div class="grp-sub">載入中…</div>');
+    api.withSuccessHandler(function (d) {
+      grp.detail = d;
+      var owner = d.myRole === 'owner';
+      var mem = d.members.map(function (m) {
+        return '<div class="grp-mem"><span>' + esc(m.nickname) + (m.isMe ? '（我）' : '') + (m.role === 'owner' ? ' 👑' : '') + '</span>' +
+          (owner && !m.isMe ? '<button class="grp-x" data-act="remove" data-uid="' + esc(m.userId) + '" data-nick="' + esc(m.nickname) + '">移除</button>' : '') + '</div>';
+      }).join('');
+      grpBody('<h2>' + esc(d.name) + '</h2><div class="grp-sub">' + d.count + ' / ' + d.max + ' 人</div>' +
+        '<div class="grp-mems">' + mem + '</div>' +
+        '<button class="btn grp-line" data-act="line">用LINE邀請</button>' +
+        (owner ? '<div class="grp-owner"><button class="btn n-cancel" data-act="regen">重新產生邀請連結</button><button class="btn n-cancel" data-act="rename">改名</button></div>' : '') +
+        '<div class="grp-soon">🍱 飯團一起決定 即將開放</div>' +
+        '<button class="btn grp-leave" data-act="leave">退出飯團</button>' +
+        '<button class="btn n-cancel" data-act="list">返回</button>');
+    }).withFailureHandler(function (e) {
+      grpBody('<h2>飯團</h2>' + grpErr(e) + '<button class="btn n-cancel" data-act="list">返回</button>');
+    }).getGroupDetail(token, id);
+  }
+
+  function viewRename() {
+    var d = grp.detail;
+    grpBody('<h2>改名</h2><input id="grpName" maxlength="12" autocomplete="off" value="' + esc(d.name) + '">' +
+      '<div class="nick-err" id="grpErr"></div>' +
+      '<div class="nick-actions"><button class="btn n-cancel" data-act="back">取消</button><button class="btn n-save" id="grpSave" data-act="rename-save">儲存</button></div>');
+    setTimeout(function () { var i = $('grpName'); if (i) { i.focus(); i.select(); } }, 0);
+  }
+
+  function viewConfirm(title, text, yesAct, yesLabel, extra) {
+    grpBody('<h2>' + esc(title) + '</h2><div class="nick-guide">' + esc(text) + '</div><div class="nick-err" id="grpErr"></div>' +
+      '<div class="nick-actions"><button class="btn n-cancel" data-act="back">取消</button><button class="btn n-save" id="grpSave" data-act="' + yesAct + '"' +
+      (extra ? ' data-uid="' + esc(extra) + '"' : '') + '>' + esc(yesLabel) + '</button></div>');
+  }
+
+  function grpInviteLink() { return INVITE_BASE + encodeURIComponent(grp.detail.inviteCode); }
+  function grpLineUrl() {
+    var text = '來加入我的飯團「' + grp.detail.name + '」，一起決定今天吃什麼！🍜\n' + grpInviteLink();
+    return 'https://line.me/R/share?text=' + encodeURIComponent(text);
+  }
+
+  function grpDo(call, okMsg, after) {   // 서버 호출 공통: 실패하면 화면의 오류줄에 표시
+    var b = $('grpSave'); if (b) b.disabled = true;
+    call(function (res) { if (okMsg) toast(okMsg); after(res); }, function (e) {
+      if (b) b.disabled = false;
+      var el = $('grpErr'); if (el) el.textContent = (e && e.message) || '發生錯誤'; else toast((e && e.message) || '發生錯誤', true);
+    });
+  }
+
+  $('grpBody').addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]'); if (!el) return;
+    var act = el.dataset.act, d = grp.detail, id = el.dataset.id;
+    if (act === 'close') grpClose();
+    else if (act === 'list') viewGroupList();
+    else if (act === 'detail') viewDetail(id);
+    else if (act === 'back') viewDetail(d.id);
+    else if (act === 'create') viewCreate();
+    else if (act === 'create-save') {
+      grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).createGroup(token, $('grpName').value); },
+            '飯團建立好了！', function (r) { viewDetail(r.id); });
+    }
+    else if (act === 'line') { var u = grpLineUrl(); if (!window.open(u, '_blank')) location.href = u; }
+    else if (act === 'regen') viewConfirm('重新產生邀請連結', '舊的邀請連結會立刻失效，要重新產生嗎？', 'regen-yes', '重新產生');
+    else if (act === 'regen-yes') {
+      grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).regenerateInvite(token, d.id); },
+            '已產生新的邀請連結', function () { viewDetail(d.id); });
+    }
+    else if (act === 'rename') viewRename();
+    else if (act === 'rename-save') {
+      grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).renameGroup(token, d.id, $('grpName').value); },
+            '已改名', function () { viewDetail(d.id); });
+    }
+    else if (act === 'remove') viewConfirm('移除成員', '要把「' + el.dataset.nick + '」移出飯團嗎？', 'remove-yes', '移除', el.dataset.uid);
+    else if (act === 'remove-yes') {
+      var uid = el.dataset.uid;
+      grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).removeMember(token, d.id, uid); },
+            '已移除', function () { viewDetail(d.id); });
+    }
+    else if (act === 'leave') viewConfirm('退出飯團', '確定要退出「' + d.name + '」嗎？', 'leave-yes', '退出');
+    else if (act === 'leave-yes') {
+      grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).leaveGroup(token, d.id); },
+            '已退出飯團', function () { viewGroupList(); });
+    }
+  });
+  $('grpModal').addEventListener('click', function (ev) { if (ev.target === $('grpModal')) grpClose(); });
+  $('groupBtn').addEventListener('click', function () { if (token) grpOpen(); });
+
+  // ----- 초대 화면 (?join=코드) -----
+  function invBody(html) { $('invBody').innerHTML = html; }
+  function invClose() { $('invModal').style.display = 'none'; clearPendingJoin(); }
+  function openInvite() {
+    var code = pendingJoin;
+    if (!code || !token) return;
+    $('invModal').style.display = 'flex';
+    invBody('<h2>飯團邀請</h2><div class="grp-sub">確認邀請中…</div>');
+    api.withSuccessHandler(function (p) {
+      if (p.alreadyMember) {
+        invBody('<h2>' + esc(p.name) + '</h2><div class="nick-guide">你已經在這個飯團裡囉</div><button class="btn n-save" data-inv="ok">好</button>');
+      } else if (p.full) {
+        invBody('<h2>' + esc(p.name) + '</h2><div class="nick-guide">這個飯團已經滿員了</div><button class="btn n-save" data-inv="ok">好</button>');
+      } else {
+        invBody('<h2>飯團邀請</h2><div class="nick-guide inv-line">' + esc(p.ownerNickname || '有人') + ' 邀請你加入「' + esc(p.name) + '」</div>' +
+          '<div class="grp-sub">目前 ' + p.count + ' / ' + p.max + ' 人</div><div class="nick-err" id="invErr"></div>' +
+          '<div class="nick-actions"><button class="btn n-cancel" data-inv="no">拒絕</button><button class="btn n-save" id="invYes" data-inv="yes">加入</button></div>');
+      }
+    }).withFailureHandler(function (e) {
+      invBody('<h2>飯團邀請</h2><div class="nick-guide">' + esc((e && e.message) || '邀請連結無效或已過期') + '</div><button class="btn n-save" data-inv="ok">好</button>');
+    }).previewInvite(token, code);
+  }
+  $('invBody').addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-inv]'); if (!el) return;
+    var a = el.dataset.inv;
+    if (a === 'ok' || a === 'no') { invClose(); return; }
+    if (a === 'yes') {
+      $('invYes').disabled = true;
+      api.withSuccessHandler(function (r) {
+        invClose(); toast('已加入「' + r.name + '」！');
+        $('grpModal').style.display = 'flex'; viewDetail(r.groupId);
+      }).withFailureHandler(function (e) {
+        $('invYes').disabled = false; var er = $('invErr'); if (er) er.textContent = (e && e.message) || '加入失敗';
+      }).joinGroup(token, pendingJoin);
+    }
+  });
+
   bootstrapIdentity(function () {
     // 진료실 PC 첫 접속: 이름이 없으면 한 번 입력받는다 (취소해도 상단 배너 버튼으로 언제든 입력 가능)
     if (isClinic() && !clinicName) openNickEditor();
     load(document.body.dataset.slot || '');
+    if (pendingJoin) openInvite();   // ?join=초대코드 로 열었으면 로그인/가입 직후 초대 화면
     if (storageUnavailable) {
       setTimeout(function () { toast('這台裝置可能無法保存登入資訊，重新整理後可能要重新登入', true); }, 1200);
     }
