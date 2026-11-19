@@ -1304,7 +1304,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.19-c';
+  var APP_VERSION = '2026.11.19-d';
   $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1731,6 +1731,16 @@
 
   function otherName() { return nameOf(who === 'jang' ? 'onni' : 'jang'); }
 
+  // 登出: 이 기기의 토큰(localStorage+쿠키)만 지우고 주소의 쿼리(?who= 등)를 뗀 채 다시 연다 → 로그인 화면.
+  // 서버 쪽 토큰은 건드리지 않으므로 다른 기기의 로그인은 그대로 유지된다.
+  function doLogout() {
+    if (!confirm('確定要登出嗎？')) return;
+    lsSet(TOKEN_KEY, '');
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    try { document.cookie = TOKEN_KEY + '=;max-age=0;path=/'; } catch (e) {}
+    location.replace(location.pathname);
+  }
+
   function updateJointBtn() {
     var b = $('jointBtn');
     b.classList.toggle('on', !!joint.mode);
@@ -1745,8 +1755,9 @@
     $('nickBanner').style.display = token && !myNick() ? 'flex' : 'none';   // 첫 실행 안내
     // 연필 그림 대신 닉네임 텍스트를 탭하면 수정 모드로 들어간다
     w.innerHTML = token ? '<span class="nick-tap" id="nickTap" role="button" tabindex="0" title="修改暱稱" aria-label="修改暱稱">' + esc(nameOf(who)) + '</span>' +
-      '' : '';
+      '<a id="logoutLink" role="button" tabindex="0">登出</a>' : '';
     if ($('nickTap')) $('nickTap').onclick = openNickEditor;
+    if ($('logoutLink')) $('logoutLink').onclick = doLogout;
   }
 
   // 평소 화면에서 상대가 이미 골랐는지 버튼에 살짝 표시
