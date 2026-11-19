@@ -7,20 +7,33 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="今天又吃什麼">
   <meta name="theme-color" content="#e0662f">
+  <meta name="color-scheme" content="light dark">
   <title>今天又吃什麼</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
     :root {
+      color-scheme: light dark;
       --bg: #fbf7f2; --card: #fff; --ink: #2b2420; --muted: #8a7f77;
       --accent: #e0662f; --accent-soft: #fde9dd; --line: #eadfd5; --ok: #2f9e6b;
+      --danger: #c0392b; --btn-dark: #2b2420; --glass: var(--glass); --scrim: var(--scrim);
+      --note-y-bg: #fff6d6; --note-y-bd: #f0dc9a; --note-b-bg: #e8f3ff; --note-b-bd: #bcd9f5;
+      --tabh: calc(58px + env(safe-area-inset-bottom, 0px));
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #17130f; --card: #26211c; --ink: #f2ebe4; --muted: #a89d94;
+        --accent: #ea743d; --accent-soft: #3d2619; --line: #3b332c; --ok: #45b987;
+        --danger: #ff7f70; --btn-dark: #4d443d; --glass: rgba(38,33,28,.92); --scrim: rgba(0,0,0,.62);
+        --note-y-bg: #3a3319; --note-y-bd: #5d5227; --note-b-bg: #1b2a39; --note-b-bd: #30495f;
+      }
     }
     * { box-sizing: border-box; }
     body {
       margin: 0; background: var(--bg); color: var(--ink);
       font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 120px; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 14px 16px calc(var(--tabh) + 110px); }
     header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     h1 { margin: 0; font-size: 28px; }
     .today { color: var(--muted); font-size: 15px; }
@@ -29,13 +42,13 @@
       background: var(--accent); color: #fff; font-weight: 700;
     }
     .slot-badge.off { background: #b9b0a8; }
-    .test-flag { font-size: 12px; color: #b44; margin-left: 6px; }
+    .test-flag { font-size: 12px; color: var(--danger); margin-left: 6px; }
     .tabs { display: inline-flex; margin-top: 14px; background: var(--line); border-radius: 999px; padding: 4px; }
     .tabs button {
       border: 0; background: transparent; font: inherit; font-weight: 700; font-size: 16px;
       padding: 6px 26px; border-radius: 999px; cursor: pointer; color: var(--muted);
     }
-    .tabs button.active { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .tabs button.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
     .tabs button:disabled { cursor: default; }
     .now-hint { font-size: 13px; color: var(--muted); margin-left: 10px; }
     section { margin-top: 26px; }
@@ -55,7 +68,7 @@
     .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--line); margin-bottom: 6px; }
     .empty { color: var(--muted); font-size: 14px; }
     .promo {
-      margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: #fff6d6; border: 1px solid #f0dc9a;
+      margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: var(--note-y-bg); border: 1px solid var(--note-y-bd);
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px;
     }
     .promo .promo-text { flex: 1 1 220px; }
@@ -64,7 +77,7 @@
     .promo .p-later { background: transparent; color: var(--muted); }
     .promo button:disabled { opacity: .5; cursor: default; }
     .variety-banner {
-      margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
+      margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; background: var(--note-b-bg); border: 1px solid var(--note-b-bd);
       display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink);
     }
     .variety-banner span { flex: 1; }
@@ -81,7 +94,7 @@
     button.btn {
       border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer;
     }
-    .btn-gacha { background: #2b2420; color: #fff; }
+    .btn-gacha { background: var(--btn-dark); color: #fff; }
     .btn-confirm { background: var(--accent); color: #fff; font-size: 18px; padding: 12px 34px; }
     .btn:disabled { opacity: .4; cursor: default; }
     .closed { margin-top: 60px; text-align: center; font-size: 22px; font-weight: 700; }
@@ -132,7 +145,7 @@
 
     /* 하단 확정 바 */
     .bar {
-      position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line);
+      position: fixed; left: 0; right: 0; bottom: var(--tabh); z-index: 22; background: var(--card); border-top: 1px solid var(--line);
       padding: 12px 16px; display: none;
     }
     .bar-inner { max-width: 760px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -143,11 +156,11 @@
 
     /* 가챠 화면 */
     .gacha {
-      position: fixed; inset: 0; background: rgba(43,36,32,.88); display: none;
-      align-items: center; justify-content: center; flex-direction: column; color: #fff; z-index: 10; padding: 16px;
+      position: fixed; inset: 0; background: rgba(20,16,13,.9); display: none;
+      align-items: center; justify-content: center; flex-direction: column; color: #fff; z-index: 45; padding: 16px;
     }
     .capsule {
-      width: min(320px, 90vw); min-height: 150px; border-radius: 22px; background: #fff; color: var(--ink);
+      width: min(320px, 90vw); min-height: 150px; border-radius: 22px; background: var(--card); color: var(--ink);
       display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
       box-shadow: 0 10px 40px rgba(0,0,0,.35);
     }
@@ -158,7 +171,7 @@
     @keyframes shake { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
     @keyframes pop { 0% { transform: scale(.8); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
     .gacha .g-actions { margin-top: 22px; display: flex; gap: 10px; }
-    .gacha .g-actions button { background: #fff; color: var(--ink); }
+    .gacha .g-actions button { background: var(--card); color: var(--ink); }
     .gacha .g-actions .btn-confirm { background: var(--accent); color: #fff; font-size: 16px; padding: 10px 18px; }
 
     /* 사용자 표시 / 一起決定 */
@@ -185,18 +198,18 @@
     .grp-x { border: 0; background: var(--line); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
     .who-box .grp-x { display: inline-block; width: auto; margin: 0; font-size: 13px; padding: 4px 10px; }
     .who-box .grp-line { background: #06c755; color: #fff; }
-    .who-box .grp-leave { background: #fff; color: #c0392b; border: 1px solid #c0392b; font-size: 15px; }
+    .who-box .grp-leave { background: var(--card); color: var(--danger); border: 1px solid var(--danger); font-size: 15px; }
     .grp-owner { display: flex; gap: 8px; } .grp-owner .btn { flex: 1; font-size: 14px !important; padding: 10px 6px !important; }
     .grp-soon { margin-top: 12px; color: var(--muted); font-size: 13px; }
     /* 飯團 화면 (목록 → 방 → 미니게임) */
-    .gs { position: fixed; inset: 0; z-index: 25; background: var(--bg); display: none; flex-direction: column; }
-    .gs-head { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px 8px; border-bottom: 1px solid var(--line); background: #fff; }
+    .gs { position: fixed; inset: 0 0 var(--tabh) 0; z-index: 25; background: var(--bg); display: none; flex-direction: column; }
+    .gs-head { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px 8px; border-bottom: 1px solid var(--line); background: var(--card); }
     .gs-title { flex: 1; text-align: center; font-size: 18px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .gs-btn { width: 44px; height: 44px; border: 0; background: transparent; font: inherit; font-size: 24px; color: var(--ink); cursor: pointer; border-radius: 12px; }
     .gs-btn:active { background: var(--line); }
-    .gs-body { flex: 1; overflow-y: auto; padding: 0 0 calc(env(safe-area-inset-bottom, 0px) + 16px); display: flex; flex-direction: column; }
+    .gs-body { flex: 1; overflow-y: auto; padding: 0 0 16px; display: flex; flex-direction: column; }
     .gl { display: flex; flex-direction: column; }
-    .gl-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--line); background: #fff; font: inherit; text-align: left; cursor: pointer; color: var(--ink); }
+    .gl-row { display: flex; -webkit-tap-highlight-color: transparent; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--line); background: var(--card); font: inherit; text-align: left; cursor: pointer; color: var(--ink); }
     .gl-row:active { background: var(--accent-soft); }
     .gl-name { flex: 1; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .gl-badge { font-size: 13px; font-weight: 700; color: var(--accent); }
@@ -204,13 +217,13 @@
     .ava { width: 40px; height: 40px; border-radius: 50%; color: #fff; font-weight: 800; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
     .gs-empty { margin: auto; text-align: center; color: var(--muted); font-size: 17px; line-height: 1.8; padding: 24px; }
     .gs-empty small { font-size: 14px; }
-    .gs-sheet { position: absolute; inset: 0; background: rgba(43,36,32,.5); display: none; align-items: flex-end; justify-content: center; }
-    .gs-sheet-box { width: 100%; max-width: 480px; max-height: 85%; overflow-y: auto; background: #fff; border-radius: 18px 18px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 20px); text-align: center; }
+    .gs-sheet { position: fixed; inset: 0; z-index: 40; background: var(--scrim); display: none; align-items: flex-end; justify-content: center; }
+    .gs-sheet-box { width: 100%; max-width: 480px; max-height: 85%; overflow-y: auto; background: var(--card); border-radius: 18px 18px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 20px); text-align: center; position: relative; }
     .gs-sheet-box h3 { margin: 0 0 8px; font-size: 18px; word-break: break-all; }
     .gs-sheet-box .btn { display: block; width: 100%; margin-top: 10px; font-size: 16px; padding: 12px; }
     .gs-sheet-box .grp-x { display: inline-block; width: auto; margin: 0; font-size: 13px; padding: 4px 10px; }
     .gs-sheet-box .grp-line { background: #06c755; color: #fff; }
-    .gs-sheet-box .grp-leave { background: #fff; color: #c0392b; border: 1px solid #c0392b; font-size: 15px; }
+    .gs-sheet-box .grp-leave { background: var(--card); color: var(--danger); border: 1px solid var(--danger); font-size: 15px; }
     .gs-sheet-box .grp-owner .btn { margin-top: 10px; }
     .gs-sheet-box .nick-actions { display: flex; gap: 8px; } .gs-sheet-box .nick-actions .btn { flex: 1; }
     .gs-body .rnd { flex: 1; display: flex; flex-direction: column; background: transparent; margin: 0; padding: 16px; justify-content: center; }
@@ -224,7 +237,7 @@
     .rnd-links { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .rnd .btn { display: block; width: 100%; max-width: 320px; margin: 6px auto 0; font-size: 18px; padding: 14px; }
     .mcs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    .mc { width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--line); color: var(--muted); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: #fff; }
+    .mc { width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--line); color: var(--muted); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: var(--card); }
     .mc.done { background: var(--accent); border-color: var(--accent); color: #fff; }
     .wait-n { font-size: 40px; font-weight: 800; }
     .rnd .n-save { background: var(--accent); color: #fff; } .rnd .n-cancel { background: var(--line); color: var(--ink); }
@@ -235,32 +248,32 @@
     .rnd .rnd-sub { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
     .rnd .rnd-timer { font-weight: 700; color: var(--accent); }
     .rnd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
-    .rnd-chip { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; color: var(--ink); }
+    .rnd-chip { border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; color: var(--ink); }
     .rnd-chip.on { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .rnd-mem { font-size: 13px; padding: 3px 9px; border-radius: 999px; background: #fff; color: var(--muted); }
+    .rnd-mem { font-size: 13px; padding: 3px 9px; border-radius: 999px; background: var(--card); color: var(--muted); }
     .rnd-mem.done { background: var(--accent); color: #fff; }
     .rnd-menus { max-height: 34vh; overflow-y: auto; margin: 6px 0; }
     .rnd-menus .lbl { font-size: 12px; color: var(--muted); margin: 8px 0 2px; }
     .who-box .rnd .btn { margin-top: 6px; }
-    .who-box .rnd .btn-any { background: #fff; color: var(--accent); border: 2px solid var(--accent); }
+    .who-box .rnd .btn-any { background: var(--card); color: var(--accent); border: 2px solid var(--accent); }
     .who-box .rnd .btn-pass { background: var(--line); color: var(--ink); }
     .rnd-reveal { text-align: center; padding: 16px 0; }
     .rnd-reveal .spin { font-size: 30px; font-weight: 800; min-height: 44px; word-break: break-all; }
     .rnd-result { text-align: center; }
     .rnd-result .win { font-size: 26px; font-weight: 800; margin: 6px 0; word-break: break-all; }
-    .rnd-result .tag { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #fff; color: var(--accent); margin: 2px; }
+    .rnd-result .tag { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--card); color: var(--accent); margin: 2px; }
     .rnd-result .msg { font-size: 14px; color: var(--muted); margin: 4px 0; }
     .rnd-result .title { display: inline-block; margin: 6px 0; padding: 4px 12px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; }
     .rnd-votes { text-align: left; font-size: 14px; margin-top: 8px; }
     .rnd-votes div { padding: 2px 0; }
     .inv-line { font-size: 17px !important; color: var(--ink) !important; }
     .nick-banner {
-      margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
+      margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--note-b-bg); border: 1px solid var(--note-b-bd);
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px;
     }
     .nick-banner span { flex: 1 1 200px; }
     .nick-banner button { border: 0; border-radius: 8px; padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; background: var(--accent); color: #fff; }
-    .nick-box .nick-err { min-height: 20px; margin-top: 6px; color: #c0392b; font-size: 13px; }
+    .nick-box .nick-err { min-height: 20px; margin-top: 6px; color: var(--danger); font-size: 13px; }
     .nick-box .nick-actions { display: flex; gap: 8px; }
     .nick-box .nick-actions button { margin-top: 4px; font-size: 16px; padding: 12px; }
     .nick-box .n-cancel { background: var(--line); color: var(--ink); }
@@ -272,7 +285,7 @@
     .fixed-box h2 { text-align: center; }
     .fixed-box input, .fixed-box select {
       width: 100%; margin-top: 10px; padding: 11px; font: inherit; font-size: 16px;
-      border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink);
+      border: 2px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink);
     }
     .fixed-box input#fxName { text-align: left; font-size: 17px; }
     .fixed-box select:focus, .fixed-box input:focus { outline: none; border-color: var(--accent); }
@@ -285,8 +298,8 @@
     .fx-days input { width: auto; margin: 0; }
     .fx-note { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.5; }
     .fx-delete {
-      display: block; width: 100%; margin-top: 10px; background: transparent; color: #c0392b;
-      border: 2px solid #f0c9c3; font-size: 14px; padding: 10px;
+      display: block; width: 100%; margin-top: 10px; background: transparent; color: var(--danger);
+      border: 2px solid var(--danger); font-size: 14px; padding: 10px;
     }
     .add-fixed-wrap { display: flex; justify-content: center; margin-top: 10px; }
     #secRec { position: relative; }
@@ -300,7 +313,7 @@
     .add-fixed-fab:active { transform: scale(.95); }
     .card-wrap { position: relative; }
     .card-edit {
-      position: absolute; top: 8px; right: 8px; z-index: 2; border: 0; background: rgba(255,255,255,.9);
+      position: absolute; top: 8px; right: 8px; z-index: 2; border: 0; background: var(--glass);
       border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
       cursor: pointer; color: var(--muted); box-shadow: 0 1px 3px rgba(0,0,0,.12);
     }
@@ -309,7 +322,7 @@
     .history-box { width: min(420px, 100%); max-height: 80vh; display: flex; flex-direction: column; padding-bottom: 16px; }
     .hist-hint { text-align: center; font-size: 12px; color: var(--accent); margin: 2px 0 0; min-height: 15px; }
     .hist-dots { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 6px 0 2px; flex: 0 0 auto; }
-    .hist-dot { width: 10px; height: 10px; padding: 0; border: 2px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; }
+    .hist-dot { width: 10px; height: 10px; padding: 0; border: 2px solid var(--line); border-radius: 999px; background: var(--card); cursor: pointer; }
     .hist-dot.active { width: 28px; border-radius: 999px; background: var(--accent); border-color: var(--accent); }
     .hist-slides {
       display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; flex: 1 1 auto; min-height: 0;
@@ -351,44 +364,12 @@
     }
     .cal-btn:active { background: var(--accent-soft); }
     .cal-btn svg { width: 18px; height: 18px; }
-    #tabBar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 0; }
-    .btn-joint { margin-left: auto; margin-top: 14px; background: #fff; color: var(--accent); border: 2px solid var(--accent) !important; }
-    .btn-joint.on { background: var(--accent); color: #fff; }
-    .joint-hint { display: block; font-size: 11px; font-weight: 400; }
-
-    /* 共選: 고르는 중인 카드에 체크 표시 */
-    .picking .card { position: relative; padding-right: 34px; }
-    .picking .card::after {
-      content: ''; position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
-      border: 2px solid var(--line); border-radius: 5px; background: #fff;
-    }
-    .picking .card.checked { border-color: var(--accent); background: var(--accent-soft); }
-    .picking .card.checked::after { content: '✓'; border-color: var(--accent); background: var(--accent); color: #fff;
-      font-size: 13px; font-weight: 800; line-height: 18px; text-align: center; }
-    .any-btn { display: block; width: 100%; margin: 0 0 14px; padding: 14px 16px; border: 2px dashed var(--accent); border-radius: 14px;
-      background: var(--accent-soft); color: var(--accent); font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .joint-panel { margin-top: 26px; background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 20px; }
-    .joint-panel .ld { margin-top: 10px; }
-    .joint-panel .ld-svg { width: min(130px, 34vw); }
-    .joint-panel h2 { margin-bottom: 8px; }
-    .joint-panel .sub { color: var(--muted); font-size: 14px; line-height: 1.6; }
-    .joint-panel .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .joint-panel .btn-plain { background: var(--line); color: var(--ink); }
-    .joint-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-    .joint-lists .col { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
-    .joint-lists .col b { display: block; margin-bottom: 4px; }
-    .joint-lists li { margin: 2px 0; }
-    .joint-lists ul { margin: 0; padding-left: 18px; }
-    .joint-lists .hit { color: var(--accent); font-weight: 700; }
-    .dots::after { content: ''; animation: dots 1.5s steps(4) infinite; }
-    @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
-
     /* 누구세요? */
     .who-modal {
-      position: fixed; inset: 0; background: rgba(43,36,32,.6); display: none; z-index: 30;
+      position: fixed; inset: 0; background: var(--scrim); display: none; z-index: 42;
       align-items: center; justify-content: center; padding: 16px;
     }
-    .who-box { background: #fff; border-radius: 18px; padding: 24px; width: min(320px, 100%); text-align: center; }
+    .who-box { background: var(--card); border-radius: 18px; padding: 24px; width: min(320px, 100%); text-align: center; position: relative; color: var(--ink); }
     .who-box h2 { margin-bottom: 16px; }
     .who-box button { display: block; width: 100%; margin-top: 10px; font-size: 18px; padding: 14px; }
     .who-box .w-jang { background: var(--accent); color: #fff; }
@@ -397,74 +378,43 @@
 
     /* ===== 모바일 전용 구조 (배달앱 패턴): 세그먼트 탭 + 分類 칩 + 큰 카드 ===== */
     .m-only { display: none; }
-    .seg { display: none; }
     .card { -webkit-tap-highlight-color: transparent; }
     .card:active { transform: scale(.99); }
     .note-toggle { display: none; }
-    .seg-dot { display: none; }
     @media (max-width: 720px) {
-      :root { --seg-h: 64px; }
-      .wrap { padding: 14px 14px 170px; }
+      .wrap { padding: 14px 14px calc(var(--tabh) + 110px); }
       h1 { font-size: 24px; }
       .today { font-size: 14px; }
 
       /* 午/晚 탭: 가로 꽉 차게 */
-      #tabBar { display: block; }
+      #slotBar { display: block; }
       .tabs { display: flex; width: 100%; margin-top: 12px; }
       .tabs button { flex: 1; padding: 11px 0; font-size: 17px; }
       .now-hint { display: block; margin: 6px 0 0 4px; }
-      #jointBtn { display: none !important; }   /* 모바일은 세그먼트의 「一起決定」 탭을 쓴다 */
 
-      /* 세그먼트 탭: 스크롤해도 위에 붙어 있음. 固定/推薦/扭蛋은 한 줄, 一起決定은 그 아래 전체 폭 한 줄 */
-      .seg.ready {
-        display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; z-index: 6;
-        background: var(--bg); padding: 10px 0 8px; margin-top: 4px;
-      }
-      .seg-row { display: flex; gap: 6px; }
-      .seg button {
-        position: relative; flex: 1; border: 0; border-radius: 12px; padding: 12px 0; font: inherit;
-        font-size: 15px; font-weight: 700; background: var(--line); color: var(--muted); cursor: pointer;
-        -webkit-tap-highlight-color: transparent; white-space: nowrap;
-      }
-      .seg-joint-btn { width: 100%; }
-      .seg button.active { background: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(224,102,47,.35); }
-      .seg-dot { position: absolute; top: 6px; right: 8px; width: 9px; height: 9px; border-radius: 50%; background: #e0372f; border: 2px solid var(--bg); }
-      .seg-dot.on { display: block; }
-
-      /* 탭별 표시: 한 번에 한 화면만 */
       section { margin-top: 10px; }
-      #main .sec-head { display: none; }
-      #main.picking .sec-head { display: flex; }
-      #main.picking .sec-head .btn-gacha { display: none; }
-      #main.seg-fixed #secRec, #main.seg-fixed #secGacha, #main.seg-fixed #secJointLoad,
-      #main.seg-rec #secFixed, #main.seg-rec #secGacha, #main.seg-rec #secJointLoad,
-      #main.seg-gacha #secFixed, #main.seg-gacha #secRec, #main.seg-gacha #secJointLoad,
-      #main.seg-joint #secGacha { display: none; }
-      #main.seg-gacha #secGacha { display: block; }
-      #main.seg-joint:not(.picking) #secFixed, #main.seg-joint:not(.picking) #secRec { display: none; }
-      #main.seg-joint:not(.picking) #secJointLoad { display: block; }
 
       /* 分類 칩 (가로 스크롤) */
       .chips {
-        display: flex; gap: 8px; overflow-x: auto; position: sticky; top: var(--seg-h); z-index: 5;
+        display: flex; gap: 8px; overflow-x: auto; position: sticky; top: 0; z-index: 5;
         background: var(--bg); padding: 6px 0 10px; margin-bottom: 4px;
         scrollbar-width: none; -webkit-overflow-scrolling: touch;
       }
       .chips::-webkit-scrollbar { display: none; }
       .chip {
-        flex: 0 0 auto; border: 2px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px;
+        flex: 0 0 auto; border: 2px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
         padding: 8px 16px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap;
         -webkit-tap-highlight-color: transparent;
       }
-      .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+      .chip.active { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 
       /* 固定菜單: 分類를 세로로, 카드는 한 줄에 하나 */
       .cat-grid { grid-template-columns: 1fr; gap: 18px; }
       /* 마지막 分類도 칩을 눌렀을 때 맨 위까지 올라올 수 있게 아래 여백을 확보 */
       /* 一起決定(picking)에서는 칩이 없어서 이 여백이 필요 없고, 있으면 推薦菜單이 안 보이는 것처럼 느껴짐 */
       /* 마지막 分類를 칩으로 눌러도 맨 위까지 스크롤되도록 보이지 않는 여백(카드/+버튼 뒤에 둬서 버튼 위치엔 영향 없음) */
-      .chip-scroll-pad { min-height: calc(100vh - var(--seg-h) - 150px); }
-      .cat { scroll-margin-top: calc(var(--seg-h) + 58px); }
+      .chip-scroll-pad { min-height: calc(100vh - 230px); }
+      .cat { scroll-margin-top: 58px; }
       h3.cat-title { font-size: 16px; color: var(--ink); margin-bottom: 10px; }
       .cat-stack { gap: 10px; }
       .grid { grid-template-columns: 1fr; gap: 10px; }
@@ -474,28 +424,16 @@
       .card .name { font-size: 18px; }
       .card .place, .card .meta { font-size: 14px; margin-top: 5px; }
       .tag { font-size: 13px; padding: 2px 10px; }
-      .picking .card { padding-right: 52px; }
-      .picking .card::after { top: 50%; right: 14px; width: 24px; height: 24px; margin-top: -12px; border-radius: 7px; }
-      .picking .card.checked::after { font-size: 16px; line-height: 20px; }
-
       /* 扭蛋 탭 */
-      .gacha-card { background: #fff; border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
+      .gacha-card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
       .gc-emoji { font-size: 56px; line-height: 1; }
       .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; }
       .gacha-card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
       .gc-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 18px; }
       .gc-types .tag { margin-bottom: 0; }
       .gacha-card .btn-gacha { width: 100%; min-height: 58px; font-size: 19px; border-radius: 16px; }
-      #secJointLoad { text-align: center; padding: 10px 0; }
-      #secJointLoad .ld { margin-top: 6vh; }
-
-      /* 一起決定 패널 */
-      .joint-panel { margin-top: 6px; padding: 18px; }
-      .joint-lists { grid-template-columns: 1fr; }
-      .joint-panel .actions .btn { min-height: 48px; }
-
       /* 하단 확정 바: 엄지로 누르기 편하게 (큰 버튼 + 備註는 접어 둠) */
-      .bar { padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 14px rgba(43,36,32,.08); }
+      .bar { padding: 10px 14px 12px; box-shadow: 0 -4px 14px rgba(43,36,32,.08); }
       .bar-inner { gap: 10px; }
       .bar .picked { order: 1; flex: 1 1 0; }
       .bar .picked b { font-size: 17px; }
@@ -506,15 +444,76 @@
       .bar .btn-confirm { order: 3; min-height: 54px; min-width: 112px; font-size: 19px; border-radius: 14px; padding: 0 22px; }
       #bar input { order: 4; flex: 1 1 100%; display: none; font-size: 16px; padding: 12px; }
       #bar.note-open input { display: block; }
-      #jbar .btn { min-height: 54px; border-radius: 14px; font-size: 17px; }
-      #jbar #jCancel { order: 2; }
-      #jbar #jSubmit { order: 3; }
-      #jbar .btn-confirm { min-width: 104px; }
-
       /* 扭蛋 오버레이 버튼도 크게 */
       .gacha .g-actions { flex-wrap: wrap; justify-content: center; }
       .gacha .g-actions .btn { min-height: 50px; font-size: 16px; }
     }
+
+    /* ===== 아래 탭바 (4칸) + 페이지 ===== */
+    .tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabh); z-index: 26; background: var(--card);
+      border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); display: none; }
+    .tabbar.on { display: block; }
+    .tabbar-in { max-width: 760px; margin: 0 auto; height: 58px; display: flex; }
+    .tb { position: relative; flex: 1; border: 0; background: transparent; font: inherit; color: var(--muted); cursor: pointer; padding: 6px 0 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; -webkit-tap-highlight-color: transparent; }
+    .tb .ti { font-size: 22px; line-height: 1.1; filter: grayscale(.85); opacity: .75; transition: transform .12s; }
+    .tb .tl { font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+    .tb.on { color: var(--accent); }
+    .tb.on .ti { filter: none; opacity: 1; transform: scale(1.1); }
+    .tb:active .ti { transform: scale(.92); }
+    .tb-badge { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #e0372f; color: #fff;
+      font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; border: 2px solid var(--card); box-sizing: content-box; display: none; }
+    .tb-badge.on { display: block; }
+    body:not([data-tab="home"]) .home-only { display: none !important; }
+    body[data-tab="groups"] .slot-only { display: none !important; }
+    .pg { display: none; }
+    .pg.on { display: block; }
+    .topbar { display: flex; align-items: center; gap: 6px; min-height: 40px; }
+    .topbar .who { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 4px; }
+    .topbar .nick-tap { font-size: 17px; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ico-btn { position: relative; border: 0; background: var(--line); cursor: pointer; color: var(--ink); border-radius: 50%; width: 38px; height: 38px; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .ico-btn:active { background: var(--accent-soft); }
+    .ico-btn svg { width: 19px; height: 19px; }
+    .ico-dot { position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; border-radius: 50%; background: #e0372f; border: 2px solid var(--bg); display: none; }
+    .ico-dot.on { display: block; }
+    .pg-head { display: flex; align-items: center; justify-content: space-between; min-height: 40px; margin-bottom: 6px; }
+    .pg-head h2 { font-size: 22px; }
+    .pg-act { border: 0; background: var(--accent); color: #fff; font: inherit; font-weight: 800; font-size: 20px; line-height: 1; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; }
+    .pg-act.txt { width: auto; padding: 0 16px; font-size: 15px; border-radius: 999px; height: 38px; }
+    .pg-act:disabled { opacity: .4; }
+    #pgGroups .gl { margin: 0 -16px; }
+    .gl-row { cursor: pointer; }
+    .gl-go { flex: none; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 15px; font-weight: 800; min-width: 48px; height: 38px;
+      padding: 0 10px; border-radius: 999px; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+    .gl-go.live { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .gl-go:active { transform: scale(.95); }
+    .gl-go:disabled { opacity: .5; }
+    .gl-sub { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+    .gl-name small { display: block; }
+    .x-btn { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--line); color: var(--ink);
+      font: inherit; font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; z-index: 2; }
+    .x-btn:active { background: var(--accent-soft); }
+    .gs-sheet-box h3, .history-box h2, .set-box h2, .live-box h2 { padding-right: 34px; padding-left: 34px; }
+    .set-box .btn, .live-box .btn { margin-top: 10px; }
+    .set-box .set-ver { margin-top: 14px; font-size: 12px; color: var(--muted); }
+    .set-box .set-out { background: var(--card); color: var(--danger); border: 1px solid var(--danger); }
+    .set-box .set-nick { background: var(--accent); color: #fff; }
+    .live-list { text-align: left; margin-top: 10px; }
+    .live-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 8px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+    .live-row b { flex: 1; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .live-row span { font-size: 14px; color: var(--accent); font-weight: 700; white-space: nowrap; }
+    .live-empty { color: var(--muted); padding: 22px 0 8px; font-size: 15px; line-height: 1.7; }
+    .gacha-card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
+    .gc-emoji { font-size: 56px; line-height: 1; }
+    .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; }
+    .gacha-card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+    .gc-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 18px; }
+    .gc-types .tag { margin-bottom: 0; }
+    .gacha-card .btn-gacha { width: 100%; min-height: 58px; font-size: 19px; border-radius: 16px; }
+    .slot-line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 0; }
+    .stale-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+    @media (prefers-color-scheme: dark) { .ld-shadow { fill: #000; } .rnd-chip, .mc { background: var(--card); } }
 
     .ver-tag { font-size: 10px; color: #b9b0a8; user-select: none; -webkit-user-select: none; cursor: default; white-space: nowrap; }
     #verTop { margin-left: 6px; }
@@ -527,13 +526,13 @@
     .toast {
       position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-120px);
       background: var(--ok); color: #fff; padding: 12px 26px; border-radius: 999px; font-weight: 700;
-      transition: transform .3s; z-index: 20;
+      transition: transform .3s; z-index: 60;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
-    .toast.err { background: #c0392b; }
+    .toast.err { background: var(--danger); }
   </style>
 </head>
-<body data-day="" data-slot="" data-who="">
+<body data-day="" data-slot="" data-who="" data-tab="home">
   <script>
     // GAS 템플릿이 하던 일: URL ?day=&slot=&who= 를 읽어 body에 심는다 (기존 코드가 body.dataset을 읽는다)
     (function () {
@@ -545,38 +544,32 @@
     })();
   </script>
   <div class="wrap">
-    <header>
-      <h1>今天吃什麼</h1>
-      <div class="head-right">
-        <span class="who" id="whoBox"></span><span class="ver-tag" id="verTop"></span>
-        <button class="cal-btn" id="groupBtn" type="button" title="我的飯團" aria-label="我的飯團"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
-        <button class="cal-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
-      </div>
-    </header>
-    <div class="today" id="today"></div>
-    <div class="promo" id="promo" style="display:none">
+    <div class="topbar home-only" id="topbar">
+      <span class="who" id="whoBox"></span><span class="ver-tag" id="verTop"></span>
+      <button class="ico-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+      <button class="ico-btn" id="liveBtn" type="button" title="進行中的一起決定" aria-label="進行中的一起決定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i class="ico-dot" id="liveDot"></i></button>
+      <button class="ico-btn" id="setBtn" type="button" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+    <div class="promo home-only" id="promo" style="display:none">
       <span class="promo-text" id="promoText"></span>
       <button class="p-add" id="promoAdd">加入固定菜單</button>
       <button class="p-later" id="promoLater">之後再說</button>
     </div>
-    <div class="nick-banner" id="nickBanner" style="display:none">
-      <span id="nickBannerText">👋 歡迎！請先為自己取個暱稱，另一位會看到這個名字。</span>
+    <div class="nick-banner home-only" id="nickBanner" style="display:none">
+      <span id="nickBannerText">👋 歡迎！請先為自己取個暱稱，別人會看到這個名字。</span>
       <button id="nickBannerBtn">設定暱稱</button>
     </div>
-    <div id="tabBar" style="display:none">
-      <div class="tabs"><button data-slot="午">午餐</button><button data-slot="晚">晚餐</button></div>
-      <span class="now-hint" id="nowHint"></span>
-      <button class="btn btn-joint" id="jointBtn">一起決定</button>
-    </div>
-    <nav class="seg" id="segBar" aria-label="功能">
-      <div class="seg-row">
-        <button data-seg="fixed">固定</button>
-        <button data-seg="rec">推薦</button>
-        <button data-seg="gacha">扭蛋</button>
+    <div class="slot-only" id="slotTop">
+      <div class="today" id="today" style="margin-top:6px"></div>
+      <div id="slotBar" style="display:none">
+        <div class="tabs"><button data-slot="午">午餐</button><button data-slot="晚">晚餐</button></div>
+        <span class="now-hint" id="nowHint"></span>
       </div>
-      <button class="seg-joint-btn" data-seg="joint" id="segJoint">一起決定<i class="seg-dot" id="segDot"></i></button>
-    </nav>
-    <div id="main"><div class="ld" role="status" aria-live="polite">
+    </div>
+
+    <div class="pg on" id="pgHome">
+      <div id="main">
+    <div class="ld" role="status" aria-live="polite">
         <svg class="ld-svg" viewBox="0 0 200 210" aria-hidden="true">
           <defs><clipPath id="ldBody"><path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z"/></clipPath></defs>
           <ellipse class="ld-shadow" cx="100" cy="194" rx="54" ry="8" fill="#2b2420"/>
@@ -599,9 +592,35 @@
         <div class="ld-msgs">
           <span>飯團集合中…</span><span>偷看大家想吃什麼…</span><span>肚子在叫了…</span><span>熱騰騰的菜單快好了…</span><span>飯糰滾過來了…</span>
         </div>
-      </div></div>
-    <div id="verTag" class="ver-tag"></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="pg" id="pgGroups">
+      <div class="pg-head"><h2>飯團</h2><button class="pg-act" type="button" data-act="create" aria-label="建立飯團">＋</button></div>
+      <div id="grpList"></div>
+    </div>
+
+    <div class="pg" id="pgRec">
+      <div class="pg-head"><h2>推薦菜單</h2><button class="pg-act txt" id="gachaBtn" type="button" style="background:var(--btn-dark)" disabled>扭蛋試試</button></div>
+      <div id="varietyBanner"></div>
+      <div id="recList"></div>
+    </div>
+
+    <div class="pg" id="pgGacha">
+      <div id="gachaPage"></div>
+    </div>
+    <div id="verTag" class="ver-tag home-only"></div>
   </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="功能">
+    <div class="tabbar-in">
+      <button class="tb on" type="button" data-tab="home"><span class="ti">🍚</span><span class="tl">照舊</span></button>
+      <button class="tb" type="button" data-tab="groups"><span class="ti">🍱</span><span class="tl">飯團</span><i class="tb-badge" id="tbBadge"></i></button>
+      <button class="tb" type="button" data-tab="rec"><span class="ti">✨</span><span class="tl">推薦</span></button>
+      <button class="tb" type="button" data-tab="gacha"><span class="ti">🎰</span><span class="tl">扭蛋</span></button>
+    </div>
+  </nav>
 
   <div class="bar" id="bar">
     <div class="bar-inner">
@@ -618,14 +637,6 @@
       <button class="btn" id="gRetry">再抽一次</button>
       <button class="btn" id="gClose">返回</button>
       <button class="btn btn-confirm" id="gPick">就吃這個</button>
-    </div>
-  </div>
-
-  <div class="bar" id="jbar">
-    <div class="bar-inner">
-      <div class="picked"><b id="jPickedNames"></b><span id="jPickedCount"></span></div>
-      <button class="btn btn-plain" id="jCancel" style="background:var(--line)">取消</button>
-      <button class="btn btn-confirm" id="jSubmit">送出</button>
     </div>
   </div>
 
@@ -664,17 +675,35 @@
       <button class="gs-btn" id="gsAct" type="button" data-act="" aria-label="選單"></button>
     </div>
     <div class="gs-body" id="gsBody"></div>
-    <div class="gs-sheet" id="gsSheet"><div class="gs-sheet-box nick-box" id="gsSheetBox"></div></div>
   </div>
+  <div class="gs-sheet" id="gsSheet"><div class="gs-sheet-box nick-box" id="gsSheetBox"></div></div>
   <div class="who-modal" id="invModal">
     <div class="who-box nick-box" id="invBody"></div>
   </div>
 
   <div class="who-modal" id="diagModal">
     <div class="who-box nick-box">
+      <button class="x-btn" id="diagClose" type="button" aria-label="關閉">✕</button>
       <h2>診斷資訊</h2>
       <pre id="diagText" style="text-align:left;white-space:pre-wrap;word-break:break-all;font-size:13px;line-height:1.6;margin:0 0 8px"></pre>
-      <div class="nick-actions"><button class="btn n-save" id="diagClose" style="width:100%">關閉</button></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="setModal">
+    <div class="who-box nick-box set-box">
+      <button class="x-btn" id="setClose" type="button" aria-label="關閉">✕</button>
+      <h2>設定</h2>
+      <button class="btn set-nick" id="setNick" type="button">修改暱稱</button>
+      <button class="btn set-out" id="setOut" type="button">登出</button>
+      <div class="set-ver" id="setVer"></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="liveModal">
+    <div class="who-box nick-box live-box">
+      <button class="x-btn" id="liveClose" type="button" aria-label="關閉">✕</button>
+      <h2>進行中</h2>
+      <div id="liveList"></div>
     </div>
   </div>
 
@@ -724,6 +753,7 @@
 
   <div class="who-modal" id="historyModal">
     <div class="who-box nick-box history-box">
+      <button class="x-btn" id="historyClose" type="button" aria-label="關閉">✕</button>
       <h2>食物紀錄</h2>
       <div class="hist-hint" id="histHint">← 滑動查看本月摘要 →</div>
       <div class="hist-dots" id="histDots">
@@ -738,9 +768,6 @@
         <div class="hist-slide" id="slideSummary">
           <div class="summary-box" id="summaryBox"></div>
         </div>
-      </div>
-      <div class="nick-actions">
-        <button class="btn n-cancel" id="historyClose">關閉</button>
       </div>
     </div>
   </div>
@@ -781,8 +808,6 @@
     return make(null, null);
   })();
 
-  var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], selection: null, gachaResult: null, busy: false,
-                varietyNudgeText: null };
   var $ = function (id) { return document.getElementById(id); };
   var LOADER_HTML = $('main').innerHTML;   // 로딩 캐릭터 마크업 (탭 전환 때 재사용)
   var LOADER_SVG = LOADER_HTML.slice(LOADER_HTML.indexOf('<svg'), LOADER_HTML.indexOf('</svg>') + 6);
@@ -800,8 +825,6 @@
     return '<div class="ld" role="status" aria-live="polite">' + LOADER_SVG +
       '<div class="ld-msgs">' + msgs.map(function (m) { return '<span>' + esc(m) + '</span>'; }).join('') + '</div></div>';
   }
-  var segment = 'fixed';                   // 모바일 세그먼트 탭: fixed | rec | gacha | joint
-
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -817,15 +840,94 @@
     toast._t = setTimeout(function () { t.className = 'toast' + (isErr ? ' err' : ''); }, 2200);
   }
 
-  function load(slot) {
-    setTabsBusy(true);
+  // ===== 상태 · 로컬 캐시 =====
+  // 지난 데이터(메뉴·飯團 목록·暱稱 등, 비밀값 제외)를 localStorage에 저장해 두었다가, 앱을 열면 먼저 보여 주고
+  // 서버 응답이 오면 조용히 갱신한다. 토큰·PIN은 캐시에 넣지 않는다(토큰은 기존 저장 방식 그대로, 캐시에는 구분용 해시만).
+  var CACHE_KEY = 'ttwhat.cache.v1';
+  function hash_(s) {   // 구분용 해시(되돌릴 수 없음, 토큰 자체가 아님)
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < s.length; i++) { var ch = s.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function cacheRead(tok) {
+    try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (c && c.v === 1 && c.h === hash_(tok)) return c; } catch (e) {}
+    return null;
+  }
+  function cacheWrite() {
+    if (!token || !state.ctx) return;
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ v: 1, h: hash_(token), at: Date.now(),
+        me: { nickname: myNick() || '', oldWho: who },
+        app: { ctx: state.ctx, fixed: state.fixed, fixedCategories: state.fixedCategories, promotionCandidates: state.promotionCandidates },
+        groups: state.groups, rec: state.recommended }));
+    } catch (e) {}
+  }
+  function cacheClear() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+  var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], promotionCandidates: [], groups: null,
+                selection: null, gachaResult: null, busy: false, varietyNudgeText: null,
+                recFetched: false, bootAt: 0, appSig: '', skew: 0 };
+  var tab = 'home';
+  var bootSeq = 0;
+
+  // 오늘 날짜(기기 시계, 대만 기준 사용자용 앱이라 기기 날짜로 충분) — 캐시가 어제 것이면 메뉴(요일별)는 쓰지 않는다
+  function todayLocal_() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+  // ===== 첫 화면 데이터: getBootstrap 1회(신원 + 照舊 + 飯團 목록·진행 중 라운드) =====
+  function applyBoot(boot) {
+    var app = boot.app;
+    state.skew = (boot.serverNowMs || Date.now()) - Date.now();
+    var sig = JSON.stringify([app.ctx, app.fixed, app.fixedCategories, app.promotionCandidates]);
+    var changed = sig !== state.appSig;
+    state.appSig = sig;
+    state.ctx = app.ctx; state.fixed = app.fixed || []; state.fixedCategories = app.fixedCategories || [];
+    state.promotionCandidates = app.promotionCandidates || [];
+    state.groups = boot.groups || [];
+    $('tabbar').classList.add('on');
+    cacheWrite();
+    renderTop();
+    if (changed || !$('today').innerHTML) renderHome();
+    renderGroupsUI();
+  }
+
+  // slot: '午'|'晚'|'' / opts.quiet: 로딩 화면 없이 조용히
+  function fetchBoot(slot, opts) {
+    opts = opts || {};
+    if (!token) return;
+    var seq = ++bootSeq;
     api
-      .withSuccessHandler(function (d) { setTabsBusy(false); render(d); })
-      .withFailureHandler(function (e) {
-        setTabsBusy(false);
-        $('main').innerHTML = '<div class="closed">載入失敗<small>' + esc(e.message) + '</small></div>';
+      .withSuccessHandler(function (b) {
+        if (seq !== bootSeq) return;
+        state.bootAt = Date.now();
+        applyIdentity(token, b.me);
+        applyBoot(b);
+        if (opts.done) opts.done();
       })
-      .getAppData(document.body.dataset.day || '', slot || '', token);
+      .withFailureHandler(function (e) {
+        if (seq !== bootSeq) return;
+        if (isNoUser_(e)) { relogin_(); return; }
+        if (opts.quiet) return;   // 조용한 갱신 실패는 지난 데이터를 그대로 둔다
+        if (!state.ctx) $('main').innerHTML = '<div class="closed">載入失敗<small>' + esc(e.message) + '</small></div>';
+        else toast((e && e.message) || '載入失敗', true);
+        if (opts.fail) opts.fail();
+      })
+      .getBootstrap(token, document.body.dataset.day || '', slot || '');
+  }
+  // 탭 전환·앱 복귀 때 조용히 갱신(15초 안에 이미 받았으면 생략)
+  function refreshBoot(force) {
+    if (!token || !state.ctx) return;
+    if (!force && Date.now() - state.bootAt < 15000) return;
+    fetchBoot(state.ctx.slot, { quiet: true });
+  }
+  function relogin_() {   // 서버가 「그 토큰의 사용자 없음」이라고 한 경우만(기존 규칙)
+    setDiag_('NO_USER — 서버가 토큰의 사용자 없음이라고 응답, 토큰 삭제');
+    lsSet(TOKEN_KEY, ''); try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    cacheClear(); token = ''; state.ctx = null; state.appSig = ''; state.groups = null;
+    $('tabbar').classList.remove('on');
+    $('main').innerHTML = LOADER_HTML;
+    bootstrapIdentity(onIdentityReady);
   }
 
   function setTabsBusy(b) {
@@ -835,10 +937,10 @@
   Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
     t.addEventListener('click', function () {
       if (state.ctx && state.ctx.slot === t.dataset.slot) return;
-      exitJoint(true);
       clearSelection();
       $('main').innerHTML = loaderHtml(SWITCH_MSGS);
-      load(t.dataset.slot);
+      setTabsBusy(true);
+      fetchBoot(t.dataset.slot, { done: function () { setTabsBusy(false); }, fail: function () { setTabsBusy(false); renderHome(); } });
     });
   });
 
@@ -847,32 +949,80 @@
     $('bar').style.display = 'none';
   }
 
-  function render(data) {
-    state.ctx = data.ctx; state.fixed = data.fixed; state.recommended = data.recommended;
-    state.fixedCategories = data.fixedCategories || [];
-    if (data.nicknames) applyNicknames(data.nicknames, true);
-    renderPromo(data.promotionCandidates || []);
-    var c = data.ctx;
+  // ===== 아래 탭바 =====
+  var TABS = ['home', 'groups', 'rec', 'gacha'];
+  function showTab(t) {
+    if (grp.depth > 0) closeRoom();
+    var same = tab === t;
+    tab = t; document.body.dataset.tab = t;
+    TABS.forEach(function (k) {
+      var pg = $('pg' + k.charAt(0).toUpperCase() + k.slice(1)); if (pg) pg.classList.toggle('on', k === t);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tb'), function (b) { b.classList.toggle('on', b.dataset.tab === t); });
+    if (!same) clearSelection();
+    window.scrollTo(0, 0);
+    if (t === 'groups') renderGroupsPage();
+    if (t === 'rec' || t === 'gacha') ensureRec();
+    if (!same) refreshBoot(false);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.tb'), function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+
+  // ===== 照舊(홈) =====
+  function renderHome() {
+    var c = state.ctx; if (!c) return;
+    renderPromo(state.promotionCandidates || []);
     $('today').innerHTML = esc(c.date) + '（星期' + esc(c.weekday) + '）' +
       (c.closed ? '' : '<span class="slot-badge' + (c.isMealTime ? '' : ' off') + '">' + esc(c.slot) + '</span>') +
       (c.isOverride ? '<span class="test-flag">測試模式</span>' : '');
-
-    $('segBar').classList.toggle('ready', !c.closed);
-    if (c.closed) {
-      $('tabBar').style.display = 'none';
-      $('main').innerHTML = '<div class="closed">本診所今日公休</div>';
-      return;
-    }
-
-    $('tabBar').style.display = 'block';
+    $('slotBar').style.display = c.closed ? 'none' : 'block';
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
       t.classList.toggle('active', t.dataset.slot === c.slot);
     });
     $('nowHint').textContent = c.isMealTime ? '' : '（預先查看）';
-    state.varietyNudgeText = null;
     renderMain();
-    refreshJointHint();
-    fetchVarietyNudge();
+    renderRec();
+  }
+
+  function renderMain() {
+    var c = state.ctx;
+    if (c.closed) { $('main').innerHTML = '<div class="closed">本診所今日公休</div>'; return; }
+    var html = '<section id="secFixed">';
+    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">今天這個時段沒有固定菜單</div>';
+    html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
+    if (state.fixed.length) html += '<div class="chip-scroll-pad" aria-hidden="true"></div>';
+    html += '</section>';
+    $('main').innerHTML = html;
+    setupChips();
+    Array.prototype.forEach.call($('main').querySelectorAll('.card'), function (el) {
+      var i = Number(el.dataset.i), name = state.fixed[i].name;
+      if (state.selection && state.selection.method === '固定' && state.selection.menu === name) el.classList.add('selected');
+      el.addEventListener('click', function () { select({ method: '固定', menu: name, note: '' }, el); });
+    });
+    Array.prototype.forEach.call($('main').querySelectorAll('.card-edit'), function (el) {
+      el.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var item = state.fixed.filter(function (m) { return m.id === el.dataset.fixid; })[0];
+        if (item) openFixedEdit(item);
+      });
+    });
+    $('addFixedBtn').addEventListener('click', function () { openFixedAdd(); });
+  }
+
+  // ===== 推薦 · 扭蛋 탭 (그 탭을 열 때만 서버에서 받는다) =====
+  function ensureRec() {
+    if (state.recFetched || !token) return;
+    state.recFetched = true;
+    api.withSuccessHandler(function (list) {
+      state.recommended = list || []; state.recLoadErr = '';
+      if (!state.selection) renderRec();
+      cacheWrite();
+    }).withFailureHandler(function (e) {
+      state.recFetched = false;
+      if (!state.recommended.length) { state.recLoadErr = (e && e.message) || ''; renderRec(); }
+    }).getRecommendedMenus(token);
+    if (tab === 'rec') fetchVarietyNudge();
   }
 
   function fetchVarietyNudge() {
@@ -884,126 +1034,42 @@
     }).withFailureHandler(function () { /* 넛지는 꾸밈 기능이라 실패해도 조용히 무시 */ }).getVarietyNudge(token);
   }
 
-  // 一起決定 결과·대기 화면이면 그것을, 아니면 固定/推薦 목록을 그린다
-  // 一起決定 중엔 그날 그 끼니의 고정 推薦 세트(joint.recommended)를, 평소엔 매번 랜덤인 state.recommended를 쓴다
-  function recList() { return (joint.mode === 'pick' && joint.recommended) ? joint.recommended : state.recommended; }
-
-  function renderMain() {
-    updateJointBtn();
-    applySeg();
-    if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') {
-      renderJointPanel();
-      return;
+  function renderRec() {
+    var c = state.ctx, rec = state.recommended;
+    if (!c) return;
+    var closedHtml = '<div class="closed">本診所今日公休</div>';
+    $('gachaBtn').disabled = !rec.length || c.closed;
+    if (c.closed) { $('recList').innerHTML = closedHtml; $('gachaPage').innerHTML = closedHtml; return; }
+    if (!rec.length && !state.recFetched && !state.recLoadErr) {
+      $('recList').innerHTML = loaderHtml(recommendLoadingPhrases);
+    } else {
+      $('recList').innerHTML = rec.length ? '<div class="grid">' + rec.map(function (r, i) {
+        var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
+        return '<button class="card" data-kind="rec" data-i="' + i + '">' +
+          '<span class="tag">' + esc(r.type) + '</span>' +
+          '<div class="name">' + esc(r.name) + '</div>' +
+          '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
+          (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
+      }).join('') + '</div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : '美食資料庫目前沒有資料') + '</div>';
     }
-    var rec = recList();
-    var html = '';
-    if (joint.mode === 'pick') html += '<button class="any-btn" id="anyBtn" type="button">我都可以，交給你決定</button>';
-    html += '<section id="secFixed"><div class="sec-head"><h2>固定菜單</h2></div>';
-    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">今天這個時段沒有固定菜單</div>';
-    if (joint.mode !== 'pick') {
-      html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
-      if (state.fixed.length) html += '<div class="chip-scroll-pad" aria-hidden="true"></div>';
-    }
-    html += '</section>';
-
-    html += '<section id="secRec"><div class="sec-head"><h2>推薦菜單</h2>' +
-      '<button class="btn btn-gacha" id="gachaBtn"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>' +
-      '<div id="varietyBanner"></div>';
-    html += rec.length ? '<div class="grid">' + rec.map(function (r, i) {
-      var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
-      return '<button class="card" data-kind="rec" data-i="' + i + '">' +
-        '<span class="tag">' + esc(r.type) + '</span>' +
-        '<div class="name">' + esc(r.name) + '</div>' +
-        '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
-        (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
-    }).join('') + '</div>' : '<div class="empty">美食資料庫目前沒有資料</div>';
-    html += '</section>';
-
-    // 모바일 전용: 扭蛋 탭 · 一起決定 불러오는 중
     var types = [];
     rec.forEach(function (x) { if (types.indexOf(x.type) < 0) types.push(x.type); });
-    html += '<section id="secGacha" class="m-only"><div class="gacha-card"><div class="gc-emoji">🎲</div>' +
-      '<h2>不知道吃什麼？</h2><p>' + (rec.length ? '交給扭蛋決定，從今天的推薦裡隨機抽一個！' : '美食資料庫目前沒有資料') + '</p>' +
+    $('gachaPage').innerHTML = '<div class="gacha-card"><div class="gc-emoji">🎲</div>' +
+      '<h2>不知道吃什麼？</h2><p>' + (rec.length ? '交給扭蛋決定，從今天的推薦裡隨機抽一個！' : (state.recFetched || state.recLoadErr ? '美食資料庫目前沒有資料' : '推薦菜單準備中…')) + '</p>' +
       '<div class="gc-types">' + types.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
-      '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div></section>';
-    html += '<section id="secJointLoad" class="m-only">' + loaderHtml(JOINT_CLICK_MSGS) + '</section>';
-
-    $('main').innerHTML = html;
-    applySeg();
-    setupChips();
-    renderVarietyBanner();
-
-    Array.prototype.forEach.call(document.querySelectorAll('.card'), function (el) {
-      var i = Number(el.dataset.i);
-      var name = el.dataset.kind === 'fixed' ? state.fixed[i].name : rec[i].name;
-      if (joint.mode === 'pick' && joint.picks.indexOf(name) >= 0) el.classList.add('checked');
-      el.addEventListener('click', function (ev) {
-        if (ev.target.tagName === 'A') return;
-        if (joint.mode === 'pick') { toggleJointPick(name, el); return; }
-        if (el.dataset.kind === 'fixed') select({ method: '固定', menu: state.fixed[i].name, note: '' }, el);
-        else select({ method: '推薦', menu: rec[i].name, note: recNote(rec[i]) }, el);
-      });
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.card-edit'), function (el) {
-      el.addEventListener('click', function (ev) {
-        ev.stopPropagation();
-        var id = el.dataset.fixid;
-        var item = state.fixed.filter(function (m) { return m.id === id; })[0];
-        if (item) openFixedEdit(item);
-      });
-    });
-    if ($('anyBtn')) $('anyBtn').addEventListener('click', function () { submitJoint([], true); });
-    if ($('addFixedBtn')) $('addFixedBtn').addEventListener('click', function () { openFixedAdd(); });
-    if ($('gachaBtn')) $('gachaBtn').addEventListener('click', openGacha);
+      '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>';
     if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
+    renderVarietyBanner();
   }
-
-  // ===== 모바일 세그먼트 탭 (固定 / 推薦 / 扭蛋 / 一起決定) =====
-  // 표시 전환은 CSS(#main.seg-*)가 담당. PC에서는 세그먼트 바가 숨겨져서 아무 영향이 없다.
-  function applySeg() {
-    var seg = joint.mode ? 'joint' : segment;
-    var m = $('main');
-    m.className = 'seg-' + seg + (joint.mode === 'pick' ? ' picking' : '');
-    Array.prototype.forEach.call(document.querySelectorAll('#segBar button'), function (b) {
-      b.classList.toggle('active', b.dataset.seg === seg);
-    });
-    document.documentElement.style.setProperty('--seg-h', ($('segBar').offsetHeight || 64) + 'px');
-  }
-
-  function scrollToContentTop() {
-    var top = $('tabBar').offsetTop + $('tabBar').offsetHeight;
-    if (window.scrollY > top) window.scrollTo(0, top);
-  }
-
-  function setSegment(s) {
-    if (!state.ctx || state.ctx.closed) return;
-    if (s === 'joint') {
-      return;   // 一起決定은 飯團 화면에서(메인 화면에는 탭을 두지 않는다)
-      return;
-    }
-    var wasJoint = !!joint.mode || segment === 'joint';
-    var showRecLoader = s === 'rec' && segment !== 'rec' && !wasJoint;
-    segment = s;
-    if (joint.mode) exitJoint(true);
-    if (wasJoint) renderMain(); else applySeg();
-    if (showRecLoader) flashRecLoader();
-    scrollToContentTop();
-  }
-
-  // 推薦 탭을 눌렀을 때 아주 잠깐 전용 로딩 문구를 보여준다 (이미 불러온 데이터 위에 살짝 덮는 연출, 카드는 그대로 유지)
-  function flashRecLoader() {
-    var sec = $('secRec');
-    if (!sec) return;
-    var ov = document.createElement('div');
-    ov.className = 'rec-load-overlay';
-    ov.innerHTML = loaderHtml(recommendLoadingPhrases);
-    sec.appendChild(ov);
-    setTimeout(function () { ov.remove(); }, 550);
-  }
-
-  Array.prototype.forEach.call(document.querySelectorAll('#segBar button'), function (b) {
-    b.addEventListener('click', function () { setSegment(b.dataset.seg); });
+  $('recList').addEventListener('click', function (ev) {
+    if (ev.target.tagName === 'A') return;
+    var el = ev.target.closest('.card[data-kind="rec"]'); if (!el) return;
+    var r = state.recommended[Number(el.dataset.i)]; if (!r) return;
+    select({ method: '推薦', menu: r.name, note: recNote(r) }, el);
   });
+  $('gachaBtn').addEventListener('click', openGacha);
+
+  function scrollToContentTop() { window.scrollTo(0, 0); }
 
   // ===== 分類 칩: 누르면 그 分類로 이동, 스크롤하면 현재 分類 칩이 강조됨 =====
   function setupChips() {
@@ -1033,11 +1099,11 @@
   var chipTick = false, chipLockUntil = 0;
   window.addEventListener('scroll', function () {
     if (Date.now() < chipLockUntil) { chipLockUntil = Date.now() + 150; return; }   // 칩으로 이동 중이면 멈출 때까지 대기
-    if (chipTick || !$('chips') || !$('secFixed') || $('secFixed').offsetParent === null) return;
+    if (tab !== 'home' || chipTick || !$('chips') || !$('secFixed')) return;
     chipTick = true;
     requestAnimationFrame(function () {
       chipTick = false;
-      var line = $('segBar').offsetHeight + 70, cur = 0;
+      var line = 70, cur = 0;
       Array.prototype.forEach.call(document.querySelectorAll('.cat'), function (cat, i) {
         if (cat.getBoundingClientRect().top <= line) cur = i;
       });
@@ -1049,13 +1115,12 @@
   function renderFixedGroups() {
     var order = state.fixedCategories.slice();
     var groups = {};
-    var editable = joint.mode !== 'pick';
     state.fixed.forEach(function (m, i) {
       if (order.indexOf(m.category) < 0) order.push(m.category);
       var card = '<button class="card" data-kind="fixed" data-i="' + i + '">' +
         (safeUrl(m.photo) ? '<img src="' + esc(m.photo) + '" alt="">' : '') +
         fixedCardBody(m.name) + '</button>';
-      var pencil = (editable && m.id) ? '<button class="card-edit" type="button" data-fixid="' + esc(m.id) + '" title="編輯" aria-label="編輯">' + PENCIL_SVG + '</button>' : '';
+      var pencil = m.id ? '<button class="card-edit" type="button" data-fixid="' + esc(m.id) + '" title="編輯" aria-label="編輯">' + PENCIL_SVG + '</button>' : '';
       (groups[m.category] = groups[m.category] || []).push('<div class="card-wrap">' + card + pencil + '</div>');
     });
     var shown = order.filter(function (c) { return groups[c]; });
@@ -1075,6 +1140,47 @@
     return '<div class="name">' + esc(m[1]) + '</div><div class="place">' + esc(m[2]) + '</div>';
   }
 
+  // ===== 상단 한 줄(暱稱 + 📅 🔔 ⚙) · 진행 중 목록 · 설정 =====
+  function renderTop() {
+    $('nickBannerText').textContent = isClinic() ? '👋 請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
+                                                  : '👋 歡迎！請先為自己取個暱稱，別人會看到這個名字。';
+    $('nickBanner').style.display = token && !myNick() ? 'flex' : 'none';   // 첫 실행 안내
+    $('whoBox').innerHTML = token ? '<span class="nick-tap" id="nickTap" role="button" tabindex="0" title="修改暱稱" aria-label="修改暱稱">' + esc(nameOf(who)) + '</span>' : '';
+    if ($('nickTap')) $('nickTap').onclick = openNickEditor;
+  }
+
+  function liveRounds() { return (state.groups || []).filter(function (g) { return g.round; }); }
+  function renderGroupsUI() {
+    var n = liveRounds().length;
+    $('tbBadge').textContent = n > 9 ? '9+' : String(n);
+    $('tbBadge').classList.toggle('on', n > 0);
+    $('liveDot').classList.toggle('on', n > 0);
+    if (tab === 'groups') renderGroupsPage();
+    if ($('liveModal').style.display === 'flex') renderLive();
+  }
+
+  function renderLive() {
+    var rs = liveRounds();
+    $('liveList').innerHTML = rs.length ? '<div class="live-list">' + rs.map(function (g) {
+      return '<button class="live-row" data-act="room" data-id="' + esc(g.id) + '">' + avatar(g.name) + '<b>' + esc(g.name) + '</b><span>' +
+        slotName(g.round.slot) + ' 🍱 ' + g.round.answered + '/' + g.round.total + '</span></button>';
+    }).join('') + '</div>' : '<div class="live-empty">目前沒有進行中的一起決定<br>到「飯團」按 🍱 就能開始</div>';
+  }
+  $('liveBtn').addEventListener('click', function () { renderLive(); $('liveModal').style.display = 'flex'; refreshBoot(false); });
+  $('liveClose').addEventListener('click', function () { $('liveModal').style.display = 'none'; });
+  $('liveList').addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-id]'); if (!el) return;
+    $('liveModal').style.display = 'none'; grpEnterRoom(el.dataset.id);
+  });
+
+  $('setBtn').addEventListener('click', function () { $('setModal').style.display = 'flex'; });
+  $('setClose').addEventListener('click', function () { $('setModal').style.display = 'none'; });
+  $('setNick').addEventListener('click', function () { $('setModal').style.display = 'none'; openNickEditor(); });
+  $('setOut').addEventListener('click', function () { $('setModal').style.display = 'none'; doLogout(); });
+  // 팝업은 바깥 영역을 눌러도 닫힌다
+  ['liveModal', 'setModal', 'historyModal', 'diagModal'].forEach(function (id) {
+    $(id).addEventListener('click', function (ev) { if (ev.target === $(id)) $(id).style.display = 'none'; });
+  });
   // ===== 固定菜單 승격 제안 배너 (가장 많이 먹은 1개만) =====
   var promoDismissed = {};   // 이번 화면에서 닫은 것 (서버 기록 없음)
   var promoCurrent = null;
@@ -1105,9 +1211,10 @@
         // 새 메뉴가 其他 分類에 바로 보이도록 고정메뉴만 갱신 (추천은 그대로)
         state.fixed = state.fixed.concat([{ name: name, category: '其他', photo: '' }]);
         if (state.fixedCategories.indexOf('其他') < 0) state.fixedCategories.push('其他');
+        state.promotionCandidates = [];
         clearSelection();
-        render({ ctx: state.ctx, fixed: state.fixed, fixedCategories: state.fixedCategories,
-                 recommended: state.recommended, promotionCandidates: [] });
+        renderHome(); cacheWrite();
+        refreshBoot(true);   // 서버 기준(編號 포함)으로 다시 맞춘다
       })
       .withFailureHandler(function (e) {
         $('promoAdd').disabled = false;
@@ -1159,7 +1266,7 @@
 
   // ===== 扭蛋 =====
   function openGacha() {
-    if (!state.recommended.length || joint.mode === 'pick') return;
+    if (!state.recommended.length || state.ctx.closed) return;
     resetGacha();
     state.gachaList = state.recommended;
     state.gachaMode = 'rec';
@@ -1199,11 +1306,6 @@
   $('gPick').addEventListener('click', function () {
     var r = state.gachaResult;
     $('gacha').style.display = 'none';
-    if (state.gachaMode === 'joint') {
-      var st = joint.status, k = st ? jointKind(st) : 'both';
-      select({ method: '共選', menu: r.name, note: k === 'both' ? '共選扭蛋' : jointNote(k) }, document.querySelector('.joint-panel .card'));
-      return;
-    }
     var idx = state.recommended.indexOf(r);
     var el = document.querySelector('.card[data-kind="rec"][data-i="' + idx + '"]');
     select({ method: '扭蛋', menu: r.name, note: recNote(r) }, el);
@@ -1214,21 +1316,18 @@
     if (!state.selection || state.busy) return;
     var s = state.selection;
     var extra = $('note').value.trim();
-    var prevStatus = joint.status;
     var cardEl = document.querySelector('.card.selected');
     // 낙관적 UI: 서버 응답을 기다리지 않고 먼저 화면을 바꾼다
     state.busy = true;
     toast('已記錄！');
     clearSelection();
     Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
-    if (s.method === '共選') exitJoint();   // 共選 행은 서버에서 지워짐 → 일반 화면으로
     api
       .withSuccessHandler(function () { state.busy = false; })
       .withFailureHandler(function (e) {
         state.busy = false;
         // 실패 → 화면을 되돌리고 에러 표시
-        if (s.method === '共選' && prevStatus) { applyStatus(prevStatus, true); startPoll(); }
-        select(s, document.querySelector('.joint-panel .card') || cardEl);
+        select(s, cardEl);
         $('note').value = extra;
         toast(e.message || '記錄失敗', true);
       })
@@ -1294,6 +1393,7 @@
     return myIdentityNick;
   }
 
+
   /**
    * 신원을 확보한다: ① 이 기기에 저장된 token이 있으면 그대로 확인, ② 없고 URL에 ?who=가 있으면
    * 그 舊who로 1회 발급(기존 링크 호환), ③ 둘 다 없으면 "取個暱稱吧" 화면에서 새로 만든다.
@@ -1311,14 +1411,24 @@
     attempt = attempt || 0;
     var saved = lsGet(TOKEN_KEY);
     if (saved) {
+      // 토큰 확인과 첫 화면 데이터를 한 번에: getBootstrap 이 getMyIdentity 역할(NO_USER 포함)을 겸한다
+      var seq = ++bootSeq;
       api
-        .withSuccessHandler(function (me) { identityRetryCb = null; setDiag_('OK (확인 성공' + (attempt ? ', 재시도 ' + attempt + '회째' : '') + ')'); applyIdentity(saved, me); cb(); })
+        .withSuccessHandler(function (b) {
+          if (seq !== bootSeq) return;
+          identityRetryCb = null; state.bootAt = Date.now();
+          setDiag_('OK (확인 성공' + (attempt ? ', 재시도 ' + attempt + '회째' : '') + ')');
+          applyIdentity(saved, b.me); cb(b);
+        })
         .withFailureHandler(function (e) {
+          if (seq !== bootSeq) return;
           if (isNoUser_(e)) {   // 서버가 확실히 "없는 토큰"이라고 한 경우에만 지운다
             setDiag_('NO_USER — 서버가 토큰의 사용자 없음이라고 응답, 토큰 삭제');
-            lsSet(TOKEN_KEY, ''); bootstrapIdentity(cb); return;
+            lsSet(TOKEN_KEY, ''); cacheClear(); token = ''; state.ctx = null; state.appSig = ''; state.groups = null;
+            $('tabbar').classList.remove('on');
+            bootstrapIdentity(cb); return;
           }
-          // 통신 실패·지연·기타 오류: 토큰은 그대로 두고 재시도
+          // 통신 실패·지연·기타 오류: 토큰은 그대로 두고 재시도 (지난 데이터가 보이는 중이면 그대로 둔다)
           setDiag_('오류(토큰 유지): ' + ((e && e.message) || '?') + ' [시도 ' + (attempt + 1) + ']');
           if (attempt < 2) {
             toast('連線不穩，重試中…');
@@ -1328,7 +1438,7 @@
             toast('連線失敗，請稍後再開啟或重新整理', true);
           }
         })
-        .getMyIdentity(saved);
+        .getBootstrap(saved, document.body.dataset.day || '', document.body.dataset.slot || '');
       return;
     }
     var fromUrl = document.body.dataset.who;
@@ -1372,8 +1482,8 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.19-f';
-  $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
+  var APP_VERSION = '2026.11.20-a';
+  $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
     var now = Date.now();
@@ -1413,6 +1523,7 @@
         '앱 버전: ' + APP_VERSION + '\n' +
         '마지막 신원 확인: ' + last + '\n' +
         'standalone(홈화면 앱): ' + (standalone ? '예' : '아니오') + '\n' +
+        '캐시: ' + (cacheRead(tok || '') ? '있음 (' + new Date(cacheRead(tok).at).toLocaleTimeString() + ')' : '없음') + '\n' +
         '현재 화면 신원: ' + (token ? '확인됨' : '미확인') + '\n' +
         '주소: ' + location.pathname;
       $('diagModal').style.display = 'flex';
@@ -1426,12 +1537,12 @@
     $('diagClose').addEventListener('click', function () { $('diagModal').style.display = 'none'; });
   })();
 
+  // 로그인·가입이 끝나면(또는 舊who 링크로 신원이 정해지면) 첫 화면 데이터를 받는다
   function finishIdentity(me) {
     var cb = pendingBootstrapCb; pendingBootstrapCb = null;
     applyIdentity(me.token, me);
-    if (cb) cb(); else { renderMain(); refreshJointHint(); }   // 로그인/가입 화면을 나중에 다시 열었을 때도 반영
+    if (cb) cb(); else fetchBoot('');
   }
-
   var claimedMe = null;   // 가입은 됐고 暱稱 설정만 남은 상태(설정을 마치면 finishIdentity)
   function claimIdentity() {
     var acc = $('claimAccount').value.trim();
@@ -1502,20 +1613,6 @@
     setTimeout(function () { $('claimAccount').focus(); }, 0);
   });
 
-  // ===== 暱稱 =====
-  // 서버에서 받은 닉네임 반영. 바뀐 게 있으면 머리말·대기/결과 화면·누구세요 버튼을 다시 그린다.
-  function applyNicknames(n, quiet) {
-    if (!n || (n.jang === WHO_NAME.jang && n.onni === WHO_NAME.onni)) return;
-    WHO_NAME = { jang: n.jang || '', onni: n.onni || '' };
-    if (quiet) return;          // render() 도중이면 거기서 다시 그린다
-    updateJointBtn();
-    if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') {
-      var keep = state.selection;   // 확정 바는 그대로 둔다
-      renderJointPanel();
-      if (keep) state.selection = keep;
-    }
-  }
-
   var PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/>' +
     '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -1536,7 +1633,7 @@
     $('nickInput').value = myNick();   // 아직 없으면 빈칸 → placeholder(例如：小明)가 보인다
     $('nickTitle').textContent = isClinic() ? (myNick() ? '修改名字' : '請問現在是哪位？') : (myNick() ? '修改暱稱' : '設定暱稱');
     $('nickGuide').textContent = isClinic() ? '請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
-                                            : '取一個你喜歡的暱稱，另一位會在畫面上看到它。暱稱只是顯示名稱，登入請用帳號。';
+                                            : '取一個你喜歡的暱稱，飯團的朋友會在畫面上看到它。暱稱只是顯示名稱，登入請用帳號。';
     $('nickErr').textContent = '';
     $('nickSave').disabled = false;
     $('nickModal').style.display = 'flex';
@@ -1551,7 +1648,7 @@
     if (len > 10) { $('nickErr').textContent = '暱稱最多 10 個字'; return; }
     if (isClinic()) {   // 진료실 PC: 서버에 저장하지 않고 이 브라우저에만 기억
       clinicName = v; lsSet(CLINIC_KEY, v);
-      closeNickEditor(); updateJointBtn(); toast('名字已更新！');
+      closeNickEditor(); renderTop(); cacheWrite(); toast('名字已更新！');
       return;
     }
     if (claimedMe) {   // 가입 직후 최초 설정
@@ -1572,8 +1669,7 @@
       .withSuccessHandler(function (res) {
         closeNickEditor();
         if (isLegacy()) WHO_NAME[who] = res.nickname; else myIdentityNick = res.nickname;
-        updateJointBtn();
-        if (joint.mode === 'wait' || joint.mode === 'result' || joint.mode === 'decided') renderJointPanel();
+        renderTop(); cacheWrite();
         toast('暱稱已更新！');
       })
       .withFailureHandler(function (e) { $('nickSave').disabled = false; $('nickErr').textContent = e.message || '儲存失敗'; })
@@ -1652,7 +1748,7 @@
     $('fxSave').disabled = true;
     var done = function () {
       closeFixedAdd(); toast(fxEditId ? '已更新固定菜單！' : '已新增固定菜單！');
-      load(state.ctx ? state.ctx.slot : '');   // 캐시가 비워졌으니 새로 불러와서 바로 보이게
+      fetchBoot(state.ctx ? state.ctx.slot : '', { quiet: true });   // 서버 캐시가 비워졌으니 새로 불러와서 바로 보이게
     };
     var fail = function (e) { $('fxSave').disabled = false; $('fxErr').textContent = e.message || '儲存失敗'; };
     if (fxEditId) {
@@ -1675,7 +1771,7 @@
       .withSuccessHandler(function () {
         $('fxDelete').disabled = false;
         closeFixedAdd(); toast('已刪除！');
-        load(state.ctx ? state.ctx.slot : '');
+        fetchBoot(state.ctx ? state.ctx.slot : '', { quiet: true });
       })
       .withFailureHandler(function (e) { $('fxDelete').disabled = false; $('fxErr').textContent = e.message || '刪除失敗'; })
       .deleteFixedMenuItem(fxEditId, token);
@@ -1792,270 +1888,15 @@
     if (n < 2) lsSet('ttwhat.histHintShown', String(n + 1));
   }
 
-  // ===== 一起決定 (共選) =====
-  // mode: null(평소) | 'pick'(체크 중) | 'wait'(상대 기다림) | 'result'(결과) | 'decided'(상대가 먼저 確定)
-  var joint = { mode: null, picks: [], status: null, timer: null, sig: '', recommended: null };
-  var POLL_MS = 5000;
-
-  function otherName() { return nameOf(who === 'jang' ? 'onni' : 'jang'); }
-
-  // 登出: 이 기기의 토큰(localStorage+쿠키)만 지우고 주소의 쿼리(?who= 등)를 뗀 채 다시 연다 → 로그인 화면.
+  // 登出: 이 기기의 토큰(localStorage+쿠키)과 저장해 둔 데이터를 지우고 주소의 쿼리(?who= 등)를 뗀 채 다시 연다 → 로그인 화면.
   // 서버 쪽 토큰은 건드리지 않으므로 다른 기기의 로그인은 그대로 유지된다.
   function doLogout() {
     if (!confirm('確定要登出嗎？')) return;
     lsSet(TOKEN_KEY, '');
     try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
     try { document.cookie = TOKEN_KEY + '=;max-age=0;path=/'; } catch (e) {}
+    cacheClear();
     location.replace(location.pathname);
-  }
-
-  function updateJointBtn() {
-    var b = $('jointBtn');
-    b.classList.toggle('on', !!joint.mode);
-    b.innerHTML = '一起決定';
-    var w = $('whoBox');
-    b.style.display = 'none';   // 메인 화면 복구(v2026.11.19-d 이전 모습): 一起決定은 상단 飯團 아이콘 → 방 안에서
-    $('segJoint').style.display = 'none';
-    $('segDot').classList.toggle('on', joint.hint === 'other' && !joint.mode);   // 상대가 먼저 골랐음
-    $('nickBannerText').textContent = isClinic() ? '👋 請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
-                                                  : '👋 歡迎！請先為自己取個暱稱，另一位會看到這個名字。';
-    $('nickBanner').style.display = token && !myNick() ? 'flex' : 'none';   // 첫 실행 안내
-    // 연필 그림 대신 닉네임 텍스트를 탭하면 수정 모드로 들어간다
-    w.innerHTML = token ? '<span class="nick-tap" id="nickTap" role="button" tabindex="0" title="修改暱稱" aria-label="修改暱稱">' + esc(nameOf(who)) + '</span>' +
-      '<a id="logoutLink" role="button" tabindex="0">登出</a>' : '';
-    if ($('nickTap')) $('nickTap').onclick = openNickEditor;
-    if ($('logoutLink')) $('logoutLink').onclick = doLogout;
-  }
-
-  // 평소 화면에서 상대가 이미 골랐는지 버튼에 살짝 표시
-  function refreshJointHint() {
-    return;   // 4단계: 2인 힌트는 더 쓰지 않는다(一起決定은 飯團 화면에서)
-    api.withSuccessHandler(function (st) {
-      if (joint.mode) return;
-      applyNicknames(st.nicknames, true);
-      joint.hint = st.mine ? 'mine' : st.other ? 'other' : '';
-      updateJointBtn();
-    }).getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
-  }
-
-  $('jointBtn').addEventListener('click', function () {
-    return;   // 一起決定은 飯團 화면에서
-  });
-
-  // 一起決定 시작: 이미 제출한 게 있으면 바로 대기/결과 화면, 없으면 체크 모드
-  function startJoint() {
-    clearSelection();
-    $('jointBtn').disabled = true;
-    api
-      .withSuccessHandler(function (st) {
-        $('jointBtn').disabled = false;
-        joint.recommended = st.recommended || [];
-        if (st.mine) { applyStatus(st); startPoll(); }
-        else { joint.mode = 'pick'; joint.picks = []; renderMain(); updateJointBar(); }
-      })
-      .withFailureHandler(function (e) {
-        $('jointBtn').disabled = false;
-        if (segment === 'joint') segment = 'fixed';
-        applySeg();
-        toast(e.message, true);
-      })
-      .getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
-  }
-
-  function toggleJointPick(name, el) {
-    var i = joint.picks.indexOf(name);
-    if (i >= 0) joint.picks.splice(i, 1);
-    else if (joint.picks.length >= 3) { toast('最多選 3 個', true); return; }
-    else joint.picks.push(name);
-    el.classList.toggle('checked', i < 0);
-    updateJointBar();
-  }
-
-  function updateJointBar() {
-    var n = joint.picks.length;
-    $('jPickedNames').textContent = n ? joint.picks.join('、') : '請勾選 1~3 個想吃的';
-    $('jPickedCount').textContent = '已選 ' + n + ' / 3';
-    $('jSubmit').disabled = n < 1 || n > 3;
-    $('jbar').style.display = joint.mode === 'pick' ? 'block' : 'none';
-  }
-
-  $('jCancel').addEventListener('click', function () {
-    // 이미 제출한 상태에서 '수정'하러 들어온 경우엔 대기 화면으로 돌아간다
-    if (joint.status && joint.status.mine) { applyStatus(joint.status, true); startPoll(); }
-    else exitJoint();
-  });
-
-  $('jSubmit').addEventListener('click', function () {
-    var n = joint.picks.length;
-    if (n < 1 || n > 3) return;
-    submitJoint(joint.picks.slice(), false);
-  });
-
-  // 낙관적 UI: 누르는 즉시 대기/결과 화면으로 바꾸고, 서버 응답으로 보정. 에러면 선택 화면으로 되돌린다.
-  function submitJoint(picks, any) {
-    var prevStatus = joint.status, prevPicks = joint.picks.slice();
-    var o = prevStatus && prevStatus.other ? prevStatus : null;
-    var otherAny = !!(o && o.otherAny);
-    var other = o ? o.other : null;
-    if (any && otherAny) { other = null; otherAny = false; }   // 둘 다 都可以 → 랜덤 결과는 서버가 정한다
-    var opt = { mine: any ? [] : picks, other: other, mineAny: !!any, otherAny: otherAny, anyPick: null,
-                otherWho: who === 'jang' ? 'onni' : 'jang', common: [], decided: '', nicknames: null };
-    if (!any && other && !otherAny) opt.common = picks.filter(function (m) { return other.indexOf(m) >= 0; });
-    applyStatus(opt, true);
-    api
-      .withSuccessHandler(function (st) { joint.recommended = st.recommended || joint.recommended; applyStatus(st, true); startPoll(); toast('已送出！'); })
-      .withFailureHandler(function (e) {
-        stopPoll(); clearSelection();
-        joint.mode = 'pick'; joint.picks = prevPicks; joint.status = prevStatus; joint.sig = '';
-        renderMain(); updateJointBar();
-        toast(e.message || '送出失敗', true);
-      })
-      .submitJointPickByToken(token, state.ctx.date, state.ctx.slot, picks, !!any);
-  }
-
-  function startPoll() {
-    stopPoll();
-    joint.timer = setInterval(function () {
-      if (!joint.mode || joint.mode === 'pick' || joint.mode === 'decided') return;
-      api.withSuccessHandler(function (st) {
-        joint.recommended = st.recommended || joint.recommended;
-        if (joint.mode && joint.mode !== 'pick') applyStatus(st);
-      }).getJointStatusByToken(token, state.ctx.date, state.ctx.slot);
-    }, POLL_MS);
-  }
-  function stopPoll() { if (joint.timer) clearInterval(joint.timer); joint.timer = null; }
-
-  // 상태가 바뀐 경우에만 다시 그린다 (결과 화면에서 고른 카드가 5초마다 풀리지 않게)
-  function applyStatus(st, force) {
-    if (st.nicknames) applyNicknames(st.nicknames);
-    // 서버 응답은 키 순서가 매번 달라질 수 있어서 JSON.stringify(st)로 비교하면 안 된다
-    var sig = JSON.stringify([st.mine, st.other, st.decided, st.mineAny, st.otherAny, st.anyPick && st.anyPick.name]);
-    joint.status = st;
-    var mode = st.mine ? (st.other ? 'result' : 'wait') : (st.decided ? 'decided' : null);
-    if (!mode) { exitJoint(); return; }   // 누군가 행을 지웠다 → 평소 화면
-    if (!force && sig === joint.sig && mode === joint.mode) return;
-    joint.sig = sig;
-    joint.mode = mode;
-    $('jbar').style.display = 'none';
-    if (mode === 'decided') stopPoll();
-    // 상태가 바뀌면 이전 결과에서 고른 確定 바는 더 이상 맞지 않으므로 닫는다
-    if (state.selection && state.selection.method === '共選') clearSelection();
-    renderMain();
-    // 후보가 딱 하나면 바로 確定 바를 띄운다
-    if (mode === 'result') {
-      var k = jointKind(st), cands = jointCands(st);
-      if (cands.length === 1) select({ method: '共選', menu: cands[0], note: jointNote(k) }, document.querySelector('.joint-panel .card'));
-      // 둘 다 都可以: 처음 결과가 나왔을 때 한 번 扭蛋 연출
-      if (k === 'bothAny' && st.anyPick && joint.animSig !== st.anyPick.name + '|' + st.anyPick.type) {
-        joint.animSig = st.anyPick.name + '|' + st.anyPick.type;
-        playAnyGacha(st.anyPick);
-      }
-    }
-  }
-
-  function jointKind(st) {
-    return st.mineAny && st.otherAny ? 'bothAny' : st.mineAny ? 'meAny' : st.otherAny ? 'otherAny' : 'both';
-  }
-  function jointCands(st) {
-    var k = jointKind(st);
-    return k === 'bothAny' ? (st.anyPick ? [st.anyPick.name] : []) : k === 'meAny' ? st.other : k === 'otherAny' ? st.mine : st.common;
-  }
-  function jointNote(k) {
-    return k === 'bothAny' ? '兩人都說都可以（隨機）' : (k === 'meAny' || k === 'otherAny') ? '一方說都可以' : '兩人都選';
-  }
-  function playAnyGacha(pick) {
-    var list = shuffle(state.recommended.map(function (r) { return { name: r.name, type: r.type }; })
-      .filter(function (r) { return r.name !== pick.name; })).slice(0, 5);
-    list.push({ name: pick.name, type: pick.type });
-    resetGacha();
-    state.gachaList = list; state.gachaMode = 'joint'; state.gachaForce = list.length - 1;
-    $('gRetry').style.display = 'none';
-    $('gacha').style.display = 'flex';
-    spin();
-  }
-  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-
-  function exitJoint(silent) {
-    stopPoll();
-    var was = joint.mode;
-    if (segment === 'joint') segment = 'fixed';   // 모바일: 一起決定 탭을 떠남
-    joint.mode = null; joint.picks = []; joint.status = null; joint.sig = ''; joint.animSig = ''; joint.hint = ''; joint.recommended = null;
-    $('jbar').style.display = 'none';
-    if (state.selection && state.selection.method === '共選') clearSelection();
-    if (!silent && was && state.ctx && !state.ctx.closed) { renderMain(); refreshJointHint(); }
-  }
-
-  function listHtml(title, items, hits) {
-    return '<div class="col"><b>' + esc(title) + '</b><ul>' + (items || []).map(function (m) {
-      return '<li' + (hits.indexOf(m) >= 0 ? ' class="hit"' : '') + '>' + esc(m) + '</li>';
-    }).join('') + '</ul></div>';
-  }
-
-  function renderJointPanel() {
-    var st = joint.status, other = otherName(), html = '<div class="joint-panel">';
-    if (joint.mode === 'wait') {
-      html += '<h2>已送出</h2><div class="sub">' + (st.mineAny ? '你選了「我都可以」，交給 ' + esc(other) + ' 決定' : '你的選擇：' + esc(st.mine.join('、'))) + '</div>' +
-        '<div class="sub" style="margin-top:4px">等待 ' + esc(other) + ' 選擇中</div>' +
-        loaderHtml(JOINT_WAIT_MSGS) +
-        '<div class="actions"><button class="btn btn-plain" id="jEdit">修改選擇</button>' +
-        '<button class="btn btn-plain" id="jBack">先看菜單</button></div>';
-    } else if (joint.mode === 'decided') {
-      html += '<h2>' + esc(other) + ' 已確定！</h2><div class="sub">今天吃：<b>' + esc(st.decided) + '</b></div>' +
-        '<div class="actions"><button class="btn btn-plain" id="jBack">返回菜單</button></div>';
-    } else if (jointKind(st) !== 'both') {
-      var k = jointKind(st), cands = jointCands(st);
-      var head = k === 'bothAny' ? ['你們都說都可以！', '兩個人都說「我都可以」，幫你們隨機挑了這個：']
-        : k === 'meAny' ? [other + ' 有想吃的！', '你選了「我都可以」，就從 ' + other + ' 選的菜單裡決定吧']
-        : [other + ' 說「我都可以」', '交給你決定！從你選的菜單裡挑一個吧'];
-      html += '<h2>' + esc(head[0]) + '</h2><div class="sub">' + esc(cands.length ? head[1] : '美食資料庫目前沒有資料，請修改選擇') + '</div>' +
-        '<div class="grid" style="margin-top:12px">' + cands.map(function (m, i) {
-          return '<button class="card" data-common="' + i + '">' + fixedCardBody(m) + '</button>';
-        }).join('') + '</div>' +
-        '<div class="actions">' + (cands.length > 1 ? '<button class="btn btn-gacha" id="jGacha">扭蛋決定</button>' : '') +
-        (k === 'bothAny' && st.anyPick ? '<button class="btn btn-plain" id="jReplay">再看一次扭蛋</button>' : '') +
-        '<button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
-    } else if (st.common.length) {
-      html += '<h2>兩人都想吃 🎉</h2><div class="sub">點一下就可以確定</div>' +
-        '<div class="grid" style="margin-top:12px">' + st.common.map(function (m, i) {
-          return '<button class="card" data-common="' + i + '">' + fixedCardBody(m) + '</button>';
-        }).join('') + '</div>' +
-        '<div class="joint-lists">' + listHtml('我', st.mine, st.common) + listHtml(other, st.other, st.common) + '</div>' +
-        '<div class="actions"><button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
-    } else {
-      html += '<h2>沒有重疊</h2><div class="sub">兩個人選的都不一樣，交給扭蛋吧！</div>' +
-        '<div class="joint-lists">' + listHtml('我', st.mine, []) + listHtml(other, st.other, []) + '</div>' +
-        '<div class="actions"><button class="btn btn-gacha" id="jGacha">扭蛋決定</button>' +
-        '<button class="btn btn-plain" id="jEdit">修改選擇</button></div>';
-    }
-    html += '</div>';
-    $('main').innerHTML = html;
-    $('main').classList.remove('picking');
-
-    Array.prototype.forEach.call(document.querySelectorAll('.joint-panel .card'), function (el) {
-      el.addEventListener('click', function () {
-        var kk = jointKind(st);
-        select({ method: '共選', menu: jointCands(st)[Number(el.dataset.common)], note: jointNote(kk) }, el);
-      });
-    });
-    if ($('jEdit')) $('jEdit').addEventListener('click', function () {
-      stopPoll(); clearSelection();
-      joint.mode = 'pick'; joint.picks = (st.mine || []).slice();
-      renderMain(); updateJointBar();
-    });
-    if ($('jBack')) $('jBack').addEventListener('click', function () { exitJoint(); });
-    if ($('jReplay')) $('jReplay').addEventListener('click', function () { playAnyGacha(st.anyPick); });
-    if ($('jGacha')) $('jGacha').addEventListener('click', function () {
-      var seen = {}, list = [];
-      var src = jointKind(st) === 'both' ? st.mine.concat(st.other) : jointCands(st);
-      src.forEach(function (m) {
-        if (seen[m]) return; seen[m] = true;
-        list.push({ name: m, type: jointKind(st) === 'meAny' ? other + ' 選的' : st.mine.indexOf(m) >= 0 ? '我選的' : other + ' 選的' });
-      });
-      resetGacha();
-      state.gachaList = list; state.gachaMode = 'joint';
-      $('gacha').style.display = 'flex';
-      spin();
-    });
   }
 
   // ===== 飯團(소그룹) + LINE 초대 =====
@@ -2077,76 +1918,88 @@
     } catch (e) {}
   }
 
-  // ===== 飯團 화면 (4단계 개편): 목록(A) → 방(B, 전체 화면) → 一起決定 미니게임(C, 방 안) =====
-  // history: 목록=1단, 방=2단. ←·아이폰 뒤로 가기는 모두 history.back() → popstate 에서 화면을 맞춘다.
-  var grp = { detail: null, depth: 0, gid: '', list: [], sheet: '' };
+  // ===== 飯團: 목록은 「飯團」 탭, 방(전체 화면, 탭바는 그대로 보임) → 一起決定 미니게임(방 안) =====
+  // history: 방=1단. ←·아이폰 뒤로 가기는 history.back() → popstate 에서 화면을 맞춘다. 탭을 누르면 방을 닫고 그 탭으로 간다.
+  var grp = { detail: null, depth: 0, gid: '', sheet: '' };
   var GRP_MSGS = ['飯團集合中…', '偷看大家想吃什麼…', '肚子在叫了…', '飯糰滾過來了…', '菜單翻找中…'];
   function gsBody(html) { $('gsBody').innerHTML = html; }
   function gsHead(title, left, right) {
     $('gsBack').style.visibility = left ? 'visible' : 'hidden';
     $('gsTitle').textContent = title;
     $('gsAct').textContent = right || ''; $('gsAct').style.visibility = right ? 'visible' : 'hidden';
-    $('gsAct').dataset.act = right === '＋' ? 'create' : right === '☰' ? 'menu' : '';
+    $('gsAct').dataset.act = right === '☰' ? 'menu' : '';
   }
   function gsLoading() { gsBody(loaderHtml(GRP_MSGS)); }
   function grpErr(e) { return '<div class="nick-err">' + esc((e && e.message) || '發生錯誤') + '</div>'; }
   function sheetClose() { grp.sheet = ''; $('gsSheet').style.display = 'none'; $('gsSheetBox').innerHTML = ''; }
   function sheetOpen(html) { $('gsSheetBox').innerHTML = html; $('gsSheet').style.display = 'flex'; }
+  function xBtn() { return '<button class="x-btn" type="button" data-act="sheet-close" aria-label="關閉">✕</button>'; }
 
-  // 화면 전환의 단일 기준: depth 0=닫힘, 1=목록, 2=방
+  // 화면 전환의 단일 기준: depth 0=방 닫힘, 1=방
   function grpApply(depth, gid) {
     sheetClose();
-    if (depth <= 0) { rndStop(); grp.depth = 0; $('grpScreen').style.display = 'none'; return; }
-    $('grpScreen').style.display = 'flex';
-    if (depth === 1) { rndStop(); grp.depth = 1; viewGroupList(); }
-    else { grp.depth = 2; viewRoom(gid || grp.gid); }
+    if (depth <= 0) {
+      var was = grp.depth; rndStop(); grp.depth = 0; $('grpScreen').style.display = 'none';
+      if (was > 0) refreshBoot(true);   // 방에서 한 일(시작·응답)이 목록 배지에 바로 반영되게
+      return;
+    }
+    $('grpScreen').style.display = 'flex'; grp.depth = 1; viewRoom(gid || grp.gid);
   }
   function grpPush(depth) { try { history.pushState({ grp: depth, gid: grp.gid }, ''); } catch (e) {} }
-  function grpOpen() { grp.depth = 1; grpPush(1); grpApply(1); }
-  function grpEnterRoom(gid) {
-    grp.gid = gid;
-    if (grp.depth === 0) { grp.depth = 1; grpPush(1); }   // 바로 방으로 들어와도 ← 로 목록을 거쳐 나가게
-    grp.depth = 2; grpPush(2); grpApply(2, gid);
+  function grpEnterRoom(gid, preset) {
+    grp.gid = gid; rnd.preset = preset || null;
+    if (grp.depth === 0) grpPush(1); else { try { history.replaceState({ grp: 1, gid: gid }, ''); } catch (e) {} }
+    grpApply(1, gid);
   }
   function grpBackBtn() {
     if (grp.depth > 0 && history.state && history.state.grp) history.back();
-    else grpApply(grp.depth - 1, grp.gid);   // history가 없는 예외 상황의 안전장치
+    else grpApply(0);   // history가 없는 예외 상황의 안전장치
   }
+  function closeRoom() { grpBackBtn(); }   // 탭을 눌렀을 때(방 → 그 탭)
   window.addEventListener('popstate', function (ev) {
     var st = ev.state, d = st && st.grp ? st.grp : 0;
     if (d === 0 && grp.depth === 0) return;
     if (st && st.gid) grp.gid = st.gid;
     grpApply(d, grp.gid);
   });
-  function grpOpenEntry() { grpOpen(); }   // 예전 一起決定 진입점 이름 유지
 
-  // ----- 화면 A: 飯團 목록 -----
+  // ----- 「飯團」 탭: 飯團 목록 (LINE 채팅 목록 형태) -----
   var AVA_COLORS = ['#e0662f', '#3f8f6b', '#4a7fc1', '#a65cc0', '#c9962b', '#c0506b'];
   function avatar(name, big) {
     var ch = Array.from(String(name || '?'))[0] || '?', h = 0;
     Array.from(String(name || '')).forEach(function (c) { h = (h * 31 + c.codePointAt(0)) % 997; });
     return '<span class="ava' + (big ? ' big' : '') + '" style="background:' + AVA_COLORS[h % AVA_COLORS.length] + '">' + esc(ch) + '</span>';
   }
+  function slotName(s) { return s === '午' ? '午餐' : '晚餐'; }
 
-  function viewGroupList() {
-    gsHead('飯團', false, '＋'); gsLoading();
-    api.withSuccessHandler(function (list) {
-      if (grp.depth !== 1) return;
-      grp.list = list;
-      gsBody(list.length ? '<div class="gl">' + list.map(function (g) {
-        return '<button class="gl-row" data-act="room" data-id="' + esc(g.id) + '">' + avatar(g.name) +
-          '<span class="gl-name">' + esc(g.name) + '</span><span class="gl-badge" id="gb-' + esc(g.id) + '"></span>' +
-          '<span class="gl-cnt">' + g.count + ' 人</span></button>';
-      }).join('') + '</div>' : '<div class="gs-empty">還沒有飯團<br><small>按右上角「＋」建立一個，邀請常一起吃飯的人吧！</small></div>');
-      list.forEach(function (g) {   // 진행 중 라운드 배지(🍱 n/N): 목록을 먼저 그리고 비동기로 채운다
-        api.withSuccessHandler(function (r) {
-          var el = $('gb-' + g.id); if (!el || !r.round || r.round.status !== 'open') return;
-          el.textContent = '🍱 ' + r.round.answered + '/' + r.round.total;
-        }).withFailureHandler(function () {}).getGroupRound(token, g.id);
-      });
+  function renderGroupsPage() {
+    var list = state.groups;
+    if (!list) { $('grpList').innerHTML = loaderHtml(GRP_MSGS); return; }
+    $('grpList').innerHTML = list.length ? '<div class="gl">' + list.map(function (g) {
+      var r = g.round;
+      return '<div class="gl-row" data-act="room" data-id="' + esc(g.id) + '" role="button" tabindex="0">' + avatar(g.name) +
+        '<span class="gl-name">' + esc(g.name) + '<small class="gl-sub">' + g.count + ' 人' + (r ? ' · ' + slotName(r.slot) + '進行中' : '') + '</small></span>' +
+        '<button class="gl-go' + (r ? ' live' : '') + '" type="button" data-act="go" data-id="' + esc(g.id) + '" aria-label="一起決定">🍱' +
+        (r ? ' ' + r.answered + '/' + r.total : '') + '</button></div>';
+    }).join('') + '</div>' : '<div class="gs-empty">還沒有飯團<br><small>按右上角「＋」建立一個，邀請常一起吃飯的人吧！</small></div>';
+  }
+
+  // 방에 들어가지 않고 바로 一起決定 시작(午/晚 자동, 30분). 진행 중이면 그 방의 미니게임으로.
+  function grpGo(gid, btn) {
+    var g = (state.groups || []).filter(function (x) { return x.id === gid; })[0];
+    if (!g || g.round) { grpEnterRoom(gid); return; }
+    if (btn.disabled) return;
+    btn.disabled = true; btn.textContent = '⏳';
+    api.withSuccessHandler(function (r) {
+      var v = r && r.round;
+      if (v) g.round = { id: v.id, slot: v.slot, answered: v.answered, total: v.total, endMs: v.endMs, mine: false };
+      renderGroupsUI(); cacheWrite();
+      grpEnterRoom(gid, r);
     }).withFailureHandler(function (e) {
-      if (grp.depth === 1) gsBody(grpErr(e));
-    }).getMyGroups(token);
+      btn.disabled = false; renderGroupsPage();
+      if (e && /進行中/.test(e.message || '')) { refreshBoot(true); grpEnterRoom(gid); return; }
+      toast((e && e.message) || '無法開始', true);
+    }).startGroupRound(token, gid, rndDefaultSlot(), 30);
   }
 
   function viewCreate(msg) {
@@ -2157,32 +2010,35 @@
     setTimeout(function () { var i = $('grpName'); if (i) i.focus(); }, 0);
   }
 
-  // ----- 화면 B: 飯團 방 -----
+  // ----- 방 (전체 화면). 제목은 목록 데이터로 바로, 멤버·메뉴(☰)는 상세가 오면 -----
   function viewRoom(gid) {
-    rndStop(); gsHead('飯團', true, ''); gsLoading();
+    rndStop();
+    var g = (state.groups || []).filter(function (x) { return x.id === gid; })[0];
+    grp.detail = null;
+    gsHead(g ? g.name + '（' + g.count + '）' : '飯團', true, '');
+    gsBody('<div id="rndBox" class="rnd"></div>');
+    rndStart(gid);   // 一起決定 상태 불러오기는 상세와 동시에 시작(순서대로 기다리지 않는다)
     api.withSuccessHandler(function (d) {
-      if (grp.depth !== 2 || grp.gid !== gid) return;
+      if (grp.depth !== 1 || grp.gid !== gid) return;
       grp.detail = d;
       gsHead(d.name + '（' + d.count + '）', true, '☰');
-      gsBody('<div id="rndBox" class="rnd"></div>');
-      rndStart(d.id);
     }).withFailureHandler(function (e) {
-      if (grp.depth === 2) { gsHead('飯團', true, ''); gsBody(grpErr(e)); }
+      if (grp.depth === 1 && grp.gid === gid && !rnd.view) { gsHead('飯團', true, ''); if (rndBox()) rndBox().innerHTML = grpErr(e); }
     }).getGroupDetail(token, gid);
   }
 
   function menuSheet() {
-    var d = grp.detail, owner = d.myRole === 'owner';
+    var d = grp.detail; if (!d) return;
+    var owner = d.myRole === 'owner';
     var mem = d.members.map(function (m) {
       return '<div class="grp-mem"><span>' + esc(m.nickname) + (m.isMe ? '（我）' : '') + (m.role === 'owner' ? ' 👑' : '') + '</span>' +
         (owner && !m.isMe ? '<button class="grp-x" data-act="remove" data-uid="' + esc(m.userId) + '" data-nick="' + esc(m.nickname) + '">移除</button>' : '') + '</div>';
     }).join('');
-    sheetOpen('<h3>' + esc(d.name) + '</h3><div class="grp-sub">成員 ' + d.count + ' / ' + d.max + ' 人</div>' +
+    sheetOpen(xBtn() + '<h3>' + esc(d.name) + '</h3><div class="grp-sub">成員 ' + d.count + ' / ' + d.max + ' 人</div>' +
       '<div class="grp-mems">' + mem + '</div>' +
       '<button class="btn grp-line" data-act="line">用LINE邀請</button>' +
       (owner ? '<div class="grp-owner"><button class="btn n-cancel" data-act="regen">重新產生邀請連結</button><button class="btn n-cancel" data-act="rename">改名</button></div>' : '') +
-      '<button class="btn grp-leave" data-act="leave">退出飯團</button>' +
-      '<button class="btn n-cancel" data-act="sheet-close">關閉</button>');
+      '<button class="btn grp-leave" data-act="leave">退出飯團</button>');
   }
 
   function viewRename() {
@@ -2217,7 +2073,7 @@
   // 서버가 결과를 한 번만 정해 저장 → 모든 멤버가 같은 결과. 마감은 누가 화면을 열거나 제출할 때 서버가 확인.
   var rnd = { gid: '', view: null, fetchedAt: 0, serverNow: 0, picks: [], editing: false, starting: false, showSet: false,
               slot: '', mins: 30, timer: null, tick: null, sig: '', reveal: null, order: [], orderFor: '', batch: 0, skipReveal: null,
-              expiredPing: false, confirming: false };
+              expiredPing: false, confirming: false, preset: null };
   var RND_SEEN_KEY = 'ttwhat.rndseen.';
   var RND_SPIN = ['🍜', '🍚', '🥟', '🍣', '🍲', '🍔', '🥗', '🍛'];
   var RND_BATCH = 8;
@@ -2237,11 +2093,20 @@
     rndStop(); rnd.gid = gid; rnd.view = null; rnd.picks = []; rnd.editing = false; rnd.starting = false; rnd.showSet = false;
     rnd.slot = rndDefaultSlot(); rnd.mins = 30; rnd.orderFor = ''; rnd.batch = 0;
     rndBox().innerHTML = loaderHtml(GRP_MSGS);
-    rndLoad(true);
+    if (rnd.preset) { rndSet(rnd.preset); rnd.preset = null; rndRender(true); }   // 🍱로 바로 시작했으면 그 응답으로 즉시 표시
+    else rndLoad(true);
     rnd.timer = setInterval(function () { rndLoad(false); }, 4000);
     rnd.tick = setInterval(rndTick, 1000);
   }
-  function rndSet(r) { rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now(); }
+  function rndSet(r) {
+    rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now();
+    // 飯團 탭의 🍱 n/N 배지·🔔 목록을 방에서 본 최신 값으로 바로 맞춘다
+    var g = (state.groups || []).filter(function (x) { return x.id === rnd.gid; })[0], v = r.round;
+    if (g) {
+      var nr = v && v.status === 'open' && v.imIn ? { id: v.id, slot: v.slot, answered: v.answered, total: v.total, endMs: v.endMs, mine: !!v.mine } : null;
+      if (JSON.stringify(nr) !== JSON.stringify(g.round)) { g.round = nr; renderGroupsUI(); }
+    }
+  }
 
   function rndLoad(first) {
     var gid = rnd.gid;
@@ -2388,19 +2253,36 @@
     }).submitGroupAnswer(token, rnd.gid, v.id, kind, picks || []);
   }
 
-  // 클릭 처리 (미니게임·시트·목록·헤더 전부 #grpScreen 위임)
-  $('grpScreen').addEventListener('click', function (ev) {
+
+  // 一起決定 새로고침(4초)은 방 화면이 보일 때만: 앱이 백그라운드로 가면 멈췄다가 돌아오면 다시 시작
+  function rndPause() { if (rnd.timer) clearInterval(rnd.timer); if (rnd.tick) clearInterval(rnd.tick); rnd.timer = rnd.tick = null; }
+  function rndResume() {
+    if (!rnd.gid || grp.depth === 0 || rnd.timer) return;
+    rnd.timer = setInterval(function () { rndLoad(false); }, 4000); rnd.tick = setInterval(rndTick, 1000); rndLoad(false);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') rndPause();
+    else { rndResume(); refreshBoot(false); }
+  });
+
+  // 클릭 처리 (미니게임·시트·飯團 탭 목록·헤더 전부 위임)
+  function grpClick(ev) {
     var el = ev.target.closest('[data-rnd]');
     if (el) { rndClick(el); return; }
     el = ev.target.closest('[data-act]'); if (!el) { if (ev.target === $('gsSheet')) sheetClose(); return; }
     var act = el.dataset.act, d = grp.detail, id = el.dataset.id;
     if (act === 'room') grpEnterRoom(id);
+    else if (act === 'go') { ev.stopPropagation(); grpGo(id, el); }
     else if (act === 'create') viewCreate();
     else if (act === 'menu') menuSheet();
     else if (act === 'sheet-close') sheetClose();
     else if (act === 'create-save') {
       grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).createGroup(token, $('grpName').value); },
-            '飯團建立好了！', function (r) { sheetClose(); grpEnterRoom(r.id); });
+            '飯團建立好了！', function (r) {
+              sheetClose();
+              (state.groups = state.groups || []).push({ id: r.id, name: r.name, count: 1, max: 6, role: 'owner', round: null });
+              renderGroupsUI(); grpEnterRoom(r.id);
+            });
     }
     else if (act === 'line') { var u = grpLineUrl(); if (!window.open(u, '_blank')) location.href = u; }
     else if (act === 'regen') viewConfirm('重新產生邀請連結', '舊的邀請連結會立刻失效，要重新產生嗎？', 'regen-yes', '重新產生');
@@ -2422,10 +2304,18 @@
     else if (act === 'leave') viewConfirm('退出飯團', '確定要退出「' + d.name + '」嗎？', 'leave-yes', '退出');
     else if (act === 'leave-yes') {
       grpDo(function (ok, ng) { api.withSuccessHandler(ok).withFailureHandler(ng).leaveGroup(token, d.id); },
-            '已退出飯團', function () { sheetClose(); grpBackBtn(); });
+            '已退出飯團', function () {
+              state.groups = (state.groups || []).filter(function (x) { return x.id !== d.id; });
+              sheetClose(); grpBackBtn();
+            });
     }
-  });
+  }
+  ['grpScreen', 'gsSheet', 'pgGroups'].forEach(function (id) { $(id).addEventListener('click', grpClick); });
   $('gsBack').addEventListener('click', grpBackBtn);
+  // 目錄 목록 줄은 키보드/보조 입력용 Enter도 허용
+  $('pgGroups').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.classList && ev.target.classList.contains('gl-row')) grpEnterRoom(ev.target.dataset.id);
+  });
 
   function rndClick(el) {
     var a = el.dataset.rnd, v = rnd.view;
@@ -2472,8 +2362,6 @@
     }
   }
 
-  $('groupBtn').addEventListener('click', function () { if (token) grpOpen(); });
-
   // ----- 초대 화면 (?join=코드) -----
   function invBody(html) { $('invBody').innerHTML = html; }
   function invClose() { $('invModal').style.display = 'none'; clearPendingJoin(); }
@@ -2504,6 +2392,7 @@
       $('invYes').disabled = true;
       api.withSuccessHandler(function (r) {
         invClose(); toast('已加入「' + r.name + '」！');
+        showTab('groups'); refreshBoot(true);
         grpEnterRoom(r.groupId);
       }).withFailureHandler(function (e) {
         $('invYes').disabled = false; var er = $('invErr'); if (er) er.textContent = (e && e.message) || '加入失敗';
@@ -2511,15 +2400,37 @@
     }
   });
 
-  bootstrapIdentity(function () {
+  // 첫 화면: 저장해 둔 데이터가 있으면 먼저 보여 주고(즉시), 서버 응답(getBootstrap 1회)이 오면 조용히 갱신한다
+  function onIdentityReady(boot) {
     // 진료실 PC 첫 접속: 이름이 없으면 한 번 입력받는다 (취소해도 상단 배너 버튼으로 언제든 입력 가능)
     if (isClinic() && !clinicName) openNickEditor();
-    load(document.body.dataset.slot || '');
+    if (boot) applyBoot(boot); else fetchBoot(document.body.dataset.slot || '');
     if (pendingJoin) openInvite();   // ?join=초대코드 로 열었으면 로그인/가입 직후 초대 화면
     if (storageUnavailable) {
       setTimeout(function () { toast('這台裝置可能無法保存登入資訊，重新整理後可能要重新登入', true); }, 1200);
     }
-  });
+  }
+  (function paintFromCache() {
+    var saved = lsGet(TOKEN_KEY);
+    var c = saved ? cacheRead(saved) : null;
+    if (!c) return;
+    applyIdentity(saved, { nickname: c.me.nickname, oldWho: c.me.oldWho });
+    if (c.app && c.app.ctx && c.app.ctx.date === todayLocal_()) {
+      state.ctx = c.app.ctx; state.fixed = c.app.fixed || []; state.fixedCategories = c.app.fixedCategories || [];
+      state.promotionCandidates = c.app.promotionCandidates || [];
+      state.appSig = '';   // 서버 응답과 비교해서 달라지면 다시 그린다
+    }
+    state.recommended = c.rec || [];
+    var now = Date.now();
+    state.groups = (c.groups || []).map(function (g) {   // 마감 시각이 이미 지난 진행 중 표시는 뺀다
+      if (g.round && g.round.endMs <= now) g.round = null; return g;
+    });
+    $('tabbar').classList.add('on');
+    renderTop();
+    if (state.ctx) renderHome();
+    renderGroupsUI();
+  })();
+  bootstrapIdentity(onIdentityReady);
 </script>
 </body>
 </html>
