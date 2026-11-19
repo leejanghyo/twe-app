@@ -188,6 +188,30 @@
     .who-box .grp-leave { background: #fff; color: #c0392b; border: 1px solid #c0392b; font-size: 15px; }
     .grp-owner { display: flex; gap: 8px; } .grp-owner .btn { flex: 1; font-size: 14px !important; padding: 10px 6px !important; }
     .grp-soon { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    /* 飯團 一起決定 */
+    .rnd { margin: 14px 0 6px; padding: 14px 12px; background: var(--accent-soft); border-radius: 14px; text-align: left; }
+    .rnd h3 { margin: 0 0 6px; font-size: 17px; }
+    .rnd .rnd-sub { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+    .rnd .rnd-timer { font-weight: 700; color: var(--accent); }
+    .rnd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+    .rnd-chip { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; color: var(--ink); }
+    .rnd-chip.on { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .rnd-mem { font-size: 13px; padding: 3px 9px; border-radius: 999px; background: #fff; color: var(--muted); }
+    .rnd-mem.done { background: var(--accent); color: #fff; }
+    .rnd-menus { max-height: 34vh; overflow-y: auto; margin: 6px 0; }
+    .rnd-menus .lbl { font-size: 12px; color: var(--muted); margin: 8px 0 2px; }
+    .who-box .rnd .btn { margin-top: 6px; }
+    .who-box .rnd .btn-any { background: #fff; color: var(--accent); border: 2px solid var(--accent); }
+    .who-box .rnd .btn-pass { background: var(--line); color: var(--ink); }
+    .rnd-reveal { text-align: center; padding: 16px 0; }
+    .rnd-reveal .spin { font-size: 30px; font-weight: 800; min-height: 44px; word-break: break-all; }
+    .rnd-result { text-align: center; }
+    .rnd-result .win { font-size: 26px; font-weight: 800; margin: 6px 0; word-break: break-all; }
+    .rnd-result .tag { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #fff; color: var(--accent); margin: 2px; }
+    .rnd-result .msg { font-size: 14px; color: var(--muted); margin: 4px 0; }
+    .rnd-result .title { display: inline-block; margin: 6px 0; padding: 4px 12px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; }
+    .rnd-votes { text-align: left; font-size: 14px; margin-top: 8px; }
+    .rnd-votes div { padding: 2px 0; }
     .inv-line { font-size: 17px !important; color: var(--ink) !important; }
     .nick-banner {
       margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #e8f3ff; border: 1px solid #bcd9f5;
@@ -907,10 +931,7 @@
   function setSegment(s) {
     if (!state.ctx || state.ctx.closed) return;
     if (s === 'joint') {
-      if (!isLegacy()) return;   // 一起決定은 舊who(jang/onni)가 있는 신원만 — 세그먼트도 숨겨져 있음
-      if (joint.mode) { segment = 'joint'; applySeg(); return; }
-      segment = 'joint'; applySeg(); scrollToContentTop();
-      startJoint();
+      openJointEntry();   // 4단계: 모바일 「一起決定」 탭도 飯團 一起決定으로 연결(탭 자체는 옮기지 않음)
       return;
     }
     var wasJoint = !!joint.mode || segment === 'joint';
@@ -1304,7 +1325,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.19-d';
+  var APP_VERSION = '2026.11.19-e';
   $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1744,11 +1765,11 @@
   function updateJointBtn() {
     var b = $('jointBtn');
     b.classList.toggle('on', !!joint.mode);
-    var hint = joint.hint === 'mine' ? '已送出，查看結果' : joint.hint === 'other' ? otherName() + ' 已選好！' : '';
-    b.innerHTML = joint.mode ? '結束一起決定' : '一起決定' + (hint ? '<span class="joint-hint">' + esc(hint) + '</span>' : '');
+    b.innerHTML = '一起決定';
     var w = $('whoBox');
-    b.style.display = isLegacy() ? '' : 'none';   // 一起決定은 舊who(jang/onni)가 있는 신원만
-    $('segJoint').style.display = isLegacy() ? '' : 'none';
+    var canJoint = token && !isClinic();   // 一起決定은 飯團 단위 — 로그인한 사람은 누구나(진료실 PC 표시 전용 제외)
+    b.style.display = canJoint ? '' : 'none';
+    $('segJoint').style.display = canJoint ? '' : 'none';
     $('segDot').classList.toggle('on', joint.hint === 'other' && !joint.mode);   // 상대가 먼저 골랐음
     $('nickBannerText').textContent = isClinic() ? '👋 請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
                                                   : '👋 歡迎！請先為自己取個暱稱，另一位會看到這個名字。';
@@ -1762,7 +1783,7 @@
 
   // 평소 화면에서 상대가 이미 골랐는지 버튼에 살짝 표시
   function refreshJointHint() {
-    if (!isLegacy() || joint.mode || !state.ctx || state.ctx.closed) return;
+    return;   // 4단계: 2인 힌트는 더 쓰지 않는다(一起決定은 飯團 화면에서)
     api.withSuccessHandler(function (st) {
       if (joint.mode) return;
       applyNicknames(st.nicknames, true);
@@ -1772,9 +1793,7 @@
   }
 
   $('jointBtn').addEventListener('click', function () {
-    if (!isLegacy()) return;   // 一起決定은 舊who(jang/onni)가 있는 신원만 — 버튼도 숨겨져 있음
-    if (joint.mode) { exitJoint(); return; }
-    startJoint();
+    openJointEntry();   // 4단계: 기존 진입점 → 飯團 一起決定
   });
 
   // 一起決定 시작: 이미 제출한 게 있으면 바로 대기/결과 화면, 없으면 체크 모드
@@ -2013,8 +2032,8 @@
   }
 
   var grp = { detail: null };
-  function grpBody(html) { $('grpBody').innerHTML = html; }
-  function grpClose() { $('grpModal').style.display = 'none'; }
+  function grpBody(html) { rndStop(); $('grpBody').innerHTML = html; }
+  function grpClose() { rndStop(); $('grpModal').style.display = 'none'; }
   function grpOpen() { $('grpModal').style.display = 'flex'; viewGroupList(); }
   function grpErr(e) { return '<div class="nick-err">' + esc((e && e.message) || '發生錯誤') + '</div>'; }
   function grpLoading() { grpBody('<h2>我的飯團</h2><div class="grp-sub">載入中…</div>'); }
@@ -2055,9 +2074,10 @@
         '<div class="grp-mems">' + mem + '</div>' +
         '<button class="btn grp-line" data-act="line">用LINE邀請</button>' +
         (owner ? '<div class="grp-owner"><button class="btn n-cancel" data-act="regen">重新產生邀請連結</button><button class="btn n-cancel" data-act="rename">改名</button></div>' : '') +
-        '<div class="grp-soon">🍱 飯團一起決定 即將開放</div>' +
+        '<div id="rndBox" class="rnd"><div class="rnd-sub">載入中…</div></div>' +
         '<button class="btn grp-leave" data-act="leave">退出飯團</button>' +
         '<button class="btn n-cancel" data-act="list">返回</button>');
+      rndStart(d.id);
     }).withFailureHandler(function (e) {
       grpBody('<h2>飯團</h2>' + grpErr(e) + '<button class="btn n-cancel" data-act="list">返回</button>');
     }).getGroupDetail(token, id);
@@ -2090,6 +2110,194 @@
       var el = $('grpErr'); if (el) el.textContent = (e && e.message) || '發生錯誤'; else toast((e && e.message) || '發生錯誤', true);
     });
   }
+
+
+  // ===== 飯團 一起決定 (4단계) =====
+  // 서버가 결과를 한 번만 정해 저장 → 모든 멤버가 같은 결과. 마감은 누가 화면을 열거나 제출할 때 서버가 확인.
+  var rnd = { gid: '', view: null, fetchedAt: 0, serverNow: 0, picks: [], editing: false, restart: false,
+              slot: '', mins: 30, timer: null, tick: null, sig: '', reveal: null };
+  var RND_SEEN_KEY = 'ttwhat.rndseen.';
+  var RND_SPIN = ['🍜', '🍚', '🥟', '🍣', '🍲', '🍔', '🥗', '🍛'];
+
+  function rndStop() {
+    if (rnd.timer) clearInterval(rnd.timer); if (rnd.tick) clearInterval(rnd.tick);
+    if (rnd.reveal) clearTimeout(rnd.reveal);
+    rnd.timer = rnd.tick = rnd.reveal = null; rnd.sig = '';
+  }
+  function rndBox() { return $('rndBox'); }
+  function rndNowServer() { return rnd.serverNow + (Date.now() - rnd.fetchedAt); }
+  function rndFmt(ms) { ms = Math.max(0, ms); var s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  function rndDefaultSlot() { var h = new Date().getHours(); return h < 15 ? '午' : '晚'; }
+  function slotName(s) { return s === '午' ? '午餐' : '晚餐'; }
+
+  function rndStart(gid) {
+    rndStop(); rnd.gid = gid; rnd.picks = []; rnd.editing = false; rnd.restart = false; rnd.slot = rndDefaultSlot();
+    rndLoad(true);
+    rnd.timer = setInterval(function () { rndLoad(false); }, 4000);
+    rnd.tick = setInterval(rndTick, 1000);
+  }
+
+  function rndLoad(first) {
+    var gid = rnd.gid;
+    api.withSuccessHandler(function (r) {
+      if (gid !== rnd.gid || !rndBox()) return;
+      rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now();
+      rndRender(false);
+    }).withFailureHandler(function (e) {
+      if (gid !== rnd.gid || !rndBox()) return;
+      if (first) rndBox().innerHTML = '<div class="nick-err">' + esc((e && e.message) || '發生錯誤') + '</div>';
+    }).getGroupRound(token, gid);
+  }
+
+  function rndTick() {
+    var v = rnd.view, el = $('rndTimer');
+    if (!rndBox()) { rndStop(); return; }
+    if (v && v.status === 'open' && el) {
+      var left = v.endMs - rndNowServer();
+      el.textContent = rndFmt(left);
+      if (left <= 0 && !rnd.expiredPing) { rnd.expiredPing = true; rndLoad(false); }   // 마감 순간 한 번 서버에 확인
+    }
+  }
+
+  // 상태가 바뀐 경우에만 다시 그린다(고르는 중인 체크가 4초마다 풀리지 않게)
+  function rndRender(force) {
+    var v = rnd.view, box = rndBox(); if (!box) return;
+    var sig = v ? [v.id, v.status, v.answered, v.total, JSON.stringify(v.mine), rnd.editing, rnd.restart].join('|') : 'none|' + rnd.restart;
+    if (!force && sig === rnd.sig) return;
+    rnd.sig = sig; rnd.expiredPing = false;
+    if (!v || rnd.restart) { box.innerHTML = rndStartHtml(!!v); return; }
+    if (v.status === 'open') { box.innerHTML = rndOpenHtml(v); rndTick(); return; }
+    var seen = lsGet(RND_SEEN_KEY + v.id);
+    if (!seen && v.result && v.result.menu) { lsSet(RND_SEEN_KEY + v.id, '1'); rndReveal(v); return; }
+    box.innerHTML = rndResultHtml(v);
+  }
+
+  function rndStartHtml(hasOld) {
+    return '<h3>🍱 一起決定</h3><div class="rnd-sub">選好餐別和截止時間，開始後團員就能回答。</div>' +
+      '<div class="rnd-chips">' + ['午', '晚'].map(function (sl) {
+        return '<button class="rnd-chip' + (rnd.slot === sl ? ' on' : '') + '" data-rnd="slot" data-v="' + sl + '">' + slotName(sl) + '</button>'; }).join('') + '</div>' +
+      '<div class="rnd-sub" style="margin-bottom:0">截止時間</div><div class="rnd-chips">' + [15, 30, 60].map(function (m) {
+        return '<button class="rnd-chip' + (rnd.mins === m ? ' on' : '') + '" data-rnd="mins" data-v="' + m + '">' + m + ' 分鐘</button>'; }).join('') + '</div>' +
+      '<div class="nick-err" id="rndErr"></div>' +
+      '<button class="btn n-save" id="rndGo" data-rnd="go">開始一起決定</button>' +
+      (hasOld ? '<button class="btn n-cancel" data-rnd="back">回到上一輪結果</button>' : '');
+  }
+
+  function rndOpenHtml(v) {
+    var h = '<h3>一起決定進行中（' + slotName(v.slot) + '）</h3>' +
+      '<div class="rnd-sub">' + esc(v.startedBy) + ' 發起 · 已回答 ' + v.answered + ' / ' + v.total + ' · 剩餘 <span class="rnd-timer" id="rndTimer">' + rndFmt(v.endMs - rndNowServer()) + '</span></div>' +
+      '<div class="rnd-chips">' + v.members.map(function (m) {
+        return '<span class="rnd-mem' + (m.answered ? ' done' : '') + '">' + (m.answered ? '✓ ' : '… ') + esc(m.nickname) + '</span>'; }).join('') + '</div>';
+    if (!v.imIn) return h + '<div class="rnd-sub">這一輪開始時你還不在飯團裡，下一輪就能一起決定囉。</div>';
+    if (v.mine && !rnd.editing) {
+      var txt = v.mine.kind === 'pick' ? '你選了：' + v.mine.picks.join('、') : v.mine.kind === 'any' ? '你選了「我都可以」' : '你選了「這次PASS」';
+      return h + '<div class="rnd-sub"><b>' + esc(txt) + '</b><br>等大家都回答，或時間到就會公開結果。</div>' +
+        '<button class="btn n-cancel" data-rnd="edit">修改我的選擇</button>';
+    }
+    var list = function (arr, lbl, key) {
+      return arr.length ? '<div class="lbl">' + lbl + '</div><div class="rnd-chips">' + arr.map(function (m) {
+        return '<button class="rnd-chip' + (rnd.picks.indexOf(m.name) >= 0 ? ' on' : '') + '" data-rnd="pick" data-v="' + esc(m.name) + '">' + esc(m.name) + '</button>'; }).join('') + '</div>' : '';
+    };
+    return h + '<div class="rnd-sub" id="rndCount">請選 1~3 個想吃的（已選 ' + rnd.picks.length + ' / 3）</div>' +
+      '<div class="rnd-menus">' + list(v.menus.fixed, '固定菜單') + list(v.menus.rec, '推薦菜單') + '</div>' +
+      '<div class="nick-err" id="rndErr"></div>' +
+      '<button class="btn n-save" id="rndSubmit" data-rnd="submit"' + (rnd.picks.length ? '' : ' disabled') + '>送出</button>' +
+      '<button class="btn btn-any" data-rnd="any">我都可以</button>' +
+      '<button class="btn btn-pass" data-rnd="pass">這次PASS</button>' +
+      (v.mine ? '<button class="btn n-cancel" data-rnd="cancel-edit">取消修改</button>' : '');
+  }
+
+  // 공개 연출: 짧은 뽑기 애니메이션(약 2.4초) 뒤 결과. 「跳過」로 바로 넘김
+  function rndReveal(v) {
+    var box = rndBox(), n = 0, pool = RND_SPIN.slice();
+    (v.result.votes || []).forEach(function (x) { pool.push(x.menu); });
+    box.innerHTML = '<div class="rnd-reveal"><div class="rnd-sub">開獎中…</div><div class="spin" id="rndSpin">🍱</div>' +
+      '<button class="btn n-cancel" data-rnd="skip">跳過</button></div>';
+    var done = function () { if (rnd.reveal) clearTimeout(rnd.reveal); rnd.reveal = null; if (rndBox()) rndBox().innerHTML = rndResultHtml(v); };
+    rnd.skipReveal = done;
+    (function step() {
+      var el = $('rndSpin'); if (!el) return;
+      if (n++ >= 12) { done(); return; }
+      el.textContent = pool[Math.floor(Math.random() * pool.length)];
+      rnd.reveal = setTimeout(step, 80 + n * 14);
+    })();
+  }
+
+  function rndResultHtml(v) {
+    var r = v.result || {}, h = '<div class="rnd-result">';
+    if (r.none || !r.menu) {
+      h += '<h3>' + slotName(v.slot) + '一起決定結束</h3><div class="msg">' + esc(r.gachaMsg || '這次沒有決定') + '</div>';
+    } else {
+      h += '<div class="rnd-sub">' + slotName(v.slot) + '，大家決定吃</div><div class="win">🎉 ' + esc(r.menu) + '</div>';
+      if (r.type) h += '<span class="tag">' + esc(r.type) + '</span>';
+      if (r.gacha) h += '<div class="msg">🎰 ' + esc(r.gachaMsg) + '</div>';
+      else if (r.tie) h += '<div class="msg">🎲 ' + esc(r.tied.join('、')) + ' 同票，由系統抽籤決定！</div>';
+      if (r.title) h += '<div class="title">🏅 ' + esc(r.title) + '</div>';
+    }
+    h += '<div class="msg">' + (r.reason === 'deadline' ? '時間到，已公開' : '全員回答完畢') + '</div>';
+    if (r.votes && r.votes.length) h += '<div class="rnd-votes"><b>得票</b>' + r.votes.map(function (x) {
+      return '<div>' + esc(x.menu) + '：' + x.n + ' 票</div>'; }).join('') + '</div>';
+    h += '<div class="rnd-votes"><b>大家的選擇</b>' + (r.answers || []).map(function (a) {
+      var t = a.kind === 'pick' ? a.picks.join('、') : a.kind === 'any' ? '我都可以' : a.kind === 'pass' ? 'PASS' : '（未回答）';
+      return '<div>' + esc(a.nickname) + (a.isMe ? '（我）' : '') + '：' + esc(t) + '</div>'; }).join('') + '</div>';
+    return h + '</div><button class="btn n-save" data-rnd="again">再來一輪</button>';
+  }
+
+  // 기존 一起決定 버튼/탭 → 飯團 화면으로 (飯團이 1개면 바로 그 飯團, 아니면 목록)
+  function openJointEntry() {
+    if (!token) return;
+    $('grpModal').style.display = 'flex'; grpLoading();
+    api.withSuccessHandler(function (list) {
+      if (list.length === 1) viewDetail(list[0].id); else viewGroupList();
+    }).withFailureHandler(function () { viewGroupList(); }).getMyGroups(token);
+  }
+
+  function rndSubmit(kind, picks) {
+    var v = rnd.view; if (!v) return;
+    var er = $('rndErr'); if (er) er.textContent = '';
+    ['rndSubmit'].forEach(function (id) { if ($(id)) $(id).disabled = true; });
+    api.withSuccessHandler(function (r) {
+      rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now(); rnd.editing = false; rnd.picks = [];
+      rndRender(true); toast('已送出！');
+    }).withFailureHandler(function (e) {
+      var el = $('rndErr'); if (el) el.textContent = (e && e.message) || '送出失敗'; else toast((e && e.message) || '送出失敗', true);
+      if ($('rndSubmit')) $('rndSubmit').disabled = !rnd.picks.length;
+      rndLoad(false);   // 이미 마감됐을 수 있으니 최신 상태로
+    }).submitGroupAnswer(token, rnd.gid, v.id, kind, picks || []);
+  }
+
+  $('grpBody').addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-rnd]'); if (!el) return;
+    ev.stopPropagation();
+    var a = el.dataset.rnd, v = rnd.view;
+    if (a === 'slot') { rnd.slot = el.dataset.v; rndRender(true); }
+    else if (a === 'mins') { rnd.mins = Number(el.dataset.v); rndRender(true); }
+    else if (a === 'back') { rnd.restart = false; rndRender(true); }
+    else if (a === 'again') { rnd.restart = true; rndRender(true); }
+    else if (a === 'go') {
+      el.disabled = true;
+      api.withSuccessHandler(function (r) {
+        rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now(); rnd.restart = false; rnd.editing = false; rnd.picks = [];
+        rndRender(true);
+      }).withFailureHandler(function (e) {
+        el.disabled = false; var er = $('rndErr'); if (er) er.textContent = (e && e.message) || '無法開始';
+        rndLoad(false);
+      }).startGroupRound(token, rnd.gid, rnd.slot, rnd.mins);
+    }
+    else if (a === 'edit') { rnd.editing = true; rnd.picks = v && v.mine && v.mine.kind === 'pick' ? v.mine.picks.slice() : []; rndRender(true); }
+    else if (a === 'cancel-edit') { rnd.editing = false; rndRender(true); }
+    else if (a === 'pick') {
+      var n = el.dataset.v, i = rnd.picks.indexOf(n);
+      if (i >= 0) rnd.picks.splice(i, 1); else if (rnd.picks.length >= 3) { toast('最多選 3 個', true); return; } else rnd.picks.push(n);
+      el.classList.toggle('on', i < 0);
+      if ($('rndCount')) $('rndCount').textContent = '請選 1~3 個想吃的（已選 ' + rnd.picks.length + ' / 3）';
+      if ($('rndSubmit')) $('rndSubmit').disabled = !rnd.picks.length;
+    }
+    else if (a === 'submit') { if (rnd.picks.length) rndSubmit('pick', rnd.picks.slice()); }
+    else if (a === 'any') rndSubmit('any', []);
+    else if (a === 'pass') rndSubmit('pass', []);
+    else if (a === 'skip') { if (rnd.skipReveal) rnd.skipReveal(); }
+  });
 
   $('grpBody').addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-act]'); if (!el) return;
