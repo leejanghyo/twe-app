@@ -566,32 +566,28 @@
 
   <div class="who-modal" id="claimModal">
     <div class="who-box nick-box">
-      <h2>建立帳號</h2>
-      <div class="nick-guide">設定帳號與PIN碼，就可以開始使用「今天吃什麼」囉！帳號建立後無法修改。</div>
-      <input id="claimAccount" maxlength="16" placeholder="帳號（2~16字，不可含空白）" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
-      <div class="nick-guide" style="margin-top:12px">設定4位數PIN碼，換手機時用帳號＋PIN碼找回來</div>
-      <input id="claimPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數字" autocomplete="off">
-      <div class="nick-guide" style="margin-top:12px">暱稱是畫面上顯示的名字（選填，可重複、之後能改）</div>
-      <input id="claimInput" maxlength="10" placeholder="暱稱（選填，例如：小明）" autocomplete="off" style="margin-top:0">
+      <h2>註冊</h2>
+      <input id="claimAccount" maxlength="16" placeholder="帳號" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <input id="claimPin" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="PIN碼（4位數字）" autocomplete="off" style="margin-top:10px">
+      <input id="claimPin2" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="再輸入一次PIN碼" autocomplete="off" style="margin-top:10px">
       <div class="nick-err" id="claimErr"></div>
       <div class="nick-actions">
-        <button class="btn n-save" id="claimSave" style="width:100%">開始使用</button>
+        <button class="btn n-save" id="claimSave" style="width:100%">註冊</button>
       </div>
-      <div class="id-switch"><a id="toLoginLink">已經有帳號？用帳號＋PIN登入</a></div>
+      <div class="id-switch"><a id="toLoginLink">已有帳號？登入</a></div>
     </div>
   </div>
 
   <div class="who-modal" id="loginModal">
     <div class="who-box nick-box">
-      <h2>用帳號＋PIN登入</h2>
-      <div class="nick-guide">換了手機、或找不到之前的帳號時，用帳號和PIN碼登入。（登入請用帳號，不是暱稱）</div>
-      <input id="loginNick" maxlength="16" placeholder="你的帳號" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
-      <input id="loginPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4位數PIN碼" autocomplete="off" style="margin-top:10px">
+      <h2>登入</h2>
+      <input id="loginNick" maxlength="16" placeholder="帳號" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <input id="loginPin" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="PIN碼（4位數字）" autocomplete="off" style="margin-top:10px">
       <div class="nick-err" id="loginErr"></div>
       <div class="nick-actions">
         <button class="btn n-save" id="loginSave" style="width:100%">登入</button>
       </div>
-      <div class="id-switch"><a id="toClaimLink">還沒有帳號？建立帳號開始使用</a></div>
+      <div class="id-switch"><a id="toClaimLink">還沒有帳號？註冊</a></div>
     </div>
   </div>
 
@@ -1275,7 +1271,7 @@
           var msg = (e && e.message) || '';
           if (msg.indexOf('PIN') >= 0) {   // PIN 전환이 끝난 舊who 링크 → 暱稱＋PIN 로그인 화면으로
             pendingBootstrapCb = cb;
-            $('loginErr').textContent = '請用帳號＋PIN登入';
+            $('loginErr').textContent = '';
             $('loginModal').style.display = 'flex';
             setTimeout(function () { $('loginNick').focus(); }, 0);
           } else toast(msg || '身份確認失敗', true);
@@ -1309,7 +1305,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.19-a';
+  var APP_VERSION = '2026.11.19-b';
   $('verTag').textContent = $('verTop').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1369,34 +1365,36 @@
     if (cb) cb(); else { renderMain(); refreshJointHint(); }   // 로그인/가입 화면을 나중에 다시 열었을 때도 반영
   }
 
+  var claimedMe = null;   // 가입은 됐고 暱稱 설정만 남은 상태(설정을 마치면 finishIdentity)
   function claimIdentity() {
     var acc = $('claimAccount').value.trim();
     var accLen = Array.from(acc).length;
     var pin = $('claimPin').value.trim();
-    var nick = $('claimInput').value.trim();
-    var nickLen = Array.from(nick).length;
+    var pin2 = $('claimPin2').value.trim();
     if (/\s/.test(acc)) { $('claimErr').textContent = '帳號不可包含空白'; return; }
     if (accLen < 2 || accLen > 16) { $('claimErr').textContent = '帳號需為 2~16 個字'; return; }
     if (!/^\d{4}$/.test(pin)) { $('claimErr').textContent = 'PIN 碼請輸入 4 位數字'; return; }
-    if (nickLen > 10) { $('claimErr').textContent = '暱稱最多 10 個字'; return; }
+    if (pin !== pin2) { $('claimErr').textContent = '兩次輸入的 PIN 碼不一樣'; return; }
+    $('claimErr').textContent = '';
     $('claimSave').disabled = true;
     api
       .withSuccessHandler(function (me) {
         $('claimSave').disabled = false;
         $('claimModal').style.display = 'none';
-        finishIdentity(me);
+        claimedMe = me;
+        openNickEditor(true);   // 가입 직후 한 번만: 暱稱(기본값=帳號) 확인
       })
-      .withFailureHandler(function (e) { $('claimSave').disabled = false; $('claimErr').textContent = e.message || '建立失敗'; })
-      .claimAccount(acc, pin, nick);
+      .withFailureHandler(function (e) { $('claimSave').disabled = false; $('claimErr').textContent = e.message || '註冊失敗'; })
+      .claimAccount(acc, pin, '');
   }
   $('claimSave').addEventListener('click', claimIdentity);
   $('claimAccount').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.isComposing) $('claimPin').focus();
   });
   $('claimPin').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.isComposing) $('claimInput').focus();
+    if (e.key === 'Enter' && !e.isComposing) $('claimPin2').focus();
   });
-  $('claimInput').addEventListener('keydown', function (e) {
+  $('claimPin2').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.isComposing) claimIdentity();
   });
 
@@ -1410,7 +1408,6 @@
       .withSuccessHandler(function (me) {
         $('loginSave').disabled = false;
         $('loginModal').style.display = 'none';
-        toast('登入成功！');
         finishIdentity(me);
       })
       .withFailureHandler(function (e) { $('loginSave').disabled = false; $('loginErr').textContent = e.message || '登入失敗'; })
@@ -1427,13 +1424,13 @@
   // 取個暱稱吧 ↔ 用暱稱＋PIN登入 전환 (가입 전에만 뜨는 화면이라 pendingBootstrapCb는 그대로 들고 간다)
   $('toLoginLink').addEventListener('click', function () {
     $('claimModal').style.display = 'none';
-    $('loginErr').textContent = ''; $('loginNick').value = ''; $('loginPin').value = '';
+    $('loginErr').textContent = ''; $('loginPin').value = '';
     $('loginModal').style.display = 'flex';
     setTimeout(function () { $('loginNick').focus(); }, 0);
   });
   $('toClaimLink').addEventListener('click', function () {
     $('loginModal').style.display = 'none';
-    $('claimErr').textContent = '';
+    $('claimErr').textContent = ''; $('claimPin').value = ''; $('claimPin2').value = '';
     $('claimModal').style.display = 'flex';
     setTimeout(function () { $('claimAccount').focus(); }, 0);
   });
@@ -1456,7 +1453,18 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/>' +
     '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 
-  function openNickEditor() {
+  function openNickEditor(first) {
+    if (first === true) {   // 가입 직후 최초 설정: 帳號를 미리 채우고 취소 불가
+      $('nickTitle').textContent = '設定暱稱';
+      $('nickGuide').textContent = '暱稱是畫面上顯示的名字，之後可以再改。';
+      $('nickInput').value = Array.from(claimedMe.nickname || '').slice(0, 10).join('');
+      $('nickErr').textContent = ''; $('nickSave').disabled = false;
+      $('nickSave').textContent = '開始使用'; $('nickCancel').style.display = 'none';
+      $('nickModal').style.display = 'flex';
+      setTimeout(function () { $('nickInput').focus(); $('nickInput').select(); }, 0);
+      return;
+    }
+    $('nickSave').textContent = '儲存'; $('nickCancel').style.display = '';
     if (!token) return;   // 신원 확보 전엔 열리지 않음 (bootstrapIdentity가 먼저 끝난다)
     $('nickInput').value = myNick();   // 아직 없으면 빈칸 → placeholder(例如：小明)가 보인다
     $('nickTitle').textContent = isClinic() ? (myNick() ? '修改名字' : '請問現在是哪位？') : (myNick() ? '修改暱稱' : '設定暱稱');
@@ -1479,6 +1487,19 @@
       closeNickEditor(); updateJointBtn(); toast('名字已更新！');
       return;
     }
+    if (claimedMe) {   // 가입 직후 최초 설정
+      var me0 = claimedMe;
+      $('nickSave').disabled = true;
+      api
+        .withSuccessHandler(function (res) {
+          claimedMe = null; closeNickEditor();
+          $('nickSave').textContent = '儲存'; $('nickCancel').style.display = '';
+          me0.nickname = res.nickname; finishIdentity(me0);
+        })
+        .withFailureHandler(function (e) { $('nickSave').disabled = false; $('nickErr').textContent = e.message || '儲存失敗'; })
+        .setUserNickname(me0.token, v);
+      return;
+    }
     $('nickSave').disabled = true;
     api
       .withSuccessHandler(function (res) {
@@ -1497,7 +1518,7 @@
   $('nickSave').addEventListener('click', saveNick);
   $('nickInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.isComposing) saveNick();   // 중국어 입력 조합 중 Enter는 무시
-    if (e.key === 'Escape') closeNickEditor();
+    if (e.key === 'Escape' && !claimedMe) closeNickEditor();
   });
 
   // ===== 固定菜單: 新增 / 修改 / 刪除 (같은 폼 재사용, fxEditId = null이면 新增) =====
