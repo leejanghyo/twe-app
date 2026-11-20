@@ -6,27 +6,27 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="今天又吃什麼">
-  <meta name="theme-color" content="#e0662f">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fffdf7" id="metaTheme">
+  <meta name="color-scheme" content="light">
+  <script>try{if(localStorage.getItem("ttwhat.theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
   <title>今天又吃什麼</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
     :root {
-      color-scheme: light dark;
-      --bg: #fbf7f2; --card: #fff; --ink: #2b2420; --muted: #8a7f77;
-      --accent: #e0662f; --accent-soft: #fde9dd; --line: #eadfd5; --ok: #2f9e6b;
+      color-scheme: light;
+      --bg: #fffdf7; --card: #fff; --ink: #2b2420; --muted: #8a7f77;
+      --accent: #e4572e; --accent-soft: #ffe8de; --line: #f1e5d3; --ok: #2f9e6b; --yolk: #f7b538;
       --danger: #c0392b; --btn-dark: #2b2420; --glass: var(--glass); --scrim: var(--scrim);
       --note-y-bg: #fff6d6; --note-y-bd: #f0dc9a; --note-b-bg: #e8f3ff; --note-b-bd: #bcd9f5;
       --tabh: calc(58px + env(safe-area-inset-bottom, 0px));
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
+    :root[data-theme="dark"] {
+        color-scheme: dark;
         --bg: #17130f; --card: #26211c; --ink: #f2ebe4; --muted: #a89d94;
         --accent: #ea743d; --accent-soft: #3d2619; --line: #3b332c; --ok: #45b987;
         --danger: #ff7f70; --btn-dark: #4d443d; --glass: rgba(38,33,28,.92); --scrim: rgba(0,0,0,.62);
         --note-y-bg: #3a3319; --note-y-bd: #5d5227; --note-b-bg: #1b2a39; --note-b-bd: #30495f;
-      }
     }
     * { box-sizing: border-box; }
     body {
@@ -517,7 +517,7 @@
     .gacha-card .btn-gacha { width: 100%; min-height: 58px; font-size: 19px; border-radius: 16px; }
     .slot-line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 0; }
     .stale-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
-    @media (prefers-color-scheme: dark) { .ld-shadow { fill: #000; } .rnd-chip, .mc { background: var(--card); } }
+    :root[data-theme="dark"] .ld-shadow { fill: #000; } :root[data-theme="dark"] .rnd-chip, :root[data-theme="dark"] .mc { background: var(--card); }
 
     .ver-tag { font-size: 10px; color: #b9b0a8; user-select: none; -webkit-user-select: none; cursor: default; white-space: nowrap; }
     #verTop { margin-left: 6px; }
@@ -534,6 +534,45 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.err { background: var(--danger); }
+
+    /* ===== 糰糰(마스코트) · 말풍선 · 처음 안내 · 설정 스위치 ===== */
+    .tm { display: block; height: auto; overflow: visible; }
+    .tm-wrap { display: flex; justify-content: center; }
+    .tb .ti.ti-svg { filter: none; display: flex; align-items: center; justify-content: center; height: 24px; }
+    .tb .ti.ti-svg svg { width: 40px; height: 24px; display: block; }
+    .tb:not(.on) .ti.ti-svg { opacity: .8; }
+    .gl-go svg { display: block; }
+    .gl-go { display: inline-flex; align-items: center; gap: 4px; }
+    .closed .tm, .gs-empty .tm, .rnd-result .tm { margin: 0 auto 10px; }
+    .g-mascot { margin-bottom: 14px; min-height: 96px; }
+    .big-go .tm { margin-bottom: 2px; }
+    .rm-center > .tm { margin-bottom: -4px; }
+    .intro { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: none; flex-direction: column; align-items: center;
+      justify-content: center; padding: 24px 24px calc(24px + env(safe-area-inset-bottom, 0px)); text-align: center; }
+    .intro.on { display: flex; }
+    .intro .tm { margin: 0 auto 6px; }
+    .intro-tag { display: inline-block; font-weight: 800; font-size: 18px; color: #fff; background: var(--accent); border-radius: 999px; padding: 6px 18px; margin: 10px 0 14px; }
+    .intro-bubble { position: relative; max-width: 320px; background: var(--note-y-bg); border: 2px solid var(--note-y-bd); border-radius: 18px;
+      padding: 14px 18px; font-size: 18px; font-weight: 700; line-height: 1.6; }
+    .intro-bubble::before { content: ""; position: absolute; top: -9px; left: 50%; width: 14px; height: 14px; margin-left: -7px; transform: rotate(45deg);
+      background: var(--note-y-bg); border-left: 2px solid var(--note-y-bd); border-top: 2px solid var(--note-y-bd); }
+    .intro-dots { display: flex; gap: 8px; margin: 22px 0 14px; }
+    .intro-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+    .intro-dots i.on { background: var(--accent); }
+    .intro-act { display: flex; flex-direction: column; gap: 10px; width: min(300px, 100%); }
+    .intro-act .btn { width: 100%; }
+    .intro .btn.n-save { background: var(--accent); color: #fff; border: 0; }
+    .intro-bubble { text-wrap: balance; }
+    .intro-skip { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 15px; padding: 8px; cursor: pointer; }
+    .theme-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line);
+      border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .sw { appearance: none; -webkit-appearance: none; width: 46px; height: 28px; border-radius: 999px; background: var(--line); position: relative; margin: 0;
+      cursor: pointer; transition: background .15s; flex: none; }
+    .theme-row .sw { width: 46px; height: 28px; padding: 0; margin: 0; border: 0; border-radius: 999px; text-align: left; }
+    .who-box .x-btn { display: flex; width: 34px; margin: 0; padding: 0; font-size: 15px; }
+    .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
+    .sw:checked { background: var(--accent); }
+    .sw:checked::after { transform: translateX(18px); }
   </style>
 </head>
 <body data-day="" data-slot="" data-who="" data-tab="home">
@@ -572,32 +611,7 @@
     </div>
 
     <div class="pg on" id="pgHome">
-      <div id="main">
-    <div class="ld" role="status" aria-live="polite">
-        <svg class="ld-svg" viewBox="0 0 200 210" aria-hidden="true">
-          <defs><clipPath id="ldBody"><path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z"/></clipPath></defs>
-          <ellipse class="ld-shadow" cx="100" cy="194" rx="54" ry="8" fill="#2b2420"/>
-          <g class="ld-steam" fill="#d8cfc6">
-            <circle cx="76" cy="30" r="6"/><circle cx="100" cy="22" r="8"/><circle cx="126" cy="31" r="5"/>
-          </g>
-          <g class="ld-char">
-            <path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z" fill="#fffdf8"/>
-            <g clip-path="url(#ldBody)"><rect x="66" y="142" width="68" height="46" rx="8" fill="#33403a"/></g>
-            <path d="M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z" fill="none" stroke="#3b2f2a" stroke-width="4" stroke-linejoin="round"/>
-            <g stroke="#e6dccf" stroke-width="3" stroke-linecap="round"><path d="M92 62l5 3"/><path d="M114 70l5 2"/><path d="M78 132l5 2"/><path d="M122 130l5-2"/></g>
-            <ellipse cx="72" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity=".75"/>
-            <ellipse cx="128" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity=".75"/>
-            <ellipse class="ld-eye" cx="84" cy="96" rx="5.5" ry="7.5" fill="#3b2f2a"/>
-            <ellipse class="ld-eye" cx="116" cy="96" rx="5.5" ry="7.5" fill="#3b2f2a"/>
-            <path class="ld-smile" d="M91 107Q100 117 109 107" fill="none" stroke="#3b2f2a" stroke-width="3.5" stroke-linecap="round"/>
-            <g class="ld-open"><ellipse cx="100" cy="111" rx="6.5" ry="7.5" fill="#7a2f2a"/><ellipse cx="100" cy="115" rx="3.5" ry="2.5" fill="#ff8f86"/></g>
-          </g>
-        </svg>
-        <div class="ld-msgs">
-          <span>飯團集合中…</span><span>偷看大家想吃什麼…</span><span>肚子在叫了…</span><span>熱騰騰的菜單快好了…</span><span>飯糰滾過來了…</span>
-        </div>
-      </div>
-      </div>
+      <div id="main"></div>
     </div>
 
     <div class="pg" id="pgGroups">
@@ -620,7 +634,7 @@
   <nav class="tabbar" id="tabbar" aria-label="功能">
     <div class="tabbar-in">
       <button class="tb on" type="button" data-tab="home"><span class="ti">🍚</span><span class="tl">照舊</span></button>
-      <button class="tb" type="button" data-tab="groups"><span class="ti">🍱</span><span class="tl">飯團</span><i class="tb-badge" id="tbBadge"></i></button>
+      <button class="tb" type="button" data-tab="groups"><span class="ti ti-svg" id="tabGroupIcon"></span><span class="tl">飯團</span><i class="tb-badge" id="tbBadge"></i></button>
       <button class="tb" type="button" data-tab="rec"><span class="ti">✨</span><span class="tl">推薦</span></button>
       <button class="tb" type="button" data-tab="gacha"><span class="ti">🎰</span><span class="tl">扭蛋</span></button>
     </div>
@@ -636,6 +650,7 @@
   </div>
 
   <div class="gacha" id="gacha">
+    <div class="g-mascot" id="gMascot"></div>
     <div class="capsule" id="capsule"><div class="g-name" id="gName"></div><div class="g-type" id="gType"></div></div>
     <div class="g-actions" id="gActions" style="visibility:hidden">
       <button class="btn" id="gRetry">再抽一次</button>
@@ -698,6 +713,7 @@
       <button class="x-btn" id="setClose" type="button" aria-label="關閉">✕</button>
       <h2>設定</h2>
       <button class="btn set-nick" id="setNick" type="button">修改暱稱</button>
+      <label class="theme-row" for="setDark"><span>深色模式</span><input type="checkbox" class="sw" id="setDark"></label>
       <button class="btn set-out" id="setOut" type="button">登出</button>
       <div class="set-ver" id="setVer"></div>
     </div>
@@ -776,6 +792,17 @@
     </div>
   </div>
 
+  <div class="intro" id="intro" role="dialog" aria-modal="true">
+    <div id="introMc"></div>
+    <div class="intro-tag" id="introTag"></div>
+    <div class="intro-bubble" id="introBubble"></div>
+    <div class="intro-dots" id="introDots"></div>
+    <div class="intro-act">
+      <button class="btn n-save" id="introNext" type="button"></button>
+      <button class="intro-skip" id="introSkip" type="button">跳過</button>
+    </div>
+  </div>
+
   <div class="upd-banner" id="updBanner" style="display:none" role="button">有新版本，點一下更新</div>
   <div class="toast" id="toast"></div>
 
@@ -796,11 +823,11 @@
             fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                                     body: JSON.stringify({ action: String(name), args: args }), redirect: 'follow' })
               .then(function (r) { return r.json(); })
-              .then(function (j) { return { j: j }; }, function () { return { e: '連線失敗，請稍後再試', net: true }; })
+              .then(function (j) { return { j: j }; }, function () { return { e: TXT.toast.net, net: true }; })
               .then(function (res) {   // 핸들러는 fetch 체인 밖에서 호출 (핸들러 예외가 실패로 오인되지 않도록)
                 if (res.j && res.j.ok) { if (onOk) onOk(res.j.data); }
                 else if (onFail) {
-                  var er = new Error(res.e || (res.j && res.j.error) || '發生錯誤');
+                  var er = new Error(res.e || (res.j && res.j.error) || TXT.toast.err);
                   er.code = res.net ? 'NETWORK' : (res.j && res.j.code) || '';
                   onFail(er);
                 }
@@ -813,18 +840,216 @@
   })();
 
   var $ = function (id) { return document.getElementById(id); };
-  var LOADER_HTML = $('main').innerHTML;   // 로딩 캐릭터 마크업 (탭 전환 때 재사용)
-  var LOADER_SVG = LOADER_HTML.slice(LOADER_HTML.indexOf('<svg'), LOADER_HTML.indexOf('</svg>') + 6);
-  var LOADER_MSGS = ['飯團集合中…', '偷看大家想吃什麼…', '肚子在叫了…', '熱騰騰的菜單快好了…', '飯糰滾過來了…'];
-  var JOINT_WAIT_MSGS = ['「我都可以」是最強大的陷阱…', '隨便你，絕對不是隨便說說的…', '對方正在天人交戰，稍等一下～'];
-  // 一起決定 버튼을 눌러서 상대 상태를 불러오는 동안(secJointLoad)
-  var JOINT_CLICK_MSGS = ['都可以不是真的都可以，不要再說隨便', '正在把兩人的菜單偷偷湊在一起…', '誰先選、誰先贏，手刀點下去！', '猜猜對方現在想吃什麼…'];
+
+  // ===== 糰糰(마스코트, 임시 SVG) — 나중에 정식 일러스트로 바꿀 때는 이 MASCOT 객체만 고치면 된다 =====
+  // MASCOT.svg(표정, 옵션) → SVG 문자열. 표정: base(기본) happy(신남) sulk(삐짐) surprise(놀람)
+  // 옵션: size(px 너비), anim(true면 로딩용 통통·눈깜빡임·김), cls(추가 클래스)
+  var MASCOT = (function () {
+    var uid = 0;
+    var BODY = 'M100 34C122 34 172 118 168 150C165 174 140 182 100 182C60 182 35 174 32 150C28 118 78 34 100 34Z';
+    var INK = '#3b2f2a';
+    function blush(o) { return '<ellipse cx="72" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity="' + o + '"/><ellipse cx="128" cy="112" rx="9" ry="5.5" fill="#ffb3a7" opacity="' + o + '"/>'; }
+    var FACE = {
+      base: function (anim) {
+        return blush('.75') +
+          '<ellipse class="' + (anim ? 'ld-eye' : '') + '" cx="84" cy="96" rx="5.5" ry="7.5" fill="' + INK + '"/>' +
+          '<ellipse class="' + (anim ? 'ld-eye' : '') + '" cx="116" cy="96" rx="5.5" ry="7.5" fill="' + INK + '"/>' +
+          '<path class="' + (anim ? 'ld-smile' : '') + '" d="M91 107Q100 117 109 107" fill="none" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>' +
+          (anim ? '<g class="ld-open"><ellipse cx="100" cy="111" rx="6.5" ry="7.5" fill="#7a2f2a"/><ellipse cx="100" cy="115" rx="3.5" ry="2.5" fill="#ff8f86"/></g>' : '');
+      },
+      happy: function () {
+        return blush('.95') +
+          '<path d="M77 99Q84 88 91 99M109 99Q116 88 123 99" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
+          '<path d="M90 105Q100 126 110 105Z" fill="#7a2f2a" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+          '<ellipse cx="100" cy="114" rx="5" ry="3" fill="#ff8f86"/>';
+      },
+      sulk: function () {
+        return blush('.4') +
+          '<path d="M77 100h14M109 100h14" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
+          '<path d="M76 87l16 6M124 87l-16 6" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>' +
+          '<path d="M92 115Q100 107 108 115" fill="none" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>';
+      },
+      surprise: function () {
+        return blush('.8') +
+          '<circle cx="84" cy="95" r="9" fill="#fff" stroke="' + INK + '" stroke-width="3"/><circle cx="116" cy="95" r="9" fill="#fff" stroke="' + INK + '" stroke-width="3"/>' +
+          '<circle cx="84" cy="96" r="3.8" fill="' + INK + '"/><circle cx="116" cy="96" r="3.8" fill="' + INK + '"/>' +
+          '<path d="M75 80Q84 74 93 80M107 80Q116 74 125 80" fill="none" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
+          '<ellipse cx="100" cy="115" rx="5.5" ry="7" fill="#7a2f2a" stroke="' + INK + '" stroke-width="2.5"/>';
+      }
+    };
+    function svg(mood, o) {
+      o = o || {}; var anim = !!o.anim, id = 'mcB' + (++uid), face = (FACE[mood] || FACE.base)(anim);
+      return '<svg class="tm tm-' + (FACE[mood] ? mood : 'base') + (o.cls ? ' ' + o.cls : '') + '" viewBox="0 0 200 210"' +
+        (o.size ? ' style="width:' + o.size + 'px"' : '') + ' aria-hidden="true">' +
+        '<defs><clipPath id="' + id + '"><path d="' + BODY + '"/></clipPath></defs>' +
+        '<ellipse class="' + (anim ? 'ld-shadow' : '') + '" cx="100" cy="194" rx="54" ry="8" fill="#2b2420" opacity=".14"/>' +
+        (anim ? '<g class="ld-steam" fill="#d8cfc6"><circle cx="76" cy="30" r="6"/><circle cx="100" cy="22" r="8"/><circle cx="126" cy="31" r="5"/></g>' : '') +
+        '<g class="' + (anim ? 'ld-char' : '') + '">' +
+        '<path d="' + BODY + '" fill="#fffdf8"/>' +
+        '<g clip-path="url(#' + id + ')"><rect x="66" y="142" width="68" height="46" rx="8" fill="#33403a"/></g>' +
+        '<path d="' + BODY + '" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+        '<g stroke="#e6dccf" stroke-width="3" stroke-linecap="round"><path d="M92 62l5 3"/><path d="M114 70l5 2"/><path d="M78 132l5 2"/><path d="M122 130l5-2"/></g>' +
+        face + '</g></svg>';
+    }
+    // 飯團 탭 아이콘(임시): 삼각김밥 세 개가 어깨동무 — 주먹밥(飯糰) + 밥 먹는 무리(飯+團)
+    function tabIcon() {
+      function one(cx) {
+        return '<path d="M' + cx + ' 4.5Q' + (cx + 2.2) + ' 4.5 ' + (cx + 4.6) + ' 12L' + (cx + 6.1) + ' 19Q' + (cx + 6.4) + ' 21 ' + (cx + 4.2) + ' 21H' + (cx - 4.2) + 'Q' + (cx - 6.4) + ' 21 ' + (cx - 6.1) + ' 19L' + (cx - 4.6) + ' 12Q' + (cx - 2.2) + ' 4.5 ' + cx + ' 4.5Z"/>' +
+          '<path d="M' + (cx - 2.4) + ' 21V16.8H' + (cx + 2.4) + 'V21" stroke-width="1.4"/>';
+      }
+      return '<svg viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        one(7) + one(20) + one(33) + '<path d="M11.6 11.2Q13.5 9.4 15.4 11.2M24.6 11.2Q26.5 9.4 28.4 11.2"/></svg>';
+    }
+    return { svg: svg, tabIcon: tabIcon };
+  })();
+  $('tabGroupIcon').innerHTML = MASCOT.tabIcon();
+
+
+  // ===== 糰糰 말투 문구 모음 — 앱 안의 안내·로딩·오류·결과·가챠 문구는 전부 여기서 고친다 =====
+  // 성격: 조금 건방지지만 밥에는 진심인 자취생 대학생. 자기를 「本糰」이라 부른다. 놀리되 체형·먹는 양·돈으로는 놀리지 않고, 훈계하지 않는다.
+  var TXT = {
+    "loading": {
+      "boot": [
+        "本糰在想了，不要催啦",
+        "本糰偷看一下大家想吃啥",
+        "肚子叫了，本糰也是",
+        "菜單熱騰騰，馬上好",
+        "本糰滾過來了，等等"
+      ],
+      "rec": [
+        "本糰翻口袋名單中…",
+        "今天的運氣交給本糰",
+        "本糰偷看資料庫，別說出去",
+        "好吃的在路上了，等等"
+      ],
+      "history": [
+        "本糰翻翻你的吃飯史",
+        "看看你這週吃了啥",
+        "本糰在回憶，不要吵",
+        "把吃過的一道道攤開"
+      ],
+      "switch": [
+        "本糰幫你換一餐",
+        "午晚大風吹，換本糰",
+        "等等，本糰換個菜單"
+      ],
+      "group": [
+        "飯團集合中，本糰點名",
+        "本糰偷看大家想吃啥",
+        "大家到了沒？本糰餓了",
+        "別催，本糰滾過去了",
+        "本糰翻菜單翻到一半"
+      ]
+    },
+    "peek": {
+      "午": [
+        "午餐還沒到，先偷看？本糰不說",
+        "還沒到午餐，本糰陪你先瞄",
+        "這麼早就餓？本糰也是"
+      ],
+      "晚": [
+        "晚餐還沒到，先偷看？本糰不說",
+        "還沒到晚餐，本糰陪你先瞄",
+        "這麼早就餓？本糰也是"
+      ]
+    },
+    "nudge": [
+      "最近連吃%s類欸，本糰只是說說",
+      "%s吃好幾次了，本糰不勉強啦",
+      "本糰覺得%s可以先放一邊"
+    ],
+    "home": {
+      "noFixed": "這餐沒有固定菜單，本糰也沒轍",
+      "closed": "今天公休，本糰也要休息"
+    },
+    "rec": {
+      "empty": "本糰的資料庫空空的",
+      "preparing": "本糰準備中，不要催啦"
+    },
+    "gacha": {
+      "title": "不知道吃什麼？本糰扭給你",
+      "sub": "交給本糰扭，抽到什麼吃什麼"
+    },
+    "toast": {
+      "recorded": "本糰記下了！",
+      "recordFail": "本糰沒記到，再試一次",
+      "already": "早就記好了啦",
+      "sent": "本糰收到了！",
+      "sendFail": "沒送出去，本糰再等你一次",
+      "promoAdded": "加進固定菜單了，本糰記住",
+      "addFail": "加不進去，再試一次",
+      "fxEdited": "改好了，本糰記住了",
+      "fxAdded": "新增好了，本糰記上了",
+      "deleted": "本糰刪掉了",
+      "nickDone": "暱稱換好了，本糰記住",
+      "nameDone": "名字換好了，本糰記住",
+      "netRetry": "訊號怪怪的，本糰再試一次",
+      "netFail": "連不上線，本糰也很無奈，等等再開",
+      "loadFail": "本糰沒載入成功，再試一次",
+      "net": "連不上，本糰等你再試",
+      "err": "出狀況了，不是本糰的錯",
+      "maxPick": "最多選 3 個，本糰的規定",
+      "cantStart": "開不了，本糰也很急",
+      "joined": function (n) { return '歡迎「' + n + '」加入，本糰也來！'; }
+    },
+    "nick": {
+      "banner": "先取個暱稱啦，本糰要叫你",
+      "guideFirst": "暱稱是別人看到的名字，之後能改",
+      "guide": "取個喜歡的暱稱，飯團的朋友會看到。登入請用帳號，本糰只認帳號"
+    },
+    "live": {
+      "empty1": "現在沒人在決定，本糰閒著",
+      "empty2": "到「飯團」按旁邊的按鈕開始吧"
+    },
+    "groups": {
+      "empty1": "還沒有飯團，本糰很寂寞",
+      "empty2": "按右上角「＋」開一個，叫朋友來"
+    },
+    "round": {
+      "lastNone": "上一輪：大家都PASS，本糰沒轍",
+      "outsider": "這輪開始時你還沒入團，下輪本糰算你",
+      "drawing": "本糰抽籤中，不要催",
+      "noResult": "這次沒結果，本糰也沒轍",
+      "tie": " 同票欸，本糰直接抽！",
+      "byDeadline": "本糰宣布：時間到，公開！",
+      "byAll": "本糰宣布：全員答完，公開！"
+    },
+    "intro": {
+      "skip": "跳過",
+      "next": "下一張",
+      "start": "開始吃飯",
+      "slides": [
+        {
+          "mood": "happy",
+          "tag": "一個人 → 照舊",
+          "say": "一個人吃？照舊就好，本糰幫你記"
+        },
+        {
+          "mood": "base",
+          "tag": "一群人 → 飯團",
+          "say": "意見太分歧？本糰直接幫你們決定！"
+        },
+        {
+          "mood": "surprise",
+          "tag": "不知道吃什麼 → 扭蛋",
+          "say": "什麼都不想吃？扭一下，本糰負責"
+        }
+      ]
+    }
+  };
+
+  var LOADER_SVG = MASCOT.svg('base', { anim: true, cls: 'ld-svg' });   // 로딩 캐릭터(탭 전환 때 재사용)
+  var LOADER_HTML = loaderHtml(TXT.loading.boot);
+  $('main').innerHTML = LOADER_HTML;
   // 推薦 탭을 눌렀을 때(美食資料庫 기반 추천) — 오늘은 뭐가 맛있을지 앞을 내다보는 느낌
-  var recommendLoadingPhrases = ['今天會遇到什麼好吃的呢…', '讓老天爺幫你選一家吧…', '附近的隱藏版美食正在現身…', '偷看美食資料庫的口袋名單中…'];
+  var recommendLoadingPhrases = TXT.loading.rec;
   // 캘린더 아이콘(食物紀錄) 모달을 눌렀을 때 — 지난 기록을 돌아보는 느낌
-  var historyLoadingPhrases = ['看看這週吃了什麼美食～', '翻翻看最近都吃了些什麼…', '把吃過的菜單一道道攤開來…', '回顧美食足跡中…'];
+  var historyLoadingPhrases = TXT.loading.history;
   // 午/晚 切換 탭을 눌렀을 때
-  var SWITCH_MSGS = ['幫你把餐廳換個場景…', '肚子正在重新設定時區…', '午餐晚餐大風吹，換你了！'];
+  var SWITCH_MSGS = TXT.loading.switch;
+  function stateHtml(mood, text, sub) {
+    return '<div class="closed">' + MASCOT.svg(mood, { size: 120 }) + esc(text) + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  }
   function loaderHtml(msgs) {
     return '<div class="ld" role="status" aria-live="polite">' + LOADER_SVG +
       '<div class="ld-msgs">' + msgs.map(function (m) { return '<span>' + esc(m) + '</span>'; }).join('') + '</div></div>';
@@ -913,8 +1138,8 @@
         if (seq !== bootSeq) return;
         if (isNoUser_(e)) { relogin_(); return; }
         if (opts.quiet) return;   // 조용한 갱신 실패는 지난 데이터를 그대로 둔다
-        if (!state.ctx) $('main').innerHTML = '<div class="closed">載入失敗<small>' + esc(e.message) + '</small></div>';
-        else toast((e && e.message) || '載入失敗', true);
+        if (!state.ctx) $('main').innerHTML = '<div class="closed">' + esc(TXT.toast.loadFail) + '<small>' + esc(e.message) + '</small></div>';
+        else toast((e && e.message) || TXT.toast.loadFail, true);
         if (opts.fail) opts.fail();
       })
       .getBootstrap(token, document.body.dataset.day || '', slot || '');
@@ -1004,8 +1229,7 @@
 
   // ===== 照舊(홈) =====
   // 식사 시간 전에 미리 볼 때 🍙가 하는 말 (끼니별로 앱을 연 동안 한 번만 뽑아 다시 그려도 안 바뀜)
-  var PEEK = { '午': ['午餐還沒到，先偷看一下 👀', '離午餐還有點時間，先瞄一眼 🍙', '還沒到午餐時間，先來看看有什麼 ✨'],
-               '晚': ['晚餐還沒到，先偷看一下 👀', '離晚餐還有點時間，先瞄一眼 🍙', '還沒到晚餐時間，先來看看有什麼 ✨'] };
+  var PEEK = TXT.peek;
   var peekPick = {};
   function peekPhrase(slot) {
     var a = PEEK[slot] || PEEK['午'];
@@ -1030,9 +1254,9 @@
 
   function renderMain() {
     var c = state.ctx;
-    if (c.closed) { $('main').innerHTML = '<div class="closed">本診所今日公休</div>'; return; }
+    if (c.closed) { $('main').innerHTML = stateHtml('sulk', TXT.home.closed); return; }
     var html = '<section id="secFixed">';
-    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">今天這個時段沒有固定菜單</div>';
+    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">' + esc(TXT.home.noFixed) + '</div>';
     html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
     if (state.fixed.length) html += '<div class="chip-scroll-pad" aria-hidden="true"></div>';
     html += '</section>';
@@ -1090,7 +1314,7 @@
   function renderRec() {
     var c = state.ctx, rec = state.recommended;
     if (!c) return;
-    var closedHtml = '<div class="closed">本診所今日公休</div>';
+    var closedHtml = stateHtml('sulk', TXT.home.closed);
     $('gachaBtn').disabled = !rec.length || c.closed;
     if (c.closed) { $('recList').innerHTML = closedHtml; $('gachaPage').innerHTML = closedHtml; return; }
     if (!rec.length && !state.recFetched && !state.recLoadErr) {
@@ -1103,12 +1327,12 @@
           '<div class="name">' + esc(r.name) + '</div>' +
           '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
           (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
-      }).join('') + '</div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : '美食資料庫目前沒有資料') + '</div>';
+      }).join('') + '</div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : TXT.rec.empty) + '</div>';
     }
     var types = [];
     rec.forEach(function (x) { if (types.indexOf(x.type) < 0) types.push(x.type); });
-    $('gachaPage').innerHTML = '<div class="gacha-card"><div class="gc-emoji">🎲</div>' +
-      '<h2>不知道吃什麼？</h2><p>' + (rec.length ? '交給扭蛋決定，從今天的推薦裡隨機抽一個！' : (state.recFetched || state.recLoadErr ? '美食資料庫目前沒有資料' : '推薦菜單準備中…')) + '</p>' +
+    $('gachaPage').innerHTML = '<div class="gacha-card"><div class="gc-emoji">' + MASCOT.svg('happy', { size: 120 }) + '</div>' +
+      '<h2>' + esc(TXT.gacha.title) + '</h2><p>' + (rec.length ? TXT.gacha.sub : (state.recFetched || state.recLoadErr ? TXT.rec.empty : TXT.rec.preparing)) + '</p>' +
       '<div class="gc-types">' + types.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
       '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>';
     if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
@@ -1196,7 +1420,7 @@
   // ===== 상단 한 줄(暱稱 + 📅 🔔 ⚙) · 진행 중 목록 · 설정 =====
   function renderTop() {
     $('nickBannerText').textContent = isClinic() ? '👋 請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
-                                                  : '👋 歡迎！請先為自己取個暱稱，別人會看到這個名字。';
+                                                  : TXT.nick.banner;
     $('nickBanner').style.display = token && !myNick() ? 'flex' : 'none';   // 첫 실행 안내
     $('whoBox').innerHTML = token ? '<span class="nick-tap" id="nickTap" role="button" tabindex="0" title="修改暱稱" aria-label="修改暱稱">' + esc(nameOf(who)) + '</span>' : '';
     if ($('nickTap')) $('nickTap').onclick = openNickEditor;
@@ -1216,8 +1440,8 @@
     var rs = liveRounds();
     $('liveList').innerHTML = rs.length ? '<div class="live-list">' + rs.map(function (g) {
       return '<button class="live-row" data-act="room" data-id="' + esc(g.id) + '">' + avatar(g.name) + '<b>' + esc(g.name) + '</b><span>' +
-        slotName(g.round.slot) + ' 🍱 ' + g.round.answered + '/' + g.round.total + '</span></button>';
-    }).join('') + '</div>' : '<div class="live-empty">目前沒有進行中的一起決定<br>到「飯團」按 🍱 就能開始</div>';
+        slotName(g.round.slot) + ' · ' + g.round.answered + '/' + g.round.total + '</span></button>';
+    }).join('') + '</div>' : '<div class="live-empty">' + esc(TXT.live.empty1) + '<br>' + esc(TXT.live.empty2) + '</div>';
   }
   $('liveBtn').addEventListener('click', function () { renderLive(); $('liveModal').style.display = 'flex'; refreshBoot(false); });
   $('liveClose').addEventListener('click', function () { $('liveModal').style.display = 'none'; });
@@ -1260,7 +1484,7 @@
       .withSuccessHandler(function () {
         promoDismissed[name] = true;
         $('promo').style.display = 'none';
-        toast('已加入固定菜單！');
+        toast(TXT.toast.promoAdded);
         // 새 메뉴가 其他 分類에 바로 보이도록 고정메뉴만 갱신 (추천은 그대로)
         state.fixed = state.fixed.concat([{ name: name, category: '其他', photo: '' }]);
         if (state.fixedCategories.indexOf('其他') < 0) state.fixedCategories.push('其他');
@@ -1271,17 +1495,13 @@
       })
       .withFailureHandler(function (e) {
         $('promoAdd').disabled = false;
-        toast(e.message || '加入失敗', true);
+        toast(e.message || TXT.toast.addFail, true);
       })
       .addToFixedMenu(name, token);
   });
 
   // ===== 推薦 탭 다양성 넛지 (최근 연속으로 같은 分類/類型을 먹었으면 살짝 알려줌) =====
-  var VARIETY_NUDGE_PHRASES = [
-    '最近連吃了%s類～今天換個口味吧？',
-    '%s吃了好幾次囉，要不要試試別的？',
-    '肚子說想念%s以外的滋味了…'
-  ];
+  var VARIETY_NUDGE_PHRASES = TXT.nudge;
   var varietyNudgeDismissed = {};   // key: date|slot — 닫으면 그 끼니 동안 다시 안 뜸
   function varietyNudgeKey() { return state.ctx ? (state.ctx.date + '|' + state.ctx.slot) : ''; }
 
@@ -1337,6 +1557,7 @@
     var n = 0, delay = 60;
     $('gActions').style.visibility = 'hidden';
     cap.className = 'capsule spinning';
+    $('gMascot').innerHTML = MASCOT.svg('surprise', { size: 96 });
 
     (function tick() {
       idx = (idx + 1) % list.length; n++;
@@ -1348,6 +1569,7 @@
       } else {
         state.gachaResult = list[idx];
         cap.className = 'capsule done';
+        $('gMascot').innerHTML = MASCOT.svg('happy', { size: 96 });
         $('gActions').style.visibility = 'visible';
       }
     })();
@@ -1372,7 +1594,7 @@
     var cardEl = document.querySelector('.card.selected');
     // 낙관적 UI: 서버 응답을 기다리지 않고 먼저 화면을 바꾼다
     state.busy = true;
-    toast('已記錄！');
+    toast(TXT.toast.recorded);
     clearSelection();
     Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
     api
@@ -1382,7 +1604,7 @@
         // 실패 → 화면을 되돌리고 에러 표시
         select(s, cardEl);
         $('note').value = extra;
-        toast(e.message || '記錄失敗', true);
+        toast(e.message || TXT.toast.recordFail, true);
       })
       .confirmChoice({
         token: token,
@@ -1484,11 +1706,11 @@
           // 통신 실패·지연·기타 오류: 토큰은 그대로 두고 재시도 (지난 데이터가 보이는 중이면 그대로 둔다)
           setDiag_('오류(토큰 유지): ' + ((e && e.message) || '?') + ' [시도 ' + (attempt + 1) + ']');
           if (attempt < 2) {
-            toast('連線不穩，重試中…');
+            toast(TXT.toast.netRetry);
             setTimeout(function () { bootstrapIdentity(cb, attempt + 1); }, 1500 * (attempt + 1));
           } else {
             identityRetryCb = cb;
-            toast('連線失敗，請稍後再開啟或重新整理', true);
+            toast(TXT.toast.netFail, true);
           }
         })
         .getBootstrap(saved, document.body.dataset.day || '', document.body.dataset.slot || '');
@@ -1535,7 +1757,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.20-c';
+  var APP_VERSION = '2026.11.20-d';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1589,6 +1811,42 @@
     });
     $('diagClose').addEventListener('click', function () { $('diagModal').style.display = 'none'; });
   })();
+
+
+  // ===== 深色模式 스위치 (기본은 밝은 테마, 켜면 이 기기에 저장) =====
+  function applyTheme(dark) {
+    if (dark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
+    var m = $('metaTheme'); if (m) m.setAttribute('content', dark ? '#17130f' : '#fffdf7');
+  }
+  (function () {
+    var dark = false; try { dark = localStorage.getItem('ttwhat.theme') === 'dark'; } catch (e) {}
+    applyTheme(dark); $('setDark').checked = dark;
+    $('setDark').addEventListener('change', function () {
+      applyTheme(this.checked);
+      try { localStorage.setItem('ttwhat.theme', this.checked ? 'dark' : 'light'); } catch (e) {}
+    });
+  })();
+
+  // ===== 처음 안내 3장 (가입 → 暱稱 설정 직후 1번만. 본 여부는 이 기기에 저장, 서버 변경 없음) =====
+  var INTRO_KEY = 'ttwhat.intro.v1', introIdx = 0;
+  function introRender() {
+    var sl = TXT.intro.slides[introIdx], last = introIdx === TXT.intro.slides.length - 1;
+    $('introMc').innerHTML = MASCOT.svg(sl.mood, { size: 150 });
+    $('introTag').textContent = sl.tag; $('introBubble').textContent = sl.say;
+    $('introDots').innerHTML = TXT.intro.slides.map(function (_, i) { return '<i' + (i === introIdx ? ' class="on"' : '') + '></i>'; }).join('');
+    $('introNext').textContent = last ? TXT.intro.start : TXT.intro.next;
+    $('introSkip').style.display = last ? 'none' : '';
+  }
+  function introClose() { $('intro').classList.remove('on'); try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {} }
+  function introOpen() {
+    try { if (localStorage.getItem(INTRO_KEY)) return; } catch (e) {}
+    introIdx = 0; introRender(); $('intro').classList.add('on');
+  }
+  $('introNext').addEventListener('click', function () {
+    if (introIdx >= TXT.intro.slides.length - 1) { introClose(); return; }
+    introIdx++; introRender();
+  });
+  $('introSkip').addEventListener('click', introClose);
 
   // 로그인·가입이 끝나면(또는 舊who 링크로 신원이 정해지면) 첫 화면 데이터를 받는다
   function finishIdentity(me) {
@@ -1673,7 +1931,7 @@
   function openNickEditor(first) {
     if (first === true) {   // 가입 직후 최초 설정: 帳號를 미리 채우고 취소 불가
       $('nickTitle').textContent = '設定暱稱';
-      $('nickGuide').textContent = '暱稱是畫面上顯示的名字，之後可以再改。';
+      $('nickGuide').textContent = TXT.nick.guideFirst;
       $('nickInput').value = Array.from(claimedMe.nickname || '').slice(0, 10).join('');
       $('nickErr').textContent = ''; $('nickSave').disabled = false;
       $('nickSave').textContent = '開始使用'; $('nickCancel').style.display = 'none';
@@ -1686,7 +1944,7 @@
     $('nickInput').value = myNick();   // 아직 없으면 빈칸 → placeholder(例如：小明)가 보인다
     $('nickTitle').textContent = isClinic() ? (myNick() ? '修改名字' : '請問現在是哪位？') : (myNick() ? '修改暱稱' : '設定暱稱');
     $('nickGuide').textContent = isClinic() ? '請輸入現在使用的人的名字（只會顯示在這台電腦上）。'
-                                            : '取一個你喜歡的暱稱，飯團的朋友會在畫面上看到它。暱稱只是顯示名稱，登入請用帳號。';
+                                            : TXT.nick.guide;
     $('nickErr').textContent = '';
     $('nickSave').disabled = false;
     $('nickModal').style.display = 'flex';
@@ -1701,7 +1959,7 @@
     if (len > 10) { $('nickErr').textContent = '暱稱最多 10 個字'; return; }
     if (isClinic()) {   // 진료실 PC: 서버에 저장하지 않고 이 브라우저에만 기억
       clinicName = v; lsSet(CLINIC_KEY, v);
-      closeNickEditor(); renderTop(); cacheWrite(); toast('名字已更新！');
+      closeNickEditor(); renderTop(); cacheWrite(); toast(TXT.toast.nameDone);
       return;
     }
     if (claimedMe) {   // 가입 직후 최초 설정
@@ -1711,7 +1969,7 @@
         .withSuccessHandler(function (res) {
           claimedMe = null; closeNickEditor();
           $('nickSave').textContent = '儲存'; $('nickCancel').style.display = '';
-          me0.nickname = res.nickname; finishIdentity(me0);
+          me0.nickname = res.nickname; finishIdentity(me0); introOpen();   // 새 가입 직후에만(기존 계정 로그인은 안 띄움)
         })
         .withFailureHandler(function (e) { $('nickSave').disabled = false; $('nickErr').textContent = e.message || '儲存失敗'; })
         .setUserNickname(me0.token, v);
@@ -1723,7 +1981,7 @@
         closeNickEditor();
         if (isLegacy()) WHO_NAME[who] = res.nickname; else myIdentityNick = res.nickname;
         renderTop(); cacheWrite();
-        toast('暱稱已更新！');
+        toast(TXT.toast.nickDone);
       })
       .withFailureHandler(function (e) { $('nickSave').disabled = false; $('nickErr').textContent = e.message || '儲存失敗'; })
       .setUserNickname(token, v);
@@ -1800,7 +2058,7 @@
     var payload = { token: token, name: name, category: $('fxCategory').value, slot: $('fxSlot').value, days: days };
     $('fxSave').disabled = true;
     var done = function () {
-      closeFixedAdd(); toast(fxEditId ? '已更新固定菜單！' : '已新增固定菜單！');
+      closeFixedAdd(); toast(fxEditId ? TXT.toast.fxEdited : TXT.toast.fxAdded);
       fetchBoot(state.ctx ? state.ctx.slot : '', { quiet: true });   // 서버 캐시가 비워졌으니 새로 불러와서 바로 보이게
     };
     var fail = function (e) { $('fxSave').disabled = false; $('fxErr').textContent = e.message || '儲存失敗'; };
@@ -1823,7 +2081,7 @@
     api
       .withSuccessHandler(function () {
         $('fxDelete').disabled = false;
-        closeFixedAdd(); toast('已刪除！');
+        closeFixedAdd(); toast(TXT.toast.deleted);
         fetchBoot(state.ctx ? state.ctx.slot : '', { quiet: true });
       })
       .withFailureHandler(function (e) { $('fxDelete').disabled = false; $('fxErr').textContent = e.message || '刪除失敗'; })
@@ -1992,7 +2250,7 @@
   // ===== 飯團: 목록은 「飯團」 탭, 방(전체 화면, 탭바는 그대로 보임) → 一起決定 미니게임(방 안) =====
   // history: 방=1단. ←·아이폰 뒤로 가기는 history.back() → popstate 에서 화면을 맞춘다. 탭을 누르면 방을 닫고 그 탭으로 간다.
   var grp = { detail: null, depth: 0, gid: '', sheet: '' };
-  var GRP_MSGS = ['飯團集合中…', '偷看大家想吃什麼…', '肚子在叫了…', '飯糰滾過來了…', '菜單翻找中…'];
+  var GRP_MSGS = TXT.loading.group;
   function gsBody(html) { $('gsBody').innerHTML = html; }
   function gsHead(title, left, right) {
     $('gsBack').style.visibility = left ? 'visible' : 'hidden';
@@ -2001,7 +2259,7 @@
     $('gsAct').dataset.act = right === '☰' ? 'menu' : '';
   }
   function gsLoading() { gsBody(loaderHtml(GRP_MSGS)); }
-  function grpErr(e) { return '<div class="nick-err">' + esc((e && e.message) || '發生錯誤') + '</div>'; }
+  function grpErr(e) { return '<div class="nick-err">' + esc((e && e.message) || TXT.toast.err) + '</div>'; }
   function sheetClose() { grp.sheet = ''; $('gsSheet').style.display = 'none'; $('gsSheetBox').innerHTML = ''; }
   function sheetOpen(html) { $('gsSheetBox').innerHTML = html; $('gsSheet').style.display = 'flex'; }
   function xBtn() { return '<button class="x-btn" type="button" data-act="sheet-close" aria-label="關閉">✕</button>'; }
@@ -2050,9 +2308,9 @@
       var r = g.round;
       return '<div class="gl-row" data-act="room" data-id="' + esc(g.id) + '" role="button" tabindex="0">' + avatar(g.name) +
         '<span class="gl-name">' + esc(g.name) + '<small class="gl-sub">' + g.count + ' 人' + (r ? ' · ' + slotName(r.slot) + '進行中' : '') + '</small></span>' +
-        '<button class="gl-go' + (r ? ' live' : '') + '" type="button" data-act="go" data-id="' + esc(g.id) + '" aria-label="一起決定">🍱' +
+        '<button class="gl-go' + (r ? ' live' : '') + '" type="button" data-act="go" data-id="' + esc(g.id) + '" aria-label="一起決定">' + MASCOT.svg('happy', { size: 26 }) + '' +
         (r ? ' ' + r.answered + '/' + r.total : '') + '</button></div>';
-    }).join('') + '</div>' : '<div class="gs-empty">還沒有飯團<br><small>按右上角「＋」建立一個，邀請常一起吃飯的人吧！</small></div>';
+    }).join('') + '</div>' : '<div class="gs-empty">' + MASCOT.svg('sulk', { size: 110 }) + esc(TXT.groups.empty1) + '<br><small>' + esc(TXT.groups.empty2) + '</small></div>';
   }
 
   // 방에 들어가지 않고 바로 一起決定 시작(午/晚 자동, 30분). 진행 중이면 그 방의 미니게임으로.
@@ -2069,7 +2327,7 @@
     }).withFailureHandler(function (e) {
       btn.disabled = false; renderGroupsPage();
       if (e && /進行中/.test(e.message || '')) { refreshBoot(true); grpEnterRoom(gid); return; }
-      toast((e && e.message) || '無法開始', true);
+      toast((e && e.message) || TXT.toast.cantStart, true);
     }).startGroupRound(token, gid, rndDefaultSlot(), 30);
   }
 
@@ -2136,7 +2394,7 @@
     var b = $('grpSave'); if (b) b.disabled = true;
     call(function (res) { if (okMsg) toast(okMsg); after(res); }, function (e) {
       if (b) b.disabled = false;
-      var el = $('grpErr'); if (el) el.textContent = (e && e.message) || '發生錯誤'; else toast((e && e.message) || '發生錯誤', true);
+      var el = $('grpErr'); if (el) el.textContent = (e && e.message) || TXT.toast.err; else toast((e && e.message) || TXT.toast.err, true);
     });
   }
 
@@ -2227,8 +2485,8 @@
   // 방의 첫 모습: 가운데 큰 버튼 하나
   function rndIdleHtml(v) {
     var last = '';
-    if (v && v.result) last = '<div class="rnd-last">' + (v.result.none || !v.result.menu ? '上一輪：大家都PASS，沒有決定' : '上一輪：' + esc(v.result.menu)) + '</div>';
-    return '<div class="rm-center"><button class="big-go" data-rnd="open">🍱<span>一起決定</span></button>' + last + '</div>';
+    if (v && v.result) last = '<div class="rnd-last">' + (v.result.none || !v.result.menu ? TXT.round.lastNone : '上一輪：' + esc(v.result.menu)) + '</div>';
+    return '<div class="rm-center"><button class="big-go" data-rnd="open">' + MASCOT.svg('happy', { size: 96 }) + '<span>一起決定</span></button>' + last + '</div>';
   }
 
   function rndStartHtml() {
@@ -2279,7 +2537,7 @@
     return '<div class="rm-center">' + rndPrevHtml(v) + '<div class="mcs">' + circ + '</div>' +
       '<div class="wait-n">' + v.answered + ' / ' + v.total + '</div>' +
       '<div class="rnd-sub">剩餘 <span class="rnd-timer" id="rndTimer">' + rndFmt(v.endMs - rndNowServer()) + '</span></div>' +
-      (outsider ? '<div class="rnd-sub">這一輪開始時你還不在飯團裡，下一輪就能一起決定囉。</div>'
+      (outsider ? '<div class="rnd-sub">' + esc(TXT.round.outsider) + '</div>'
                 : '<div class="rnd-sub"><b>' + esc(txt) + '</b></div><button class="lnk" data-rnd="edit">修改我的選擇</button>') + '</div>';
   }
 
@@ -2287,7 +2545,7 @@
   function rndReveal(v) {
     var box = rndBox(), n = 0, pool = RND_SPIN.slice();
     (v.result.votes || []).forEach(function (x) { pool.push(x.menu); });
-    box.innerHTML = '<div class="rm-center"><div class="rnd-sub">開獎中…</div><div class="spin" id="rndSpin">🍱</div>' +
+    box.innerHTML = '<div class="rm-center">' + MASCOT.svg('surprise', { size: 110 }) + '<div class="rnd-sub">' + esc(TXT.round.drawing) + '</div><div class="spin" id="rndSpin">…</div>' +
       '<button class="lnk" data-rnd="skip">跳過</button></div>';
     var done = function () { if (rnd.reveal) clearTimeout(rnd.reveal); rnd.reveal = null; rnd.skipReveal = null; rnd.sig = ''; if (rndBox()) rndRender(true); };
     rnd.skipReveal = done;
@@ -2300,17 +2558,17 @@
   }
 
   function rndResultHtml(v) {
-    var r = v.result || {}, h = '<div class="rm-center rnd-result">';
+    var r = v.result || {}, h = '<div class="rm-center rnd-result">' + MASCOT.svg((r.none || !r.menu) ? 'sulk' : 'happy', { size: 110 });
     if (r.none || !r.menu) {
-      h += '<h3>' + slotName(v.slot) + '一起決定結束</h3><div class="msg">' + esc(r.gachaMsg || '這次沒有決定') + '</div>';
+      h += '<h3>' + slotName(v.slot) + '一起決定結束</h3><div class="msg">' + esc(r.gachaMsg || TXT.round.noResult) + '</div>';
     } else {
-      h += '<div class="rnd-sub">' + slotName(v.slot) + '，大家決定吃</div><div class="win">🎉 ' + esc(r.menu) + '</div>';
+      h += '<div class="rnd-sub">' + slotName(v.slot) + '，大家決定吃</div><div class="win">' + esc(r.menu) + '</div>';
       if (r.type) h += '<span class="tag">' + esc(r.type) + '</span>';
       if (r.gacha) h += '<div class="msg">🎰 ' + esc(r.gachaMsg) + '</div>';
-      else if (r.tie) h += '<div class="msg">🎲 ' + esc(r.tied.join('、')) + ' 同票，由系統抽籤決定！</div>';
+      else if (r.tie) h += '<div class="msg">🎲 ' + esc(r.tied.join('、')) + ' ' + TXT.round.tie + '</div>';
       if (r.title) h += '<div class="title">🏅 ' + esc(r.title) + '</div>';
     }
-    h += '<div class="msg">' + (r.reason === 'deadline' ? '🍙：時間到～大家的答案都公開囉！' : '🍙：大家都答完啦，馬上公開！') + '</div>';
+    h += '<div class="msg">' + (r.reason === 'deadline' ? TXT.round.byDeadline : TXT.round.byAll) + '</div>';
     if (r.menu && !r.none) {
       h += r.recorded ? '<div class="rec-ok">✓ 已記錄（' + esc(r.recorded.by) + '）</div>'
                       : '<button class="btn n-save" id="rndOk" data-rnd="ok">就吃這個</button>';
@@ -2324,9 +2582,9 @@
     if ($('rndSubmit')) $('rndSubmit').disabled = true;
     api.withSuccessHandler(function (r) {
       rndSet(r); rnd.editing = false; rnd.picks = [];
-      rndRender(true); toast('已送出！');
+      rndRender(true); toast(TXT.toast.sent);
     }).withFailureHandler(function (e) {
-      var el = $('rndErr'); if (el) el.textContent = (e && e.message) || '送出失敗'; else toast((e && e.message) || '送出失敗', true);
+      var el = $('rndErr'); if (el) el.textContent = (e && e.message) || TXT.toast.sendFail; else toast((e && e.message) || TXT.toast.sendFail, true);
       if ($('rndSubmit')) $('rndSubmit').disabled = !rnd.picks.length;
       rndLoad(false);   // 이미 마감됐을 수 있으니 최신 상태로
     }).submitGroupAnswer(token, rnd.gid, v.id, kind, picks || []);
@@ -2410,7 +2668,7 @@
         rndSet(r); rnd.starting = false; rnd.showSet = false; rnd.editing = false; rnd.picks = []; rnd.orderFor = '';
         rndRender(true);
       }).withFailureHandler(function (e) {
-        el.disabled = false; var er = $('rndErr'); if (er) er.textContent = (e && e.message) || '無法開始';
+        el.disabled = false; var er = $('rndErr'); if (er) er.textContent = (e && e.message) || TXT.toast.cantStart;
         rndLoad(false);
       }).startGroupRound(token, rnd.gid, rnd.slot, rnd.mins);
     }
@@ -2419,7 +2677,7 @@
     else if (a === 'batch') { rnd.batch++; rndRender(true); }
     else if (a === 'pick') {
       var n = el.dataset.v, i = rnd.picks.indexOf(n);
-      if (i >= 0) rnd.picks.splice(i, 1); else if (rnd.picks.length >= 3) { toast('最多選 3 個', true); return; } else rnd.picks.push(n);
+      if (i >= 0) rnd.picks.splice(i, 1); else if (rnd.picks.length >= 3) { toast(TXT.toast.maxPick, true); return; } else rnd.picks.push(n);
       el.classList.toggle('on', i < 0);
       if ($('rndCount')) $('rndCount').textContent = rnd.picks.length;
       if ($('rndSubmit')) $('rndSubmit').disabled = !rnd.picks.length;
@@ -2433,10 +2691,10 @@
       rnd.confirming = true; el.disabled = true;
       api.withSuccessHandler(function (r) {
         rnd.confirming = false; rndSet(r);
-        toast(r.already ? '已經記錄囉' : '已記錄！');
+        toast(r.already ? TXT.toast.already : TXT.toast.recorded);
         rndRender(true);
       }).withFailureHandler(function (e) {
-        rnd.confirming = false; el.disabled = false; toast((e && e.message) || '記錄失敗', true);
+        rnd.confirming = false; el.disabled = false; toast((e && e.message) || TXT.toast.recordFail, true);
       }).confirmGroupRound(token, rnd.gid, v.id);
     }
   }
@@ -2470,11 +2728,11 @@
     if (a === 'yes') {
       $('invYes').disabled = true;
       api.withSuccessHandler(function (r) {
-        invClose(); toast('已加入「' + r.name + '」！');
+        invClose(); toast(TXT.toast.joined(r.name));
         showTab('groups'); refreshBoot(true);
         grpEnterRoom(r.groupId);
       }).withFailureHandler(function (e) {
-        $('invYes').disabled = false; var er = $('invErr'); if (er) er.textContent = (e && e.message) || '加入失敗';
+        $('invYes').disabled = false; var er = $('invErr'); if (er) er.textContent = (e && e.message) || TXT.toast.addFail;
       }).joinGroup(token, pendingJoin);
     }
   });
