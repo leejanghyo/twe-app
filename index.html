@@ -245,6 +245,7 @@
     /* 飯團 一起決定 */
     .rnd { margin: 14px 0 6px; padding: 14px 12px; background: var(--accent-soft); border-radius: 14px; text-align: left; }
     .rnd h3 { margin: 0 0 6px; font-size: 17px; }
+    .rnd .rnd-prev { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
     .rnd .rnd-sub { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
     .rnd .rnd-timer { font-weight: 700; color: var(--accent); }
     .rnd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
@@ -339,6 +340,8 @@
     .history-day { margin-bottom: 14px; }
     .history-day h4 { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
     .history-row { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .history-row.has-note { cursor: pointer; }
+    .history-tip { position: fixed; z-index: 60; max-width: min(280px, calc(100vw - 24px)); background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 8px 10px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.25); word-break: break-word; }
     .history-row .h-slot { flex: 0 0 auto; font-weight: 700; color: var(--accent); }
     .history-row .h-menu { flex: 1; }
     .history-row .h-method { flex: 0 0 auto; font-size: 12px; color: var(--muted); }
@@ -1482,7 +1485,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.20-a';
+  var APP_VERSION = '2026.11.20-b';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -1845,14 +1848,32 @@
     });
     $('historyList').innerHTML = byDate.map(function (d) {
       return '<div class="history-day"><h4>' + esc(d) + '</h4>' + map[d].map(function (r) {
-        return '<div class="history-row"><span class="h-slot">' + esc(r.slot) + '</span>' +
-          '<span class="h-menu">' + esc(r.menu) + (r.note ? '<br><small style="color:var(--muted)">' + esc(r.note) + '</small>' : '') + '</span>' +
+        return '<div class="history-row' + (r.note ? ' has-note' : '') + '"' + (r.note ? ' data-note="' + esc(r.note) + '" tabindex="0" role="button"' : '') + '><span class="h-slot">' + esc(r.slot) + '</span>' +
+          '<span class="h-menu">' + esc(r.menu) + '</span>' +
           '<span class="h-method">' + esc(r.method) + '</span></div>';
       }).join('') + '</div>';
     }).join('');
   }
+  // 줄을 누르면 備註를 작은 풍선으로(다시 누르거나 다른 곳을 누르면 닫힘). 표시만 — 시트 데이터는 그대로.
+  var histTip = null;
+  function histTipClose() { if (histTip) { histTip.remove(); histTip = null; } }
+  $('historyList').addEventListener('click', function (e) {
+    var row = e.target.closest ? e.target.closest('.history-row.has-note') : null;
+    var same = row && histTip && histTip._row === row;
+    histTipClose();
+    if (!row || same) return;
+    e.stopPropagation();
+    var t = document.createElement('div'); t.className = 'history-tip'; t.textContent = row.getAttribute('data-note');
+    document.body.appendChild(t); t._row = row; histTip = t;
+    var rc = row.getBoundingClientRect(), tw = t.offsetWidth, th = t.offsetHeight;
+    var left = Math.max(12, Math.min(window.innerWidth - tw - 12, rc.left + 8));
+    var top = rc.top - th - 6; if (top < 8) top = rc.bottom + 6;
+    t.style.left = left + 'px'; t.style.top = top + 'px';
+  });
+  document.addEventListener('click', histTipClose);
+  $('histSlides').addEventListener('scroll', histTipClose);
   $('historyBtn').addEventListener('click', openHistory);
-  $('historyClose').addEventListener('click', function () { $('historyModal').style.display = 'none'; });
+  $('historyClose').addEventListener('click', function () { histTipClose(); $('historyModal').style.display = 'none'; });
 
   // 카드 슬라이드(가장자리 peek): 점 누르면 그 슬라이드로 가운데 정렬, 스와이프/스크롤하면 점이 따라 바뀐다
   var HIST_SLIDES = $('histSlides').querySelectorAll('.hist-slide');
@@ -1987,7 +2008,7 @@
   // 방에 들어가지 않고 바로 一起決定 시작(午/晚 자동, 30분). 진행 중이면 그 방의 미니게임으로.
   function grpGo(gid, btn) {
     var g = (state.groups || []).filter(function (x) { return x.id === gid; })[0];
-    if (!g || g.round) { grpEnterRoom(gid); return; }
+    if (!g || (g.round && g.round.endMs > Date.now())) { grpEnterRoom(gid); return; }   // 진짜 진행 중일 때만 그 방으로(마감이 지난 캐시는 새 라운드로)
     if (btn.disabled) return;
     btn.disabled = true; btn.textContent = '⏳';
     api.withSuccessHandler(function (r) {
@@ -2182,7 +2203,7 @@
 
   function rndPickHtml(v) {
     var cands = rndCandidates(v);
-    return '<div class="rnd-sub c">想吃什麼？選 1~3 個（<span id="rndCount">' + rnd.picks.length + '</span> / 3）</div>' +
+    return rndPrevHtml(v) + '<div class="rnd-sub c">想吃什麼？選 1~3 個（<span id="rndCount">' + rnd.picks.length + '</span> / 3）</div>' +
       '<div class="rnd-chips c">' + cands.map(function (n) {
         return '<button class="rnd-chip' + (rnd.picks.indexOf(n) >= 0 ? ' on' : '') + '" data-rnd="pick" data-v="' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '</div>' +
       (rnd.order.length > RND_BATCH ? '<div class="c"><button class="lnk" data-rnd="batch">🔄 換一批</button></div>' : '') +
@@ -2192,12 +2213,15 @@
       (v.mine ? '<button class="lnk" data-rnd="cancel-edit">取消修改</button>' : '') + '</div>';
   }
 
+  function rndPrevHtml(v) {
+    return v.prev ? '<div class="rnd-prev">上一輪：' + esc(v.prev.none ? '沒有決定' : v.prev.menu) + '</div>' : '';
+  }
   function rndWaitHtml(v, outsider) {
     var circ = v.members.map(function (m) {
       return '<span class="mc' + (m.answered ? ' done' : '') + '" title="' + esc(m.nickname) + '">' + esc(Array.from(m.nickname)[0] || '?') + '</span>'; }).join('');
     var txt = '';
     if (v.mine) txt = v.mine.kind === 'pick' ? '你選了：' + v.mine.picks.join('、') : v.mine.kind === 'any' ? '你選了「我都可以」' : '你選了「PASS」';
-    return '<div class="rm-center"><div class="mcs">' + circ + '</div>' +
+    return '<div class="rm-center">' + rndPrevHtml(v) + '<div class="mcs">' + circ + '</div>' +
       '<div class="wait-n">' + v.answered + ' / ' + v.total + '</div>' +
       '<div class="rnd-sub">剩餘 <span class="rnd-timer" id="rndTimer">' + rndFmt(v.endMs - rndNowServer()) + '</span></div>' +
       (outsider ? '<div class="rnd-sub">這一輪開始時你還不在飯團裡，下一輪就能一起決定囉。</div>'
