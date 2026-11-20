@@ -227,6 +227,7 @@
     .gs-sheet-box .grp-owner .btn { margin-top: 10px; }
     .gs-sheet-box .nick-actions { display: flex; gap: 8px; } .gs-sheet-box .nick-actions .btn { flex: 1; }
     .gs-body .rnd { flex: 1; display: flex; flex-direction: column; background: transparent; margin: 0; padding: 16px; justify-content: center; }
+    .rnd-last { font-size: 13px; color: var(--muted); }
     .rm-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
     .rnd .c, .rnd-chips.c { text-align: center; justify-content: center; }
     .big-go { width: 190px; height: 190px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font: inherit; font-size: 56px; line-height: 1.1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 8px 24px rgba(224,102,47,.35); cursor: pointer; }
@@ -972,7 +973,46 @@
     b.addEventListener('click', function () { showTab(b.dataset.tab); });
   });
 
+  // 탭 화면에서 좌우로 밀면 옆 탭으로(구조만 참고한 일반적인 스와이프). 방 안·팝업/시트·가로로 스크롤되는 영역·입력칸에서는 작동하지 않는다.
+  var SWIPE_MIN_X = 70, SWIPE_RATIO = 2, SWIPE_MAX_MS = 700, swipe = null;
+  function swipeBlocked(target) {
+    if (grp.depth > 0 || !$('tabbar').classList.contains('on')) return true;
+    var layers = document.querySelectorAll('.who-modal, .gs-sheet, .gacha, .gs');
+    for (var i = 0; i < layers.length; i++) if (getComputedStyle(layers[i]).display !== 'none') return true;
+    for (var el = target; el && el !== document.body; el = el.parentElement) {
+      if (el.nodeType !== 1) continue;
+      var tg = el.tagName; if (tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT') return true;
+      if (el.scrollWidth > el.clientWidth + 1) { var ox = getComputedStyle(el).overflowX; if (ox === 'auto' || ox === 'scroll') return true; }
+    }
+    return false;
+  }
+  document.addEventListener('touchstart', function (ev) {
+    swipe = null;
+    if (ev.touches.length !== 1 || swipeBlocked(ev.target)) return;
+    var t = ev.touches[0]; swipe = { x: t.clientX, y: t.clientY, t: Date.now() };
+  }, { passive: true });
+  document.addEventListener('touchend', function (ev) {
+    var s0 = swipe; swipe = null;
+    if (!s0 || !ev.changedTouches.length) return;
+    var t = ev.changedTouches[0], dx = t.clientX - s0.x, dy = t.clientY - s0.y;
+    if (Date.now() - s0.t > SWIPE_MAX_MS || Math.abs(dx) < SWIPE_MIN_X || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+    if (swipeBlocked(document.body)) return;   // 밀던 사이에 팝업이 열렸으면 무시
+    var i = TABS.indexOf(tab) + (dx < 0 ? 1 : -1);
+    if (i >= 0 && i < TABS.length) showTab(TABS[i]);
+  }, { passive: true });
+  document.addEventListener('touchcancel', function () { swipe = null; }, { passive: true });
+
   // ===== 照舊(홈) =====
+  // 식사 시간 전에 미리 볼 때 🍙가 하는 말 (끼니별로 앱을 연 동안 한 번만 뽑아 다시 그려도 안 바뀜)
+  var PEEK = { '午': ['午餐還沒到，先偷看一下 👀', '離午餐還有點時間，先瞄一眼 🍙', '還沒到午餐時間，先來看看有什麼 ✨'],
+               '晚': ['晚餐還沒到，先偷看一下 👀', '離晚餐還有點時間，先瞄一眼 🍙', '還沒到晚餐時間，先來看看有什麼 ✨'] };
+  var peekPick = {};
+  function peekPhrase(slot) {
+    var a = PEEK[slot] || PEEK['午'];
+    if (peekPick[slot] == null) peekPick[slot] = Math.floor(Math.random() * a.length);
+    return a[peekPick[slot]];
+  }
+
   function renderHome() {
     var c = state.ctx; if (!c) return;
     renderPromo(state.promotionCandidates || []);
@@ -983,7 +1023,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
       t.classList.toggle('active', t.dataset.slot === c.slot);
     });
-    $('nowHint').textContent = c.isMealTime ? '' : '（預先查看）';
+    $('nowHint').textContent = c.isMealTime ? '' : peekPhrase(c.slot);
     renderMain();
     renderRec();
   }
@@ -1014,11 +1054,21 @@
   }
 
   // ===== 推薦 · 扭蛋 탭 (그 탭을 열 때만 서버에서 받는다) =====
+  // 끼니는 지금 시각으로 자동(午 10:00~14:59, 晚 15:00~21:59, 그 밖이면 다음 끼니). 早午餐 類型은 午에만.
+  // 서버도 같은 규칙으로 거르지만, 저녁에 낮에 저장해 둔 목록이 보이지 않도록 화면에서도 한 번 더 거른다.
+  function recSlot() {
+    var d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+    return m >= 15 * 60 && m < 22 * 60 ? '晚' : '午';
+  }
+  function recFilter(list) {
+    var slot = recSlot();
+    return (list || []).filter(function (x) { return !(slot === '晚' && String(x.type || '').indexOf('早午餐') >= 0); });
+  }
   function ensureRec() {
     if (state.recFetched || !token) return;
     state.recFetched = true;
     api.withSuccessHandler(function (list) {
-      state.recommended = list || []; state.recLoadErr = '';
+      state.recommended = recFilter(list); state.recLoadErr = '';
       if (!state.selection) renderRec();
       cacheWrite();
     }).withFailureHandler(function (e) {
@@ -1485,7 +1535,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.20-b';
+  var APP_VERSION = '2026.11.20-c';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -2094,7 +2144,7 @@
   // 서버가 결과를 한 번만 정해 저장 → 모든 멤버가 같은 결과. 마감은 누가 화면을 열거나 제출할 때 서버가 확인.
   var rnd = { gid: '', view: null, fetchedAt: 0, serverNow: 0, picks: [], editing: false, starting: false, showSet: false,
               slot: '', mins: 30, timer: null, tick: null, sig: '', reveal: null, order: [], orderFor: '', batch: 0, skipReveal: null,
-              expiredPing: false, confirming: false, preset: null };
+              expiredPing: false, confirming: false, preset: null, watch: '' };
   var RND_SEEN_KEY = 'ttwhat.rndseen.';
   var RND_SPIN = ['🍜', '🍚', '🥟', '🍣', '🍲', '🍔', '🥗', '🍛'];
   var RND_BATCH = 8;
@@ -2111,7 +2161,7 @@
   function slotName(s) { return s === '午' ? '午餐' : '晚餐'; }
 
   function rndStart(gid) {
-    rndStop(); rnd.gid = gid; rnd.view = null; rnd.picks = []; rnd.editing = false; rnd.starting = false; rnd.showSet = false;
+    rndStop(); rnd.gid = gid; rnd.view = null; rnd.watch = ''; rnd.picks = []; rnd.editing = false; rnd.starting = false; rnd.showSet = false;
     rnd.slot = rndDefaultSlot(); rnd.mins = 30; rnd.orderFor = ''; rnd.batch = 0;
     rndBox().innerHTML = loaderHtml(GRP_MSGS);
     if (rnd.preset) { rndSet(rnd.preset); rnd.preset = null; rndRender(true); }   // 🍱로 바로 시작했으면 그 응답으로 즉시 표시
@@ -2158,22 +2208,27 @@
     if (!force && sig === rnd.sig) return;
     rnd.sig = sig; rnd.expiredPing = false;
     if (rnd.reveal && !force) return;   // 연출 중에는 건드리지 않는다
-    if (!v) { box.innerHTML = rnd.starting ? rndStartHtml() : rndIdleHtml(); return; }
+    if (!v) { box.innerHTML = rnd.starting ? rndStartHtml() : rndIdleHtml(null); return; }
     if (v.status === 'open') {
-      rnd.starting = false;
+      rnd.starting = false; rnd.watch = v.id;   // 이 방에서 진행 중인 걸 지켜봤다 → 끝나는 순간 결과를 보여 준다
       if (!v.imIn) { box.innerHTML = rndWaitHtml(v, true); rndTick(); return; }
       box.innerHTML = (v.mine && !rnd.editing) ? rndWaitHtml(v, false) : rndPickHtml(v);
       rndTick(); return;
     }
     if (rnd.starting) { box.innerHTML = rndStartHtml(); return; }
+    // 결과 화면은 라운드가 막 끝난 순간(이 방에서 지켜봤거나 끝난 지 1분 안)에만. 나중에 들어오면 큰 🍱 버튼 + 회색 한 줄.
+    var fresh = rnd.watch === v.id || (v.result && rndNowServer() - (v.result.decidedMs || 0) < 60000);
+    if (!fresh) { box.innerHTML = rndIdleHtml(v); return; }
     var seen = lsGet(RND_SEEN_KEY + v.id);
     if (!seen && v.result && v.result.menu) { lsSet(RND_SEEN_KEY + v.id, '1'); rndReveal(v); return; }
     box.innerHTML = rndResultHtml(v);
   }
 
   // 방의 첫 모습: 가운데 큰 버튼 하나
-  function rndIdleHtml() {
-    return '<div class="rm-center"><button class="big-go" data-rnd="open">🍱<span>一起決定</span></button></div>';
+  function rndIdleHtml(v) {
+    var last = '';
+    if (v && v.result) last = '<div class="rnd-last">' + (v.result.none || !v.result.menu ? '上一輪：大家都PASS，沒有決定' : '上一輪：' + esc(v.result.menu)) + '</div>';
+    return '<div class="rm-center"><button class="big-go" data-rnd="open">🍱<span>一起決定</span></button>' + last + '</div>';
   }
 
   function rndStartHtml() {
@@ -2255,7 +2310,7 @@
       else if (r.tie) h += '<div class="msg">🎲 ' + esc(r.tied.join('、')) + ' 同票，由系統抽籤決定！</div>';
       if (r.title) h += '<div class="title">🏅 ' + esc(r.title) + '</div>';
     }
-    h += '<div class="msg">' + (r.reason === 'deadline' ? '時間到，已公開' : '全員回答完畢') + '</div>';
+    h += '<div class="msg">' + (r.reason === 'deadline' ? '🍙：時間到～大家的答案都公開囉！' : '🍙：大家都答完啦，馬上公開！') + '</div>';
     if (r.menu && !r.none) {
       h += r.recorded ? '<div class="rec-ok">✓ 已記錄（' + esc(r.recorded.by) + '）</div>'
                       : '<button class="btn n-save" id="rndOk" data-rnd="ok">就吃這個</button>';
@@ -2444,7 +2499,7 @@
       state.promotionCandidates = c.app.promotionCandidates || [];
       state.appSig = '';   // 서버 응답과 비교해서 달라지면 다시 그린다
     }
-    state.recommended = c.rec || [];
+    state.recommended = recFilter(c.rec);
     var now = Date.now();
     state.groups = (c.groups || []).map(function (g) {   // 마감 시각이 이미 지난 진행 중 표시는 뺀다
       if (g.round && g.round.endMs <= now) g.round = null; return g;
