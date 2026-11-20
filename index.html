@@ -28,12 +28,18 @@
         --danger: #ff7f70; --btn-dark: #4d443d; --glass: rgba(38,33,28,.92); --scrim: rgba(0,0,0,.62);
         --note-y-bg: #3a3319; --note-y-bd: #5d5227; --note-b-bg: #1b2a39; --note-b-bd: #30495f;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    /* 화면 전체는 고정(고무줄 튕김 없음). 긴 영역(.scroller·방·시트·팝업)만 안에서 스크롤하고 세로 막대는 어디서도 안 보인다. */
+    html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
     body {
-      margin: 0; background: var(--bg); color: var(--ink);
+      margin: 0; background: var(--bg); color: var(--ink); position: fixed; inset: 0; width: 100%;
       font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 14px 16px calc(var(--tabh) + 110px); }
+    .wrap { position: fixed; inset: 0; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; padding: 0; --gx: 16px; }
+    .wrap > .topbar { flex: 0 0 auto; padding: 14px var(--gx) 0; }
+    .scroller { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+      padding: 14px var(--gx) calc(var(--tabh) + 110px); }
     header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     h1 { margin: 0; font-size: 28px; }
     .today { color: var(--muted); font-size: 15px; }
@@ -227,6 +233,34 @@
     .gs-sheet-box .grp-owner .btn { margin-top: 10px; }
     .gs-sheet-box .nick-actions { display: flex; gap: 8px; } .gs-sheet-box .nick-actions .btn { flex: 1; }
     .gs-body .rnd { flex: 1; display: flex; flex-direction: column; background: transparent; margin: 0; padding: 16px; justify-content: center; }
+    .gs-body .rnd.pick { justify-content: flex-start; }
+    /* 고르기 화면: 안내 한 줄 → 후보 격자 → 換一批(오른쪽) → 我都可以/PASS → 送出 */
+    .pk-head { display: flex; align-items: center; gap: 10px; margin: 2px 0 4px; }
+    .pk-head .tm { flex: none; }
+    .pk-title { font-size: 19px; font-weight: 800; line-height: 1.3; }
+    .pk-prog { font-size: 13px; color: var(--muted); margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+    .pk-prog b { color: var(--accent); font-weight: 800; }
+    .pk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .pk-card { height: 58px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); font: inherit; font-size: 15px; font-weight: 700;
+      line-height: 1.25; text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; -webkit-tap-highlight-color: transparent; }
+    .pk-card span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; word-break: normal; }
+    .pk-card:active { transform: scale(.97); }
+    .pk-card.on { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(224,102,47,.28); }
+    .pk-card.on::after { content: "✓"; position: absolute; top: 3px; right: 8px; font-size: 12px; font-weight: 800; }
+    .pk-more { display: flex; justify-content: flex-end; margin: 8px 0 12px; }
+    .pk-sm { border: 0; background: var(--line); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 7px 12px 7px 10px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px; -webkit-tap-highlight-color: transparent; }
+    .pk-sm:active { background: var(--accent-soft); }
+    .pk-duo { display: flex; gap: 10px; margin-bottom: 10px; }
+    .pk-duo button { flex: 1; min-width: 0; height: 50px; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 16px; font-weight: 800; border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .pk-duo button:active { background: var(--accent-soft); border-color: var(--accent); }
+    .pk-duo button:disabled { opacity: .5; }
+    .gs-body .rnd.pick .btn { max-width: none; margin-top: 0; }
+    .pk-foot { text-align: center; margin-top: 8px; min-height: 20px; }
+    .pk-foot .lnk { font-size: 13px; }
+    .pk-note { font-size: 12px; color: var(--muted); }
+    .btn-busy { opacity: .85; pointer-events: none; }
     .rnd-last { font-size: 13px; color: var(--muted); }
     .rm-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
     .rnd .c, .rnd-chips.c { text-align: center; justify-content: center; }
@@ -386,7 +420,7 @@
     .card:active { transform: scale(.99); }
     .note-toggle { display: none; }
     @media (max-width: 720px) {
-      .wrap { padding: 14px 14px calc(var(--tabh) + 110px); }
+      .wrap { --gx: 14px; }
       h1 { font-size: 24px; }
       .today { font-size: 14px; }
 
@@ -493,6 +527,8 @@
     .gl-go.live { background: var(--accent); border-color: var(--accent); color: #fff; }
     .gl-go:active { transform: scale(.95); }
     .gl-go:disabled { opacity: .5; }
+    .gl-go.busy { opacity: 1; background: var(--accent-soft); border-color: var(--accent); transform: scale(.94); }
+    .gl-go.busy .ld-shadow, .gl-go.busy .ld-steam { display: none; }
     .gl-sub { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
     .gl-name small { display: block; }
     .x-btn { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--line); color: var(--ink);
@@ -538,9 +574,9 @@
     /* ===== 糰糰(마스코트) · 말풍선 · 처음 안내 · 설정 스위치 ===== */
     .tm { display: block; height: auto; overflow: visible; }
     .tm-wrap { display: flex; justify-content: center; }
-    .tb .ti.ti-svg { filter: none; display: flex; align-items: center; justify-content: center; height: 24px; }
-    .tb .ti.ti-svg svg { width: 40px; height: 24px; display: block; }
-    .tb:not(.on) .ti.ti-svg { opacity: .8; }
+    .tb .ti.ti-svg { filter: none; display: flex; align-items: center; justify-content: center; height: 25px; }
+    .tb .ti.ti-svg svg { display: block; }
+    .tb:not(.on) .ti.ti-svg { opacity: .7; }
     .gl-go svg { display: block; }
     .gl-go { display: inline-flex; align-items: center; gap: 4px; }
     .closed .tm, .gs-empty .tm, .rnd-result .tm { margin: 0 auto 10px; }
@@ -593,6 +629,7 @@
       <button class="ico-btn" id="liveBtn" type="button" title="進行中的一起決定" aria-label="進行中的一起決定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i class="ico-dot" id="liveDot"></i></button>
       <button class="ico-btn" id="setBtn" type="button" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
+    <div class="scroller" id="scroller">
     <div class="promo home-only" id="promo" style="display:none">
       <span class="promo-text" id="promoText"></span>
       <button class="p-add" id="promoAdd">加入固定菜單</button>
@@ -629,14 +666,15 @@
       <div id="gachaPage"></div>
     </div>
     <div id="verTag" class="ver-tag home-only"></div>
+    </div>
   </div>
 
   <nav class="tabbar" id="tabbar" aria-label="功能">
     <div class="tabbar-in">
-      <button class="tb on" type="button" data-tab="home"><span class="ti">🍚</span><span class="tl">照舊</span></button>
+      <button class="tb on" type="button" data-tab="home"><span class="ti ti-svg" id="tabHomeIcon"></span><span class="tl">照舊</span></button>
       <button class="tb" type="button" data-tab="groups"><span class="ti ti-svg" id="tabGroupIcon"></span><span class="tl">飯團</span><i class="tb-badge" id="tbBadge"></i></button>
-      <button class="tb" type="button" data-tab="rec"><span class="ti">✨</span><span class="tl">推薦</span></button>
-      <button class="tb" type="button" data-tab="gacha"><span class="ti">🎰</span><span class="tl">扭蛋</span></button>
+      <button class="tb" type="button" data-tab="rec"><span class="ti ti-svg" id="tabRecIcon"></span><span class="tl">推薦</span></button>
+      <button class="tb" type="button" data-tab="gacha"><span class="ti ti-svg" id="tabGachaIcon"></span><span class="tl">扭蛋</span></button>
     </div>
   </nav>
 
@@ -891,128 +929,165 @@
         '<g stroke="#e6dccf" stroke-width="3" stroke-linecap="round"><path d="M92 62l5 3"/><path d="M114 70l5 2"/><path d="M78 132l5 2"/><path d="M122 130l5-2"/></g>' +
         face + '</g></svg>';
     }
-    // 飯團 탭 아이콘(임시): 삼각김밥 세 개가 어깨동무 — 주먹밥(飯糰) + 밥 먹는 무리(飯+團)
-    function tabIcon() {
-      function one(cx) {
-        return '<path d="M' + cx + ' 4.5Q' + (cx + 2.2) + ' 4.5 ' + (cx + 4.6) + ' 12L' + (cx + 6.1) + ' 19Q' + (cx + 6.4) + ' 21 ' + (cx + 4.2) + ' 21H' + (cx - 4.2) + 'Q' + (cx - 6.4) + ' 21 ' + (cx - 6.1) + ' 19L' + (cx - 4.6) + ' 12Q' + (cx - 2.2) + ' 4.5 ' + cx + ' 4.5Z"/>' +
-          '<path d="M' + (cx - 2.4) + ' 21V16.8H' + (cx + 2.4) + 'V21" stroke-width="1.4"/>';
-      }
-      return '<svg viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-        one(7) + one(20) + one(33) + '<path d="M11.6 11.2Q13.5 9.4 15.4 11.2M24.6 11.2Q26.5 9.4 28.4 11.2"/></svg>';
-    }
-    return { svg: svg, tabIcon: tabIcon };
+    return { svg: svg };
   })();
-  $('tabGroupIcon').innerHTML = MASCOT.tabIcon();
+
+  // ===== 선형 아이콘 시리즈 — 아래 탭 4개와 버튼 아이콘은 전부 여기서 만든다 =====
+  // 기준은 飯團 탭 아이콘(삼각김밥 세 개 어깨동무): 선 굵기 1.7, 둥근 끝·둥근 모서리, 색은 currentColor(탭 상태·테마를 따라감).
+  // 정식 일러스트가 나오면 이 한 곳만 바꾼다.
+  var ICON = (function () {
+    function wrap(vb, w, h, body) {
+      return '<svg viewBox="' + vb + '" width="' + w + '" height="' + h + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>';
+    }
+    function sq(body, size) { return wrap('0 0 24 24', size || 24, size || 24, body); }
+    // 탭용 24칸 아이콘: 여백을 줄여(2~22칸만 보이게) 飯團 아이콘과 비슷한 크기로 보이게 하고, 그만큼 커진 선 굵기를 1.42로 낮춰 같은 1.7처럼 보이게 한다
+    function tabSq(body) { return '<svg viewBox="2 2 20 20" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.42" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; }
+    // 飯團: 삼각김밥 세 개가 어깨동무 — 주먹밥(飯糰) + 밥 먹는 무리(飯+團)
+    function onigiri(cx) {
+      return '<path d="M' + cx + ' 4.5Q' + (cx + 2.2) + ' 4.5 ' + (cx + 4.6) + ' 12L' + (cx + 6.1) + ' 19Q' + (cx + 6.4) + ' 21 ' + (cx + 4.2) + ' 21H' + (cx - 4.2) + 'Q' + (cx - 6.4) + ' 21 ' + (cx - 6.1) + ' 19L' + (cx - 4.6) + ' 12Q' + (cx - 2.2) + ' 4.5 ' + cx + ' 4.5Z"/>' +
+        '<path d="M' + (cx - 2.4) + ' 21V16.8H' + (cx + 2.4) + 'V21" stroke-width="1.4"/>';
+    }
+    var tab = {
+      // 照舊: 김이 나는 밥그릇(늘 먹던 그 한 그릇)
+      home: function () { return tabSq('<path d="M4 12.5h16Q20 19.5 12 19.5T4 12.5Z"/><path d="M8.5 21h7"/><path d="M6.6 12.5Q7 7 12 7t5.4 5.5"/><path d="M10 3.2q-.9 1 0 2M14 3.2q-.9 1 0 2"/>'); },
+      groups: function () { return wrap('0 0 40 24', 40, 24, onigiri(7) + onigiri(20) + onigiri(33) + '<path d="M11.6 11.2Q13.5 9.4 15.4 11.2M24.6 11.2Q26.5 9.4 28.4 11.2"/>'); },
+      // 推薦: 반짝이
+      rec: function () { return tabSq('<path d="M10.5 4.5Q11.2 10 16.5 10.8Q11.2 11.6 10.5 17.1Q9.8 11.6 4.5 10.8Q9.8 10 10.5 4.5Z"/><path d="M18.5 3.5v4M16.5 5.5h4"/><path d="M18 15.5v4M16 17.5h4"/>'); },
+      // 扭蛋: 동그란 유리통 + 몸통 + 손잡이(뽑기 기계)
+      gacha: function () { return tabSq('<circle cx="12" cy="9.2" r="6.2"/><path d="M5.8 9.2h12.4"/><rect x="5.5" y="15.4" width="13" height="5.6" rx="2"/><circle cx="12" cy="18.2" r="1.1"/><path d="M9.3 6.2q1-1.2 2.4-1.4"/>'); }
+    };
+    // 버튼용 작은 아이콘
+    var btn = {
+      refresh: function (n) { return sq('<path d="M20.5 11.5A8.5 8.5 0 0 0 6 6L3.8 8.2"/><path d="M3.8 3.8v4.4h4.4"/><path d="M3.5 12.5A8.5 8.5 0 0 0 18 18l2.2-2.2"/><path d="M15.8 15.8h4.4v4.4"/>', n || 18); },
+      any: function (n) { return sq('<circle cx="12" cy="12" r="9"/><path d="M9 10v.4M15 10v.4" stroke-width="2.4"/><path d="M8.4 14.4Q12 18 15.6 14.4"/>', n || 20); },
+      pass: function (n) { return sq('<path d="M5.5 5.5 14.5 12l-9 6.5Z"/><path d="M18.5 5v14"/>', n || 20); }
+    };
+    return { tab: tab, btn: btn };
+  })();
+  $('tabHomeIcon').innerHTML = ICON.tab.home();
+  $('tabGroupIcon').innerHTML = ICON.tab.groups();
+  $('tabRecIcon').innerHTML = ICON.tab.rec();
+  $('tabGachaIcon').innerHTML = ICON.tab.gacha();
 
 
   // ===== 糰糰 말투 문구 모음 — 앱 안의 안내·로딩·오류·결과·가챠 문구는 전부 여기서 고친다 =====
-  // 성격: 조금 건방지지만 밥에는 진심인 자취생 대학생. 자기를 「本糰」이라 부른다. 놀리되 체형·먹는 양·돈으로는 놀리지 않고, 훈계하지 않는다.
+  // 성격: 조금 건방지지만 밥에는 진심인 자취생 대학생. 자기를 「糰糰」이라 부른다. 놀리되 체형·먹는 양·돈으로는 놀리지 않고, 훈계하지 않는다.
   var TXT = {
     "loading": {
       "boot": [
-        "本糰在想了，不要催啦",
-        "本糰偷看一下大家想吃啥",
-        "肚子叫了，本糰也是",
+        "糰糰在想了，不要催啦",
+        "糰糰偷看一下大家想吃啥",
+        "肚子叫了，糰糰也是",
         "菜單熱騰騰，馬上好",
-        "本糰滾過來了，等等"
+        "糰糰滾過來了，等等"
       ],
       "rec": [
-        "本糰翻口袋名單中…",
-        "今天的運氣交給本糰",
-        "本糰偷看資料庫，別說出去",
+        "糰糰翻口袋名單中…",
+        "今天的運氣交給糰糰",
+        "糰糰偷看資料庫，別說出去",
         "好吃的在路上了，等等"
       ],
       "history": [
-        "本糰翻翻你的吃飯史",
+        "糰糰翻翻你的吃飯史",
         "看看你這週吃了啥",
-        "本糰在回憶，不要吵",
+        "糰糰在回憶，不要吵",
         "把吃過的一道道攤開"
       ],
       "switch": [
-        "本糰幫你換一餐",
-        "午晚大風吹，換本糰",
-        "等等，本糰換個菜單"
+        "糰糰幫你換一餐",
+        "午晚大風吹，換糰糰",
+        "等等，糰糰換個菜單"
       ],
       "group": [
-        "飯團集合中，本糰點名",
-        "本糰偷看大家想吃啥",
-        "大家到了沒？本糰餓了",
-        "別催，本糰滾過去了",
-        "本糰翻菜單翻到一半"
+        "飯團集合中，糰糰點名",
+        "糰糰偷看大家想吃啥",
+        "大家到了沒？糰糰餓了",
+        "別催，糰糰滾過去了",
+        "糰糰翻菜單翻到一半"
       ]
     },
     "peek": {
       "午": [
-        "午餐還沒到，先偷看？本糰不說",
-        "還沒到午餐，本糰陪你先瞄",
-        "這麼早就餓？本糰也是"
+        "午餐還沒到，先偷看？糰糰不說",
+        "還沒到午餐，糰糰陪你先瞄",
+        "這麼早就餓？糰糰也是"
       ],
       "晚": [
-        "晚餐還沒到，先偷看？本糰不說",
-        "還沒到晚餐，本糰陪你先瞄",
-        "這麼早就餓？本糰也是"
+        "晚餐還沒到，先偷看？糰糰不說",
+        "還沒到晚餐，糰糰陪你先瞄",
+        "這麼早就餓？糰糰也是"
       ]
     },
     "nudge": [
-      "最近連吃%s類欸，本糰只是說說",
-      "%s吃好幾次了，本糰不勉強啦",
-      "本糰覺得%s可以先放一邊"
+      "最近連吃%s類欸，糰糰只是說說",
+      "%s吃好幾次了，糰糰不勉強啦",
+      "糰糰覺得%s可以先放一邊"
     ],
     "home": {
-      "noFixed": "這餐沒有固定菜單，本糰也沒轍",
-      "closed": "今天公休，本糰也要休息"
+      "noFixed": "這餐沒有固定菜單，糰糰也沒轍",
+      "closed": "今天公休，糰糰也要休息"
     },
     "rec": {
-      "empty": "本糰的資料庫空空的",
-      "preparing": "本糰準備中，不要催啦"
+      "empty": "糰糰的資料庫空空的",
+      "preparing": "糰糰準備中，不要催啦"
     },
     "gacha": {
-      "title": "不知道吃什麼？本糰扭給你",
-      "sub": "交給本糰扭，抽到什麼吃什麼"
+      "title": "不知道吃什麼？糰糰扭給你",
+      "sub": "交給糰糰扭，抽到什麼吃什麼"
     },
     "toast": {
-      "recorded": "本糰記下了！",
-      "recordFail": "本糰沒記到，再試一次",
+      "recorded": "糰糰記下了！",
+      "recordFail": "糰糰沒記到，再試一次",
       "already": "早就記好了啦",
-      "sent": "本糰收到了！",
-      "sendFail": "沒送出去，本糰再等你一次",
-      "promoAdded": "加進固定菜單了，本糰記住",
+      "sent": "糰糰收到了！",
+      "sendFail": "沒送出去，糰糰再等你一次",
+      "promoAdded": "加進固定菜單了，糰糰記住",
       "addFail": "加不進去，再試一次",
-      "fxEdited": "改好了，本糰記住了",
-      "fxAdded": "新增好了，本糰記上了",
-      "deleted": "本糰刪掉了",
-      "nickDone": "暱稱換好了，本糰記住",
-      "nameDone": "名字換好了，本糰記住",
-      "netRetry": "訊號怪怪的，本糰再試一次",
-      "netFail": "連不上線，本糰也很無奈，等等再開",
-      "loadFail": "本糰沒載入成功，再試一次",
-      "net": "連不上，本糰等你再試",
-      "err": "出狀況了，不是本糰的錯",
-      "maxPick": "最多選 3 個，本糰的規定",
-      "cantStart": "開不了，本糰也很急",
-      "joined": function (n) { return '歡迎「' + n + '」加入，本糰也來！'; }
+      "fxEdited": "改好了，糰糰記住了",
+      "fxAdded": "新增好了，糰糰記上了",
+      "deleted": "糰糰刪掉了",
+      "nickDone": "暱稱換好了，糰糰記住",
+      "nameDone": "名字換好了，糰糰記住",
+      "netRetry": "訊號怪怪的，糰糰再試一次",
+      "netFail": "連不上線，糰糰也很無奈，等等再開",
+      "loadFail": "糰糰沒載入成功，再試一次",
+      "net": "連不上，糰糰等你再試",
+      "err": "出狀況了，不是糰糰的錯",
+      "maxPick": "最多選 3 個，糰糰的規定",
+      "cantStart": "開不了，糰糰也很急",
+      "joined": function (n) { return '歡迎「' + n + '」加入，糰糰也來！'; }
     },
     "nick": {
-      "banner": "先取個暱稱啦，本糰要叫你",
+      "banner": "先取個暱稱啦，糰糰要叫你",
       "guideFirst": "暱稱是別人看到的名字，之後能改",
-      "guide": "取個喜歡的暱稱，飯團的朋友會看到。登入請用帳號，本糰只認帳號"
+      "guide": "取個喜歡的暱稱，飯團的朋友會看到。登入請用帳號，糰糰只認帳號"
     },
     "live": {
-      "empty1": "現在沒人在決定，本糰閒著",
+      "empty1": "現在沒人在決定，糰糰閒著",
       "empty2": "到「飯團」按旁邊的按鈕開始吧"
     },
     "groups": {
-      "empty1": "還沒有飯團，本糰很寂寞",
+      "empty1": "還沒有飯團，糰糰很寂寞",
       "empty2": "按右上角「＋」開一個，叫朋友來"
     },
     "round": {
-      "lastNone": "上一輪：大家都PASS，本糰沒轍",
-      "outsider": "這輪開始時你還沒入團，下輪本糰算你",
-      "drawing": "本糰抽籤中，不要催",
-      "noResult": "這次沒結果，本糰也沒轍",
-      "tie": " 同票欸，本糰直接抽！",
-      "byDeadline": "本糰宣布：時間到，公開！",
-      "byAll": "本糰宣布：全員答完，公開！"
+      "lastNone": "上一輪：大家都PASS，糰糰沒轍",
+      "outsider": "這輪開始時你還沒入團，下輪糰糰算你",
+      "drawing": "糰糰抽籤中，不要催",
+      "noResult": "這次沒結果，糰糰也沒轍",
+      "tie": " 同票欸，糰糰直接抽！",
+      "byDeadline": "糰糰宣布：時間到，公開！",
+      "byAll": "糰糰宣布：全員答完，公開！",
+      "pickTitle": "糰糰：選1~3個你想吃的",
+      "cancel": "取消這一輪",
+      "cancelAsk": "取消這一輪？",
+      "cancelAskSub": "這一輪會當作沒發生過，什麼都不會記錄。",
+      "cancelKeep": "先不要",
+      "cancelDone": "取消了，糰糰當作沒發生",
+      "cancelBlocked": "已經有人回答了，不能取消",
+      "refresh": "換一批",
+      "any": "我都可以",
+      "pass": "PASS"
     },
     "intro": {
       "skip": "跳過",
@@ -1022,17 +1097,17 @@
         {
           "mood": "happy",
           "tag": "一個人 → 照舊",
-          "say": "一個人吃？照舊就好，本糰幫你記"
+          "say": "一個人吃？照舊就好，糰糰幫你記"
         },
         {
           "mood": "base",
           "tag": "一群人 → 飯團",
-          "say": "意見太分歧？本糰直接幫你們決定！"
+          "say": "意見太分歧？糰糰直接幫你們決定！"
         },
         {
           "mood": "surprise",
           "tag": "不知道吃什麼 → 扭蛋",
-          "say": "什麼都不想吃？扭一下，本糰負責"
+          "say": "什麼都不想吃？扭一下，糰糰負責"
         }
       ]
     }
@@ -1189,7 +1264,7 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll('.tb'), function (b) { b.classList.toggle('on', b.dataset.tab === t); });
     if (!same) clearSelection();
-    window.scrollTo(0, 0);
+    $('scroller').scrollTop = 0;
     if (t === 'groups') renderGroupsPage();
     if (t === 'rec' || t === 'gacha') ensureRec();
     if (!same) refreshBoot(false);
@@ -1346,7 +1421,7 @@
   });
   $('gachaBtn').addEventListener('click', openGacha);
 
-  function scrollToContentTop() { window.scrollTo(0, 0); }
+  function scrollToContentTop() { $('scroller').scrollTop = 0; }
 
   // ===== 分類 칩: 누르면 그 分類로 이동, 스크롤하면 현재 分類 칩이 강조됨 =====
   function setupChips() {
@@ -1374,13 +1449,13 @@
   }
 
   var chipTick = false, chipLockUntil = 0;
-  window.addEventListener('scroll', function () {
+  $('scroller').addEventListener('scroll', function () {
     if (Date.now() < chipLockUntil) { chipLockUntil = Date.now() + 150; return; }   // 칩으로 이동 중이면 멈출 때까지 대기
     if (tab !== 'home' || chipTick || !$('chips') || !$('secFixed')) return;
     chipTick = true;
     requestAnimationFrame(function () {
       chipTick = false;
-      var line = 70, cur = 0;
+      var line = $('scroller').getBoundingClientRect().top + 70, cur = 0;
       Array.prototype.forEach.call(document.querySelectorAll('.cat'), function (cat, i) {
         if (cat.getBoundingClientRect().top <= line) cur = i;
       });
@@ -1757,7 +1832,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.20-d';
+  var APP_VERSION = '2026.11.20-e';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -2314,18 +2389,23 @@
   }
 
   // 방에 들어가지 않고 바로 一起決定 시작(午/晚 자동, 30분). 진행 중이면 그 방의 미니게임으로.
+  var goBusy = {};   // 飯團별로 「시작」 요청이 날아가는 중이면 true — 응답이 올 때까지 다시 눌러도 두 번 시작되지 않는다
   function grpGo(gid, btn) {
     var g = (state.groups || []).filter(function (x) { return x.id === gid; })[0];
+    if (goBusy[gid]) return;
     if (!g || (g.round && g.round.endMs > Date.now())) { grpEnterRoom(gid); return; }   // 진짜 진행 중일 때만 그 방으로(마감이 지난 캐시는 새 라운드로)
-    if (btn.disabled) return;
-    btn.disabled = true; btn.textContent = '⏳';
+    goBusy[gid] = true;
+    // 누르는 즉시(서버 응답을 기다리지 않고): 버튼이 눌린 상태 + 糰糰 로딩
+    btn.disabled = true; btn.classList.add('busy'); btn.innerHTML = MASCOT.svg('base', { anim: true, size: 26 });
     api.withSuccessHandler(function (r) {
+      goBusy[gid] = false;
       var v = r && r.round;
       if (v) g.round = { id: v.id, slot: v.slot, answered: v.answered, total: v.total, endMs: v.endMs, mine: false };
       renderGroupsUI(); cacheWrite();
       grpEnterRoom(gid, r);
     }).withFailureHandler(function (e) {
-      btn.disabled = false; renderGroupsPage();
+      goBusy[gid] = false;
+      renderGroupsPage();
       if (e && /進行中/.test(e.message || '')) { refreshBoot(true); grpEnterRoom(gid); return; }
       toast((e && e.message) || TXT.toast.cantStart, true);
     }).startGroupRound(token, gid, rndDefaultSlot(), 30);
@@ -2421,6 +2501,7 @@
   function rndStart(gid) {
     rndStop(); rnd.gid = gid; rnd.view = null; rnd.watch = ''; rnd.picks = []; rnd.editing = false; rnd.starting = false; rnd.showSet = false;
     rnd.slot = rndDefaultSlot(); rnd.mins = 30; rnd.orderFor = ''; rnd.batch = 0;
+    rnd.goBusy = false; rnd.cancelling = false;
     rndBox().innerHTML = loaderHtml(GRP_MSGS);
     if (rnd.preset) { rndSet(rnd.preset); rnd.preset = null; rndRender(true); }   // 🍱로 바로 시작했으면 그 응답으로 즉시 표시
     else rndLoad(true);
@@ -2462,15 +2543,18 @@
   function rndRender(force) {
     var v = rnd.view, box = rndBox(); if (!box) return;
     var sig = v ? [v.id, v.status, v.answered, v.total, JSON.stringify(v.mine), rnd.editing, rnd.starting, rnd.showSet,
-                   v.result && v.result.recorded ? 'rec' : ''].join('|') : 'none|' + rnd.starting + '|' + rnd.showSet;
+                   v.result && v.result.recorded ? 'rec' : '', v.isStarter, v.othersAnswered].join('|') : 'none|' + rnd.starting + '|' + rnd.showSet;
     if (!force && sig === rnd.sig) return;
     rnd.sig = sig; rnd.expiredPing = false;
+    box.classList.remove('pick');   // 고르기 화면일 때만 아래에서 다시 붙인다(위쪽 정렬)
     if (rnd.reveal && !force) return;   // 연출 중에는 건드리지 않는다
     if (!v) { box.innerHTML = rnd.starting ? rndStartHtml() : rndIdleHtml(null); return; }
     if (v.status === 'open') {
       rnd.starting = false; rnd.watch = v.id;   // 이 방에서 진행 중인 걸 지켜봤다 → 끝나는 순간 결과를 보여 준다
       if (!v.imIn) { box.innerHTML = rndWaitHtml(v, true); rndTick(); return; }
-      box.innerHTML = (v.mine && !rnd.editing) ? rndWaitHtml(v, false) : rndPickHtml(v);
+      var picking = !(v.mine && !rnd.editing);
+      box.classList.toggle('pick', picking);
+      box.innerHTML = picking ? rndPickHtml(v) : rndWaitHtml(v, false);
       rndTick(); return;
     }
     if (rnd.starting) { box.innerHTML = rndStartHtml(); return; }
@@ -2514,16 +2598,24 @@
     return res;
   }
 
+  function rndCancelHtml(v) {   // 시작한 사람에게만: 아무도 응답 안 했으면 「取消這一輪」, 누가 응답했으면 안내 한 줄
+    if (!v.isStarter) return '';
+    return v.othersAnswered ? '<div class="pk-note">' + esc(TXT.round.cancelBlocked) + '</div>'
+                            : '<button class="lnk" data-rnd="cancel-ask">' + esc(TXT.round.cancel) + '</button>';
+  }
+
   function rndPickHtml(v) {
     var cands = rndCandidates(v);
-    return rndPrevHtml(v) + '<div class="rnd-sub c">想吃什麼？選 1~3 個（<span id="rndCount">' + rnd.picks.length + '</span> / 3）</div>' +
-      '<div class="rnd-chips c">' + cands.map(function (n) {
-        return '<button class="rnd-chip' + (rnd.picks.indexOf(n) >= 0 ? ' on' : '') + '" data-rnd="pick" data-v="' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '</div>' +
-      (rnd.order.length > RND_BATCH ? '<div class="c"><button class="lnk" data-rnd="batch">🔄 換一批</button></div>' : '') +
+    return '<div class="pk-head">' + MASCOT.svg('happy', { size: 44 }) + '<div class="pk-title">' + esc(TXT.round.pickTitle) + '</div></div>' +
+      '<div class="pk-prog"><span>已選 <b id="rndCount">' + rnd.picks.length + '</b> / 3</span><span>已回答 <b>' + v.answered + '</b> / ' + v.total + '</span>' +
+      '<span>剩餘 <b class="rnd-timer" id="rndTimer">' + rndFmt(v.endMs - rndNowServer()) + '</b></span></div>' +
+      '<div class="pk-grid">' + cands.map(function (n) {
+        return '<button class="pk-card' + (rnd.picks.indexOf(n) >= 0 ? ' on' : '') + '" data-rnd="pick" data-v="' + esc(n) + '"><span>' + esc(n) + '</span></button>'; }).join('') + '</div>' +
+      (rnd.order.length > RND_BATCH ? '<div class="pk-more"><button class="pk-sm" data-rnd="batch">' + ICON.btn.refresh(16) + esc(TXT.round.refresh) + '</button></div>' : '<div class="pk-more"></div>') +
+      '<div class="pk-duo"><button data-rnd="any">' + ICON.btn.any() + esc(TXT.round.any) + '</button><button data-rnd="pass">' + ICON.btn.pass() + esc(TXT.round.pass) + '</button></div>' +
       '<div class="nick-err" id="rndErr"></div>' +
       '<button class="btn n-save" id="rndSubmit" data-rnd="submit"' + (rnd.picks.length ? '' : ' disabled') + '>送出</button>' +
-      '<div class="rnd-links"><button class="lnk" data-rnd="any">我都可以</button><button class="lnk" data-rnd="pass">PASS</button>' +
-      (v.mine ? '<button class="lnk" data-rnd="cancel-edit">取消修改</button>' : '') + '</div>';
+      '<div class="pk-foot">' + (v.mine ? '<button class="lnk" data-rnd="cancel-edit">取消修改</button>' : '') + rndCancelHtml(v) + rndPrevHtml(v) + '</div>';
   }
 
   function rndPrevHtml(v) {
@@ -2538,7 +2630,7 @@
       '<div class="wait-n">' + v.answered + ' / ' + v.total + '</div>' +
       '<div class="rnd-sub">剩餘 <span class="rnd-timer" id="rndTimer">' + rndFmt(v.endMs - rndNowServer()) + '</span></div>' +
       (outsider ? '<div class="rnd-sub">' + esc(TXT.round.outsider) + '</div>'
-                : '<div class="rnd-sub"><b>' + esc(txt) + '</b></div><button class="lnk" data-rnd="edit">修改我的選擇</button>') + '</div>';
+                : '<div class="rnd-sub"><b>' + esc(txt) + '</b></div><button class="lnk" data-rnd="edit">修改我的選擇</button>' + rndCancelHtml(v)) + '</div>';
   }
 
   // 공개 연출: 짧은 뽑기 애니메이션(약 2.4초) 뒤 결과. 「跳過」로 바로 넘김
@@ -2663,12 +2755,13 @@
     else if (a === 'mins') { rnd.mins = Number(el.dataset.v); rndRender(true); }
     else if (a === 'again') { rnd.starting = true; rnd.showSet = false; rndRender(true); }
     else if (a === 'go') {
-      el.disabled = true;
+      if (rnd.goBusy) return;
+      rnd.goBusy = true; el.disabled = true; el.classList.add('btn-busy'); el.innerHTML = MASCOT.svg('base', { anim: true, size: 74 });   // 누른 즉시 눌린 상태 + 糰糰 로딩
       api.withSuccessHandler(function (r) {
-        rndSet(r); rnd.starting = false; rnd.showSet = false; rnd.editing = false; rnd.picks = []; rnd.orderFor = '';
+        rnd.goBusy = false; rndSet(r); rnd.starting = false; rnd.showSet = false; rnd.editing = false; rnd.picks = []; rnd.orderFor = '';
         rndRender(true);
       }).withFailureHandler(function (e) {
-        el.disabled = false; var er = $('rndErr'); if (er) er.textContent = (e && e.message) || TXT.toast.cantStart;
+        rnd.goBusy = false; el.disabled = false; el.classList.remove('btn-busy'); el.textContent = '開始'; var er = $('rndErr'); if (er) er.textContent = (e && e.message) || TXT.toast.cantStart;
         rndLoad(false);
       }).startGroupRound(token, rnd.gid, rnd.slot, rnd.mins);
     }
@@ -2686,6 +2779,24 @@
     else if (a === 'any') rndSubmit('any', []);
     else if (a === 'pass') rndSubmit('pass', []);
     else if (a === 'skip') { if (rnd.skipReveal) rnd.skipReveal(); }
+    else if (a === 'cancel-ask') {
+      if (!v || v.status !== 'open') return;
+      sheetOpen('<h3>' + esc(TXT.round.cancelAsk) + '</h3><div class="nick-guide">' + esc(TXT.round.cancelAskSub) + '</div><div class="nick-err" id="grpErr"></div>' +
+        '<div class="nick-actions"><button class="btn n-cancel" data-act="sheet-close">' + esc(TXT.round.cancelKeep) + '</button><button class="btn n-save" id="grpSave" data-rnd="cancel-yes">' + esc(TXT.round.cancel) + '</button></div>');
+    }
+    else if (a === 'cancel-yes') {
+      if (!v || rnd.cancelling) return;
+      rnd.cancelling = true; el.disabled = true;
+      api.withSuccessHandler(function (r) {
+        rnd.cancelling = false; sheetClose();
+        rnd.watch = ''; rnd.editing = false; rnd.picks = []; rnd.starting = false; rnd.orderFor = '';
+        rndSet(r); rndRender(true); toast(TXT.round.cancelDone);
+      }).withFailureHandler(function (e) {
+        rnd.cancelling = false; el.disabled = false;
+        var er = $('grpErr'); if (er) er.textContent = (e && e.message) || TXT.toast.err;
+        rndLoad(false);   // 그 사이 누가 응답했을 수 있으니 최신 상태로(취소 버튼이 안내로 바뀐다)
+      }).cancelGroupRound(token, rnd.gid, v.id);
+    }
     else if (a === 'ok') {
       if (!v || rnd.confirming) return;
       rnd.confirming = true; el.disabled = true;
