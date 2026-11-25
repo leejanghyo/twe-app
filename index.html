@@ -545,6 +545,34 @@
     .set-box .set-ver { margin-top: 14px; font-size: 12px; color: var(--muted); }
     .set-box .set-out { background: var(--card); color: var(--danger); border: 1px solid var(--danger); }
     .set-box .set-nick { background: var(--accent); color: #fff; }
+    .set-box .set-fb { background: var(--card); color: var(--accent); border: 2px solid var(--accent); }
+    .set-links { display: flex; justify-content: center; gap: 18px; margin-top: 14px; }
+    .set-links a, .agree a { color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
+    .agree { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; text-align: center; }
+    .agree a { font-size: 12px; color: var(--accent); }
+    .legal-box { width: min(420px, 100%); max-height: 82vh; display: flex; flex-direction: column; padding-bottom: 16px; }
+    .legal-body { overflow-y: auto; text-align: left; font-size: 13.5px; line-height: 1.75; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .legal-body::-webkit-scrollbar { display: none; }
+    .legal-body h3 { font-size: 14.5px; margin: 14px 0 4px; }
+    .legal-body p, .legal-body li { color: var(--ink); margin: 0 0 4px; }
+    .legal-body ul { margin: 0; padding-left: 20px; }
+    .legal-body .lg-note { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .fb-box { text-align: left; }
+    .fb-box h2 { text-align: center; }
+    .fb-chips { display: flex; gap: 8px; margin-top: 4px; }
+    .fb-chip { flex: 1; width: auto !important; margin: 0 !important; font-size: 14px !important; padding: 8px 4px !important; border: 2px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted); font-weight: 700; cursor: pointer; }
+    .fb-chip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .fb-box textarea { display: block; width: 100%; margin-top: 12px; padding: 12px; font: inherit; font-size: 16px; line-height: 1.5; min-height: 120px; resize: none;
+      border: 2px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+    .fb-box textarea:focus { outline: none; border-color: var(--accent); }
+    .fb-count { margin-top: 4px; text-align: right; font-size: 12px; color: var(--muted); }
+    .fb-done { text-align: center; }
+    .fb-done .fb-msg { margin: 8px 0 4px; font-size: 18px; font-weight: 700; }
+    .first-empty { margin-top: 36px; text-align: center; }
+    .first-empty > svg, .fb-done > svg { display: block; margin: 0 auto; }
+    .first-empty .fe-t { margin-top: 10px; font-size: 18px; font-weight: 700; line-height: 1.5; }
+    .first-empty .fe-add { display: block; margin: 18px auto 0; min-width: 150px; font-size: 18px; padding: 12px 34px; background: var(--accent); color: #fff; }
+    .first-empty .fe-rec { display: block; margin: 12px auto 0; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; padding: 8px 10px; cursor: pointer; }
     .live-list { text-align: left; margin-top: 10px; }
     .live-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 8px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
     .live-row b { flex: 1; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -714,6 +742,7 @@
       <div class="nick-actions">
         <button class="btn n-save" id="claimSave" style="width:100%">註冊</button>
       </div>
+      <div class="agree">註冊即表示同意<a data-legal="terms">服務條款</a>與<a data-legal="privacy">隱私權政策</a></div>
       <div class="id-switch"><a id="toLoginLink">已有帳號？登入</a></div>
     </div>
   </div>
@@ -758,9 +787,38 @@
       <button class="x-btn" id="setClose" type="button" aria-label="關閉">✕</button>
       <h2>設定</h2>
       <button class="btn set-nick" id="setNick" type="button">修改暱稱</button>
+      <button class="btn set-fb" id="setFb" type="button">意見回饋</button>
       <label class="theme-row" for="setDark"><span>深色模式</span><input type="checkbox" class="sw" id="setDark"></label>
       <button class="btn set-out" id="setOut" type="button">登出</button>
+      <div class="set-links"><a data-legal="terms">服務條款</a><a data-legal="privacy">隱私權政策</a></div>
       <div class="set-ver" id="setVer"></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="fbModal">
+    <div class="who-box nick-box fb-box">
+      <button class="x-btn" id="fbClose" type="button" aria-label="關閉">✕</button>
+      <h2>意見回饋</h2>
+      <div id="fbForm">
+        <div class="fb-chips" id="fbChips">
+          <button class="fb-chip on" type="button" data-type="有問題">有問題</button>
+          <button class="fb-chip" type="button" data-type="建議">建議</button>
+          <button class="fb-chip" type="button" data-type="其他">其他</button>
+        </div>
+        <textarea id="fbText" maxlength="500" placeholder="想跟糰糰說什麼？" rows="5"></textarea>
+        <div class="fb-count"><span id="fbCnt">0</span> / 500</div>
+        <div class="nick-err" id="fbErr"></div>
+        <button class="btn n-save" id="fbSend" type="button" style="font-size:16px;padding:12px">送出</button>
+      </div>
+      <div id="fbDone" class="fb-done" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="legalModal">
+    <div class="who-box nick-box legal-box">
+      <button class="x-btn" id="legalClose" type="button" aria-label="關閉">✕</button>
+      <h2 id="legalTitle"></h2>
+      <div class="legal-body" id="legalBody"></div>
     </div>
   </div>
 
@@ -1032,6 +1090,9 @@
     ],
     "home": {
       "noFixed": "這餐沒有固定菜單，糰糰也沒轍",
+      "firstEmpty": "還沒有固定菜單？先加一個常吃的吧",
+      "firstAdd": "新增",
+      "firstRec": "或先去推薦看看",
       "closed": "今天公休，糰糰也要休息"
     },
     "rec": {
@@ -1343,10 +1404,22 @@
     var c = state.ctx;
     if (c.closed) { $('main').innerHTML = stateHtml('sulk', TXT.home.closed); return; }
     var html = '<section id="secFixed">';
-    html += state.fixed.length ? renderFixedGroups() : '<div class="empty">' + esc(TXT.home.noFixed) + '</div>';
-    html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
+    var firstEmpty = !state.fixed.length;   // 메뉴가 0개: 빈 화면 대신 「新增」 한 가지만 권한다
+    if (firstEmpty) {
+      html += '<div class="first-empty">' + MASCOT.svg('base', { size: 130 }) + '<div class="fe-t">' + esc(TXT.home.firstEmpty) + '</div>' +
+        '<button class="btn fe-add" id="feAdd" type="button">' + esc(TXT.home.firstAdd) + '</button>' +
+        '<button class="fe-rec" id="feRec" type="button">' + esc(TXT.home.firstRec) + '</button></div>';
+    } else {
+      html += renderFixedGroups();
+      html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
+    }
     html += '</section>';
     $('main').innerHTML = html;
+    if (firstEmpty) {
+      $('feAdd').addEventListener('click', function () { openFixedAdd(); });
+      $('feRec').addEventListener('click', function () { showTab('rec'); });
+      return;
+    }
     setupChips();
     applyCatFilter();
     Array.prototype.forEach.call($('main').querySelectorAll('.card'), function (el) {
@@ -1547,6 +1620,83 @@
   $('setClose').addEventListener('click', function () { $('setModal').style.display = 'none'; });
   $('setNick').addEventListener('click', function () { $('setModal').style.display = 'none'; openNickEditor(); });
   $('setOut').addEventListener('click', function () { $('setModal').style.display = 'none'; doLogout(); });
+
+  // ===== 服務條款 · 隱私權政策 (測試階段草稿 — 法律審閱前的版本, 最終文字由老闆確定) =====
+  var LEGAL = {
+    terms: { title: '服務條款', html: [
+      '<p class="lg-note">測試階段版本 · 最後更新 2026-11-25</p>',
+      '<h3>1. 這是什麼</h3><p>「今天吃什麼」（糰糰）是幫你決定每餐吃什麼的小工具，目前為少數人試用的測試階段。</p>',
+      '<h3>2. 測試階段說明</h3><p>服務內容、功能與資料可能不經預告就修改、暫停或重置，也可能隨時結束測試。重要的事請自行另外記下，我們不保證資料永久保存。</p>',
+      '<h3>3. 推薦的公平性</h3><p>推薦與扭蛋的結果不會因為廣告費或任何付費而改變順序。餐廳資料來自公開資訊，營業時間、價位等可能與實際不同，出門前請自行確認。</p>',
+      '<h3>4. 帳號與 PIN 碼</h3><p>請自行保管帳號與 4 位數 PIN 碼。連續輸入錯誤太多次，帳號會暫時鎖定 15 分鐘。請勿冒用他人帳號，或做出干擾服務運作的行為。</p>',
+      '<h3>5. 你的內容</h3><p>你輸入的暱稱、固定菜單、備註與意見，僅用於提供服務與改善服務。請勿輸入違法或侵害他人的內容。</p>',
+      '<h3>6. 責任範圍</h3><p>本服務依現況提供，不保證不中斷或沒有錯誤。因使用推薦結果而產生的用餐決定與花費，由使用者自行負責。</p>',
+      '<h3>7. 聯絡</h3><p>營運者聯絡方式：（待填）。也可以在「設定 → 意見回饋」留言。</p>'
+    ].join('') },
+    privacy: { title: '隱私權政策', html: [
+      '<p class="lg-note">測試階段版本 · 最後更新 2026-11-25</p>',
+      '<h3>1. 我們收集什麼</h3><ul><li>暱稱與帳號</li><li>PIN 碼的雜湊值（不保存 PIN 碼本身）</li><li>你按下「確定」的用餐紀錄（日期、時段、選擇方式、菜單、備註）</li><li>你建立的固定菜單</li><li>你加入或建立的飯團與成員資料、一起決定的回答</li><li>你送出的意見回饋</li><li>開啟本程式的日期（最後開啟日、累計開啟天數，每天最多記一次）</li></ul>',
+      '<h3>2. 為什麼收集</h3><p>用來登入、顯示你的紀錄與固定菜單、讓飯團一起決定、避免連續推薦相同的食物、處理你的意見，以及了解測試期間有沒有人在用。</p>',
+      '<h3>3. 存放在哪裡</h3><p>資料存放在營運者的 Google 試算表（Google 雲端硬碟）。你的裝置上也會保存登入憑證與暫存資料，登出後會清除。</p>',
+      '<h3>4. 保存多久</h3><p>帳號存在期間會持續保存。測試結束或你要求刪除時，會一併刪除或匿名化。測試階段也可能整批清除測試資料。</p>',
+      '<h3>5. 位置資訊</h3><p>目前不收集你的位置資訊。</p>',
+      '<h3>6. 分享給誰</h3><p>不會出售或提供給第三方做廣告。同一個飯團的成員看得到你的暱稱與你在一起決定中的回答。</p>',
+      '<h3>7. 刪除與查詢</h3><p>想刪除帳號與資料，請到「設定 → 意見回饋」留言，營運者確認後會刪除。</p>',
+      '<h3>8. 聯絡</h3><p>營運者聯絡方式：（待填）。</p>'
+    ].join('') }
+  };
+  function openLegal(kind) {
+    var d = LEGAL[kind]; if (!d) return;
+    $('legalTitle').textContent = d.title;
+    $('legalBody').innerHTML = d.html; $('legalBody').scrollTop = 0;
+    $('legalModal').style.display = 'flex';
+  }
+  $('legalClose').addEventListener('click', function () { $('legalModal').style.display = 'none'; });
+  $('legalModal').addEventListener('click', function (ev) { if (ev.target === $('legalModal')) $('legalModal').style.display = 'none'; });
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a[data-legal]') : null;
+    if (a) { ev.preventDefault(); openLegal(a.dataset.legal); }
+  });
+
+  // ===== 意見回饋 =====
+  var fbType = '有問題', fbBusy = false;
+  function openFeedback() {
+    fbType = '有問題'; fbBusy = false;
+    Array.prototype.forEach.call(document.querySelectorAll('.fb-chip'), function (c) { c.classList.toggle('on', c.dataset.type === fbType); });
+    $('fbText').value = ''; $('fbCnt').textContent = '0'; $('fbErr').textContent = '';
+    $('fbSend').disabled = false;
+    $('fbForm').style.display = ''; $('fbDone').style.display = 'none';
+    $('setModal').style.display = 'none';
+    $('fbModal').style.display = 'flex';
+  }
+  $('setFb').addEventListener('click', openFeedback);
+  $('fbClose').addEventListener('click', function () { $('fbModal').style.display = 'none'; });
+  Array.prototype.forEach.call(document.querySelectorAll('.fb-chip'), function (c) {
+    c.addEventListener('click', function () {
+      fbType = c.dataset.type;
+      Array.prototype.forEach.call(document.querySelectorAll('.fb-chip'), function (x) { x.classList.toggle('on', x === c); });
+    });
+  });
+  $('fbText').addEventListener('input', function () { $('fbCnt').textContent = String(Array.from(this.value).length); });
+  $('fbSend').addEventListener('click', function () {
+    if (fbBusy) return;
+    var text = $('fbText').value.trim();
+    if (!text) { $('fbErr').textContent = '請先寫下想說的話'; return; }
+    if (Array.from(text).length > 500) { $('fbErr').textContent = '最多 500 個字'; return; }
+    fbBusy = true; $('fbSend').disabled = true; $('fbErr').textContent = '';
+    api.withSuccessHandler(function () {
+      fbBusy = false;
+      $('fbForm').style.display = 'none';
+      $('fbDone').innerHTML = MASCOT.svg('happy', { size: 110 }) + '<div class="fb-msg">收到了，糰糰會轉告老闆</div>' +
+        '<button class="btn n-save" id="fbOk" type="button" style="font-size:16px;padding:12px">好</button>';
+      $('fbDone').style.display = 'block';
+      $('fbOk').addEventListener('click', function () { $('fbModal').style.display = 'none'; });
+    }).withFailureHandler(function (e) {
+      fbBusy = false; $('fbSend').disabled = false;
+      if (isNoUser_(e)) { $('fbModal').style.display = 'none'; relogin_(); return; }
+      $('fbErr').textContent = (e && e.message) || TXT.toast.err;
+    }).submitFeedback(token, fbType, text, APP_VERSION);
+  });
   // 팝업은 바깥 영역을 눌러도 닫힌다
   ['liveModal', 'setModal', 'historyModal', 'diagModal'].forEach(function (id) {
     $(id).addEventListener('click', function (ev) { if (ev.target === $(id)) $(id).style.display = 'none'; });
@@ -1850,7 +2000,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.25-b';
+  var APP_VERSION = '2026.11.25-c';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
