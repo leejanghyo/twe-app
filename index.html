@@ -1404,13 +1404,14 @@
     var c = state.ctx;
     if (c.closed) { $('main').innerHTML = stateHtml('sulk', TXT.home.closed); return; }
     var html = '<section id="secFixed">';
-    var firstEmpty = !state.fixed.length;   // 메뉴가 0개: 빈 화면 대신 「新增」 한 가지만 권한다
+    var firstEmpty = !state.fixed.length && !state.fixedCategories.length;   // 내 固定菜單이 아예 0개: 빈 화면 대신 「新增」 한 가지만 권한다 (그 요일·끼니에만 없으면 아래 짧은 안내)
+    var noneNow = !state.fixed.length && !firstEmpty;
     if (firstEmpty) {
       html += '<div class="first-empty">' + MASCOT.svg('base', { size: 130 }) + '<div class="fe-t">' + esc(TXT.home.firstEmpty) + '</div>' +
         '<button class="btn fe-add" id="feAdd" type="button">' + esc(TXT.home.firstAdd) + '</button>' +
         '<button class="fe-rec" id="feRec" type="button">' + esc(TXT.home.firstRec) + '</button></div>';
     } else {
-      html += renderFixedGroups();
+      html += noneNow ? stateHtml('sulk', TXT.home.noFixed) : renderFixedGroups();
       html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
     }
     html += '</section>';
@@ -2000,7 +2001,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.25-c';
+  var APP_VERSION = '2026.11.25-d';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
