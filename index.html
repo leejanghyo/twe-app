@@ -101,11 +101,13 @@
       cursor: pointer; padding: 2px 4px;
     }
     /* 固定菜單: 分類 4개씩 한 줄(4열), 각 열은 分類명 + 카드 세로 나열. 좁으면 2열 → 1열 */
-    .cat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 12px; align-items: start; }
-    .cat-stack { display: flex; flex-direction: column; gap: 8px; }
-    .cat-stack .card { width: 100%; }
+    .cat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 12px; align-items: start; }
+    .cat-grid .card { width: 100%; }
+    .cat-grid .card-wrap.off { display: none; }
+    .rec-more { display: flex; justify-content: center; margin: 14px 0 4px; }
+    .rec-more .pk-sm { font-size: 15px; padding: 11px 22px 11px 18px; min-height: 44px; }
+    .rec-more .pk-sm.on, .rec-more .pk-sm:disabled { background: var(--accent-soft); color: var(--accent); cursor: default; }
     .card .place { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; }
-    h3.cat-title { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: .05em; }
     button.btn {
       border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer;
     }
@@ -455,14 +457,10 @@
       .chip.active { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 
       /* 固定菜單: 分類를 세로로, 카드는 한 줄에 하나 */
-      .cat-grid { grid-template-columns: 1fr; gap: 18px; }
+      .cat-grid { grid-template-columns: 1fr; gap: 10px; }
       /* 마지막 分類도 칩을 눌렀을 때 맨 위까지 올라올 수 있게 아래 여백을 확보 */
       /* 一起決定(picking)에서는 칩이 없어서 이 여백이 필요 없고, 있으면 推薦菜單이 안 보이는 것처럼 느껴짐 */
       /* 마지막 分類를 칩으로 눌러도 맨 위까지 스크롤되도록 보이지 않는 여백(카드/+버튼 뒤에 둬서 버튼 위치엔 영향 없음) */
-      .chip-scroll-pad { min-height: calc(100vh - 230px); }
-      .cat { scroll-margin-top: 58px; }
-      h3.cat-title { font-size: 16px; color: var(--ink); margin-bottom: 10px; }
-      .cat-stack { gap: 10px; }
       .grid { grid-template-columns: 1fr; gap: 10px; }
 
       /* 더 큰 터치 영역 + 모바일 글자 크기 */
@@ -1037,6 +1035,8 @@
       "closed": "今天公休，糰糰也要休息"
     },
     "rec": {
+      "moreBusy": "糰糰翻找中…",
+      "moreFail": "換一批失敗了，再按一次試試",
       "empty": "糰糰的資料庫空空的",
       "preparing": "糰糰準備中，不要催啦"
     },
@@ -1181,7 +1181,7 @@
 
   var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], promotionCandidates: [], groups: null,
                 selection: null, gachaResult: null, busy: false, varietyNudgeText: null,
-                recFetched: false, bootAt: 0, appSig: '', skew: 0 };
+                recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0 };
   var tab = 'home';
   var bootSeq = 0;
 
@@ -1345,10 +1345,10 @@
     var html = '<section id="secFixed">';
     html += state.fixed.length ? renderFixedGroups() : '<div class="empty">' + esc(TXT.home.noFixed) + '</div>';
     html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
-    if (state.fixed.length) html += '<div class="chip-scroll-pad" aria-hidden="true"></div>';
     html += '</section>';
     $('main').innerHTML = html;
     setupChips();
+    applyCatFilter();
     Array.prototype.forEach.call($('main').querySelectorAll('.card'), function (el) {
       var i = Number(el.dataset.i), name = state.fixed[i].name;
       if (state.selection && state.selection.method === '固定' && state.selection.menu === name) el.classList.add('selected');
@@ -1379,7 +1379,7 @@
     if (state.recFetched || !token) return;
     state.recFetched = true;
     api.withSuccessHandler(function (list) {
-      state.recommended = recFilter(list); state.recLoadErr = '';
+      state.recommended = recFilter(list); state.recPage = 0; state.recLoadErr = '';
       if (!state.selection) renderRec();
       cacheWrite();
     }).withFailureHandler(function (e) {
@@ -1407,14 +1407,18 @@
     if (!rec.length && !state.recFetched && !state.recLoadErr) {
       $('recList').innerHTML = loaderHtml(recommendLoadingPhrases);
     } else {
-      $('recList').innerHTML = rec.length ? '<div class="grid">' + rec.map(function (r, i) {
+      var RP = 10, pg = state.recPage * RP < rec.length ? state.recPage : 0;
+      var pageList = rec.slice(pg * RP, pg * RP + RP);
+      $('recList').innerHTML = rec.length ? '<div class="grid">' + pageList.map(function (r, k) {
+        var i = pg * RP + k;
         var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
         return '<button class="card" data-kind="rec" data-i="' + i + '">' +
           '<span class="tag">' + esc(r.type) + '</span>' +
           '<div class="name">' + esc(r.name) + '</div>' +
           '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
           (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
-      }).join('') + '</div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : TXT.rec.empty) + '</div>';
+      }).join('') + '</div><div class="rec-more"><button class="pk-sm' + (state.recMoreBusy ? ' on' : '') + '" id="recMore" type="button"' + (state.recMoreBusy ? ' disabled' : '') + '>' +
+        ICON.btn.refresh(16) + esc(state.recMoreBusy ? TXT.rec.moreBusy : TXT.round.refresh) + '</button></div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : TXT.rec.empty) + '</div>';
     }
     var types = [];
     rec.forEach(function (x) { if (types.indexOf(x.type) < 0) types.push(x.type); });
@@ -1425,7 +1429,24 @@
     if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
     renderVarietyBanner();
   }
+  // 換一批: 서버를 부르지 않고 다음 10개(+맨 위로). 30개를 다 봤을 때만 서버에서 새 30개(본 것은 되도록 제외).
+  function recMore() {
+    if (state.recMoreBusy) return;
+    var rec = state.recommended, next = state.recPage + 1;
+    if (next * 10 < rec.length) { state.recPage = next; renderRec(); scrollToContentTop(); return; }
+    state.recMoreBusy = true; renderRec();   // 눌린 모양을 즉시 보여 주고 중복 눌림 막기(전체 화면 載入中 없음)
+    var seen = rec.map(function (x) { return x.name; });
+    api.withSuccessHandler(function (list) {
+      state.recMoreBusy = false;
+      var f = recFilter(list);
+      if (f.length) { state.recommended = f; state.recPage = 0; cacheWrite(); }
+      renderRec(); scrollToContentTop();
+    }).withFailureHandler(function (e) {
+      state.recMoreBusy = false; renderRec(); toast((e && e.message) || TXT.rec.moreFail, true);
+    }).getRecommendedMenus(token, seen);
+  }
   $('recList').addEventListener('click', function (ev) {
+    if (ev.target.closest('#recMore')) { recMore(); return; }
     if (ev.target.tagName === 'A') return;
     var el = ev.target.closest('.card[data-kind="rec"]'); if (!el) return;
     var r = state.recommended[Number(el.dataset.i)]; if (!r) return;
@@ -1437,65 +1458,48 @@
   function nbLines(t) { return String(t).split('|').map(function (x) { return '<span class="nb">' + esc(x) + '</span>'; }).join(''); }
   function scrollToContentTop() { $('scroller').scrollTop = 0; }
 
-  // ===== 分類 칩: 누르면 그 分類로 이동, 스크롤하면 현재 分類 칩이 강조됨 =====
+  // ===== 分類 필터: 칩 하나를 누르면 그 分類 카드만 남고(눌린 모양), 같은 칩을 다시 누르면 전체. 한 번에 한 分類만. =====
   function setupChips() {
     var bar = $('chips');
     if (!bar) return;
     Array.prototype.forEach.call(bar.querySelectorAll('.chip'), function (chip) {
       chip.addEventListener('click', function () {
-        chipLockUntil = Date.now() + 800;   // 이동하는 동안 스크롤 감지가 칩 강조를 덮어쓰지 않게
-        var cat = $('cat-' + chip.dataset.cat);
-        if (cat) cat.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        markChip(Number(chip.dataset.cat));
+        var cat = chip.dataset.cat;
+        state.catFilter = state.catFilter === cat ? null : cat;
+        applyCatFilter();
       });
     });
-    markChip(0);
   }
-
-  function markChip(idx) {
+  function applyCatFilter() {
+    var f = state.catFilter;
     var bar = $('chips');
-    if (!bar) return;
-    Array.prototype.forEach.call(bar.querySelectorAll('.chip'), function (c) {
-      var on = Number(c.dataset.cat) === idx;
-      c.classList.toggle('active', on);
-      if (on && bar.scrollTo) bar.scrollTo({ left: c.offsetLeft - (bar.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });
+    if (bar && f !== null && !Array.prototype.some.call(bar.querySelectorAll('.chip'), function (c) { return c.dataset.cat === f; })) f = state.catFilter = null;   // 그 分類가 지금 목록에 없으면 해제
+    if (bar) Array.prototype.forEach.call(bar.querySelectorAll('.chip'), function (c) {
+      var on = f !== null && c.dataset.cat === f;
+      c.classList.toggle('active', on); c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#secFixed .card-wrap'), function (w) {
+      w.classList.toggle('off', f !== null && w.dataset.cat !== f);
     });
   }
-
-  var chipTick = false, chipLockUntil = 0;
-  $('scroller').addEventListener('scroll', function () {
-    if (Date.now() < chipLockUntil) { chipLockUntil = Date.now() + 150; return; }   // 칩으로 이동 중이면 멈출 때까지 대기
-    if (tab !== 'home' || chipTick || !$('chips') || !$('secFixed')) return;
-    chipTick = true;
-    requestAnimationFrame(function () {
-      chipTick = false;
-      var line = $('scroller').getBoundingClientRect().top + 70, cur = 0;
-      Array.prototype.forEach.call(document.querySelectorAll('.cat'), function (cat, i) {
-        if (cat.getBoundingClientRect().top <= line) cur = i;
-      });
-      if (!$('chips').querySelector('.chip.active') || Number($('chips').querySelector('.chip.active').dataset.cat) !== cur) markChip(cur);
-    });
-  }, { passive: true });
 
   // 固定菜單을 分類별로 묶는다. 순서는 시트에 分類가 처음 나온 순서, 메뉴가 없는 分類는 숨김.
   function renderFixedGroups() {
-    var order = state.fixedCategories.slice();
-    var groups = {};
-    state.fixed.forEach(function (m, i) {
+    var order = state.fixedCategories.slice(), have = {};
+    var cards = state.fixed.map(function (m, i) {
       if (order.indexOf(m.category) < 0) order.push(m.category);
+      have[m.category] = true;
       var card = '<button class="card" data-kind="fixed" data-i="' + i + '">' +
         (safeUrl(m.photo) ? '<img src="' + esc(m.photo) + '" alt="">' : '') +
-        fixedCardBody(m.name) + '</button>';
+        '<span class="tag">' + esc(m.category) + '</span>' + fixedCardBody(m.name) + '</button>';
       var pencil = m.id ? '<button class="card-edit" type="button" data-fixid="' + esc(m.id) + '" title="編輯" aria-label="編輯">' + PENCIL_SVG + '</button>' : '';
-      (groups[m.category] = groups[m.category] || []).push('<div class="card-wrap">' + card + pencil + '</div>');
+      return '<div class="card-wrap" data-cat="' + esc(m.category) + '">' + card + pencil + '</div>';   // 시트에 나온 순서 그대로(分類별로 모으지 않음)
     });
-    var shown = order.filter(function (c) { return groups[c]; });
-    var chips = shown.length > 1 ? '<div class="chips m-only" id="chips">' + shown.map(function (c, i) {
-      return '<button class="chip" type="button" data-cat="' + i + '">' + esc(c) + '</button>';
+    var shown = order.filter(function (c) { return have[c]; });
+    var chips = shown.length > 1 ? '<div class="chips m-only" id="chips">' + shown.map(function (c) {
+      return '<button class="chip" type="button" aria-pressed="false" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
     }).join('') + '</div>' : '';
-    return chips + '<div class="cat-grid">' + shown.map(function (c, i) {
-      return '<div class="cat" id="cat-' + i + '"><h3 class="cat-title">' + esc(c) + '</h3><div class="cat-stack">' + groups[c].join('') + '</div></div>';
-    }).join('') + '</div>';
+    return chips + '<div class="cat-grid">' + cards.join('') + '</div>';
   }
 
   // 「음식명(식당명)」이면 음식명은 크게, 식당명은 아래 작은 글씨로. 괄호가 없으면 음식명만.
@@ -1846,7 +1850,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.25-a';
+  var APP_VERSION = '2026.11.25-b';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
