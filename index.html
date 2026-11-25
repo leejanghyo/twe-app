@@ -17,7 +17,7 @@
       color-scheme: light;
       --bg: #fffdf7; --card: #fff; --ink: #2b2420; --muted: #8a7f77;
       --accent: #e4572e; --accent-soft: #ffe8de; --line: #f1e5d3; --ok: #2f9e6b; --yolk: #f7b538;
-      --danger: #c0392b; --btn-dark: #2b2420; --glass: var(--glass); --scrim: var(--scrim);
+      --danger: #c0392b; --btn-dark: #2b2420; --glass: rgba(255,255,255,.92); --scrim: rgba(43,36,32,.6);
       --note-y-bg: #fff6d6; --note-y-bd: #f0dc9a; --note-b-bg: #e8f3ff; --note-b-bd: #bcd9f5;
       --tabh: calc(58px + env(safe-area-inset-bottom, 0px));
     }
@@ -644,6 +644,80 @@
     .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
     .sw:checked { background: var(--accent); }
     .sw:checked::after { transform: translateX(18px); }
+    /* 첫 화면 프로필 줄(한 줄): 등급 이미지 자리 + 레벨 이름 + 얇은 진행 막대 + 新手期 */
+    .prof { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px var(--gx) 0; min-height: 42px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .prof[hidden] { display: none !important; }
+    .prof-ico, .lv-ico { position: relative; border-radius: 50%; background: var(--accent-soft); border: 1.5px solid var(--accent); color: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden; flex: 0 0 auto; }
+    .prof-ico { width: 26px; height: 26px; font-size: 12px; }
+    .lv-ico { width: 84px; height: 84px; font-size: 34px; border-width: 3px; margin: 0 auto; }
+    .prof-ico img, .lv-ico img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .prof-ico.has .n, .lv-ico.has .n { display: none; }
+    .prof-name { font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .prof-bar { flex: 1 1 auto; min-width: 36px; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+    .prof-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+    .prof-tut { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    /* 吃貨等級 화면 */
+    .lv-box { width: min(380px, 100%); max-height: calc(100vh - 150px); overflow-y: auto; text-align: center; padding-bottom: 18px; }
+    .lv-box h2 { padding: 0 34px; }
+    .lv-name { font-size: 22px; font-weight: 800; margin-top: 10px; }
+    .lv-sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .lv-bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 12px 4px 6px; }
+    .lv-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+    .lv-need { font-size: 13px; color: var(--muted); }
+    .lv-tut { margin: 12px 0 0; padding: 8px 12px; border-radius: 12px; background: var(--note-y-bg); border: 1px solid var(--note-y-bd); font-size: 13px; }
+    .lv-box h3 { margin: 18px 0 10px; font-size: 16px; text-align: left; }
+    .bd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .bd { padding: 10px 4px 8px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); }
+    .bd svg { width: 34px; height: 34px; color: var(--accent); }
+    .bd b { display: block; font-size: 13px; margin-top: 4px; }
+    .bd small { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
+    .bd.off { opacity: .5; filter: grayscale(1); }
+    .bd.off svg { color: var(--muted); }
+    .ul-box { width: min(320px, 100%); text-align: center; }
+    .ul-say { font-size: 18px; font-weight: 800; margin: 8px 0 10px; line-height: 1.4; }
+    .ul-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 4px; }
+    .ul-b { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+    .ul-b svg { width: 18px; height: 18px; }
+    .ul-more { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    /* ♡ (선 아이콘, 눌리면 채워짐) */
+    .heart { position: absolute; top: 6px; right: 6px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%; padding: 0; background: var(--glass); color: var(--muted);
+      display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.12); -webkit-tap-highlight-color: transparent; }
+    .heart svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .heart.on { color: var(--accent); }
+    .heart.on svg { fill: currentColor; }
+    .heart:active { transform: scale(.92); }
+    .heart.inline { position: static; flex: 0 0 44px; width: 44px; height: 44px; background: var(--line); box-shadow: none; border-radius: 12px; }
+    .grid .card-wrap > .card { height: 100%; }
+    .grid .card-wrap .card { padding-right: 50px; }
+    .capsule { position: relative; }
+    .capsule .heart { position: static; order: 3; margin-top: 12px; width: 40px; height: 40px; box-shadow: none; background: var(--line); }
+    .ul-box .tm, .pkt-empty .tm { display: block; margin: 0 auto 8px; }
+    .capsule.spinning .heart { visibility: hidden; }
+    /* 推薦 탭 全部 / 我的口袋 */
+    .seg { display: flex; background: var(--line); border-radius: 999px; padding: 4px; margin: 2px 0 12px; }
+    .seg button { flex: 1; border: 0; background: transparent; font: inherit; font-weight: 700; font-size: 15px; min-height: 36px; border-radius: 999px; color: var(--muted); cursor: pointer; }
+    .seg button.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .pkt-top { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+    .pkt-top h3 { margin: 0 0 6px; font-size: 16px; }
+    .pkt-top ol { margin: 0; padding: 0; list-style: none; }
+    .pkt-top li { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 15px; }
+    .pkt-top .rk { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .pkt-top .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+    .pkt-top .ct { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .pkt-top .none { color: var(--muted); font-size: 14px; }
+    .pkt-card { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+    .pkt-card.gone { opacity: .5; }
+    .pkt-card .name { font-weight: 700; font-size: 18px; }
+    .pkt-card .meta { color: var(--muted); font-size: 14px; margin-top: 5px; line-height: 1.4; }
+    .pkt-card .meta a { color: var(--accent); }
+    .pkt-acts { display: flex; gap: 8px; margin-top: 10px; }
+    .pkt-btn { flex: 1; min-height: 44px; border: 0; border-radius: 12px; font: inherit; font-weight: 700; font-size: 15px; background: var(--accent); color: #fff; cursor: pointer; }
+    .pkt-btn.undo { background: var(--btn-dark); }
+    .pkt-btn.dim { background: var(--line); color: var(--muted); }
+    .pkt-btn:disabled { opacity: .6; cursor: default; }
+    .pkt-empty { text-align: center; padding: 30px 0 10px; font-size: 16px; font-weight: 700; }
+    .pkt-empty .btn { margin-top: 14px; }
   </style>
 </head>
 <body data-day="" data-slot="" data-who="" data-tab="home">
@@ -658,6 +732,7 @@
     })();
   </script>
   <div class="wrap">
+    <div class="prof home-only" id="prof" role="button" tabindex="0" hidden aria-label="我的吃貨等級"></div>
     <div class="topbar home-only" id="topbar">
       <span class="who" id="whoBox"></span><span class="ver-tag" id="verTop"></span>
       <button class="ico-btn" id="historyBtn" type="button" title="食物紀錄" aria-label="食物紀錄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
@@ -693,6 +768,7 @@
 
     <div class="pg" id="pgRec">
       <div class="pg-head"><h2>推薦菜單</h2><button class="pg-act txt" id="gachaBtn" type="button" style="background:var(--btn-dark)" disabled>扭蛋試試</button></div>
+      <div class="seg" id="recSeg"><button type="button" data-v="all" class="active">全部</button><button type="button" data-v="mine">我的口袋</button></div>
       <div id="varietyBanner"></div>
       <div id="recList"></div>
     </div>
@@ -724,7 +800,7 @@
 
   <div class="gacha" id="gacha">
     <div class="g-mascot" id="gMascot"></div>
-    <div class="capsule" id="capsule"><div class="g-name" id="gName"></div><div class="g-type" id="gType"></div></div>
+    <div class="capsule" id="capsule"><button class="heart" id="gHeart" type="button" aria-label="加入口袋" aria-pressed="false"></button><div class="g-name" id="gName"></div><div class="g-type" id="gType"></div></div>
     <div class="g-actions" id="gActions" style="visibility:hidden">
       <button class="btn" id="gRetry">再抽一次</button>
       <button class="btn" id="gClose">返回</button>
@@ -871,6 +947,21 @@
         <button class="btn n-save" id="fxSave">新增</button>
       </div>
       <button class="btn fx-delete" id="fxDelete" style="display:none">刪除這項固定菜單</button>
+    </div>
+  </div>
+
+  <div class="who-modal" id="lvModal">
+    <div class="who-box lv-box">
+      <button class="x-btn" id="lvClose" type="button" aria-label="關閉">✕</button>
+      <h2 id="lvTitle">我的吃貨等級</h2>
+      <div id="lvBody"></div>
+    </div>
+  </div>
+
+  <div class="who-modal" id="unlockModal">
+    <div class="who-box ul-box">
+      <div id="unlockBody"></div>
+      <button class="btn btn-confirm" id="unlockOk" type="button" style="margin-top:14px;width:100%">收到</button>
     </div>
   </div>
 
@@ -1159,6 +1250,43 @@
       "any": "我都可以",
       "pass": "PASS"
     },
+    "lv": {
+      "title": "我的吃貨等級",
+      "tut": "新手期 還有{n}天",
+      "tutLong": "新手期 還有{n}天，這段時間經驗值 ×{m}，糰糰幫你加速",
+      "exp": "經驗值 {a} / {b}",
+      "need": "還差 {n} 升到〈{name}〉",
+      "max": "已經是最高等級，糰糰服了",
+      "badges": "勳章",
+      "loading": "糰糰翻勳章中…",
+      "loadFail": "勳章載入失敗，再開一次試試",
+      "unlock": "恭喜解鎖〈{name}〉，糰糰對你刮目相看",
+      "more": "另外還有 {n} 個新勳章",
+      "ok": "收到"
+    },
+    "pocket": {
+      "all": "全部",
+      "mine": "我的口袋",
+      "top5": "我的 Top5",
+      "times": "去過 {n} 次",
+      "last": "最近 {d}",
+      "topNone": "還沒有去過的紀錄，去過就按「又去了」，糰糰幫你數",
+      "empty": "口袋空空的，糰糰也餓",
+      "goRec": "去推薦看看",
+      "again": "又去了",
+      "undo": "取消",
+      "today": "今天已經記過了",
+      "added": "收進口袋了",
+      "removed": "從口袋拿出來了",
+      "visited": "糰糰幫你記一次",
+      "undone": "取消了，糰糰當沒發生",
+      "undoLate": "來不及取消了",
+      "fail": "口袋沒更新到，再試一次",
+      "loading": "糰糰翻口袋中…",
+      "loadFail": "口袋載入失敗",
+      "addAria": "加入口袋",
+      "removeAria": "移出口袋"
+    },
     "intro": {
       "skip": "跳過",
       "next": "下一張",
@@ -1235,14 +1363,15 @@
       localStorage.setItem(CACHE_KEY, JSON.stringify({ v: 1, h: hash_(token), at: Date.now(),
         me: { nickname: myNick() || '', oldWho: who },
         app: { ctx: state.ctx, fixed: state.fixed, fixedCategories: state.fixedCategories, promotionCandidates: state.promotionCandidates },
-        groups: state.groups, rec: state.recommended }));
+        groups: state.groups, rec: state.recommended, lv: state.level ? Object.assign({}, state.level, { pending: [] }) : null }));
     } catch (e) {}
   }
   function cacheClear() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
 
   var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], promotionCandidates: [], groups: null,
                 selection: null, gachaResult: null, busy: false, varietyNudgeText: null,
-                recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0 };
+                recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0,
+                level: null, unlockOpen: false, recView: 'all', pockets: { items: [] }, pkSet: {}, pkBusy: {}, pkFetched: false, pkFetching: false, pkAt: 0, pkErr: '' };
   var tab = 'home';
   var bootSeq = 0;
 
@@ -1260,6 +1389,7 @@
     state.promotionCandidates = app.promotionCandidates || [];
     state.groups = boot.groups || [];
     $('tabbar').classList.add('on');
+    if (boot.level) applyLevel(boot.level, true);   // 서버가 준 요약 1칸(프로필 줄). 새 勳章 한마디는 서버 응답일 때만
     cacheWrite();
     renderTop();
     if (changed || !$('today').innerHTML) renderHome();
@@ -1438,6 +1568,241 @@
     $('addFixedBtn').addEventListener('click', function () { openFixedAdd(); });
   }
 
+  // ===== 吃貨等級(첫 화면 프로필 줄 + 等級 화면 + 勳章) · 口袋名單(♡·我的口袋) =====
+  // 레벨 이미지: img/level/{레벨숫자}.png (예: img/level/1.png). 파일이 있으면 숫자 자리 표시 대신 그 이미지가 보인다.
+  var LV_IMG_MISS = {};
+  window.lvImgMiss = function (img) { LV_IMG_MISS[img.getAttribute('data-n')] = 1; img.remove(); };
+  window.lvImgHit = function (img) { if (img.parentNode) img.parentNode.classList.add('has'); };
+  function lvIco(n, cls) {
+    return '<span class="' + cls + '"><span class="n">' + esc(n) + '</span>' + (LV_IMG_MISS[n] ? '' :
+      '<img src="img/level/' + esc(n) + '.png" data-n="' + esc(n) + '" alt="" onload="lvImgHit(this)" onerror="lvImgMiss(this)">') + '</span>';
+  }
+  var BADGE_ICON = {
+    first: '<path d="M12 3c-2.2 0-3.6 2-3.6 4.3S9.8 11.5 12 11.5s3.6-1.9 3.6-4.2S14.2 3 12 3z"/><path d="M12 11.5V21"/>',
+    streak3: '<circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/><path d="M7.3 12h2.4M14.3 12h2.4"/>',
+    explore: '<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
+    regular: '<path d="M4 10l1.6-5h12.8L20 10"/><path d="M4.5 10h15V20h-15z"/><path d="M10 20v-5h4v5"/>',
+    group3: '<circle cx="6" cy="8.5" r="2.2"/><circle cx="12" cy="7.5" r="2.2"/><circle cx="18" cy="8.5" r="2.2"/><path d="M2.6 18c0-2.6 1.5-4.2 3.4-4.2s3.4 1.6 3.4 4.2M8.6 17c0-2.6 1.5-4.2 3.4-4.2s3.4 1.6 3.4 4.2M14.6 18c0-2.6 1.5-4.2 3.4-4.2s3.4 1.6 3.4 4.2"/>',
+    pocket10: '<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9.5 8.5h5M9.5 11.5h3"/>',
+    pocket1: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+    again: '<path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4.6h-4.6"/>',
+    group1: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M8.5 10.5l2.2 2.2 4.3-4.3"/>'
+  };
+  function bIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BADGE_ICON[id] || BADGE_ICON.first) + '</svg>'; }
+  function heartSvg() { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>'; }
+  function fmt(t, o) { return String(t).replace(/\{(\w+)\}/g, function (_, k) { return o[k] == null ? '' : o[k]; }); }
+
+  function applyLevel(lv, fromBoot) {
+    if (!lv) return;
+    state.level = lv;
+    renderProf();
+    if ($('lvModal').style.display === 'flex') renderLvTop();
+    if (fromBoot) cacheWrite();
+    if (fromBoot && lv.pending && lv.pending.length) showUnlock(lv.pending);
+  }
+  function renderProf() {
+    var L = state.level, el = $('prof');
+    if (!L || !token || isClinic()) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = lvIco(L.lv, 'prof-ico') + '<span class="prof-name">' + esc(L.name) + '</span>' +
+      '<span class="prof-bar"><i style="width:' + L.pct + '%"></i></span>' +
+      (L.tutLeft > 0 ? '<span class="prof-tut">' + esc(fmt(TXT.lv.tut, { n: L.tutLeft })) + '</span>' : '');
+  }
+  function lvTopHtml(L) {
+    return lvIco(L.lv, 'lv-ico') + '<div class="lv-name">' + esc(L.name) + '</div><div class="lv-sub">Lv ' + esc(L.lv) + ' / ' + esc(L.maxLv) + '</div>' +
+      '<div class="lv-bar"><i style="width:' + L.pct + '%"></i></div>' +
+      '<div class="lv-need">' + (L.nextMin != null ? esc(fmt(TXT.lv.exp, { a: L.xp, b: L.nextMin })) + '　' + esc(fmt(TXT.lv.need, { n: L.nextMin - L.xp, name: L.nextName })) : esc(TXT.lv.max)) + '</div>' +
+      (L.tutLeft > 0 ? '<div class="lv-tut">' + esc(fmt(TXT.lv.tutLong, { n: L.tutLeft, m: L.tutMult || 2 })) + '</div>' : '');
+  }
+  function renderLvTop() { var t = $('lvTop'); if (t && state.level) t.innerHTML = lvTopHtml(state.level); }
+  function openLevel() {
+    if (!state.level || !token) return;
+    $('lvTitle').textContent = TXT.lv.title;
+    $('lvBody').innerHTML = '<div id="lvTop">' + lvTopHtml(state.level) + '</div><h3>' + esc(TXT.lv.badges) + '</h3><div id="lvBadges" class="lv-sub">' + esc(TXT.lv.loading) + '</div>';
+    $('lvModal').style.display = 'flex';
+    api.withSuccessHandler(function (d) {
+      if ($('lvModal').style.display !== 'flex') return;
+      var keep = state.level && state.level.pending;
+      d.pending = keep || d.pending; state.level = d; renderProf(); renderLvTop();
+      $('lvBadges').className = 'bd-grid';
+      $('lvBadges').innerHTML = d.badges.map(function (b) {
+        return '<div class="bd' + (b.earned ? '' : ' off') + '">' + bIcon(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
+      }).join('');
+    }).withFailureHandler(function () { if ($('lvBadges')) $('lvBadges').textContent = TXT.lv.loadFail; }).getLevelDetail(token);
+  }
+  $('prof').addEventListener('click', openLevel);
+  $('prof').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openLevel(); } });
+  $('lvClose').addEventListener('click', function () { $('lvModal').style.display = 'none'; });
+
+  // 새 勳章 첫 해금 한마디: 서버가 준 「아직 안 본 勳章」을 한 번 보여 주고 바로 본 것으로 기록한다(다시 안 뜸).
+  function showUnlock(list) {
+    if (state.unlockOpen || !list || !list.length) return;
+    state.unlockOpen = true;
+    var ids = list.map(function (b) { return b.id; });
+    $('unlockBody').innerHTML = MASCOT.svg('happy', { size: 96 }) +
+      '<div class="ul-say">' + esc(fmt(TXT.lv.unlock, { name: list[0].name })) + '</div>' +
+      '<div class="ul-list">' + list.map(function (b) { return '<span class="ul-b">' + bIcon(b.id) + esc(b.name) + '</span>'; }).join('') + '</div>' +
+      (list.length > 1 ? '<div class="ul-more">' + esc(fmt(TXT.lv.more, { n: list.length - 1 })) + '</div>' : '');
+    $('unlockOk').textContent = TXT.lv.ok;
+    $('unlockModal').style.display = 'flex';
+    if (state.level) state.level.pending = [];
+    api.markBadgesSeen(token, ids);
+  }
+  function closeUnlock() { $('unlockModal').style.display = 'none'; state.unlockOpen = false; }
+  $('unlockOk').addEventListener('click', closeUnlock);
+
+  // ----- 口袋名單 -----
+  function pkKey(n) { return String(n || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+  function pkHas(n) { return !!state.pkSet[pkKey(n)]; }
+  function pkFind(n) { var k = pkKey(n), it = state.pockets.items; for (var i = 0; i < it.length; i++) if (pkKey(it[i].name) === k) return it[i]; return null; }
+  function pkRebuildSet() { var s = {}; state.pockets.items.forEach(function (i) { if (!i._gone) s[pkKey(i.name)] = 1; }); state.pkSet = s; }
+  function pkAnyBusy() { for (var k in state.pkBusy) if (state.pkBusy[k]) return true; return false; }
+  function heartBtn(name, extra) {
+    var on = pkHas(name);
+    return '<button class="heart' + (on ? ' on' : '') + (extra || '') + '" type="button" data-pn="' + esc(name) + '" aria-pressed="' + on + '" aria-label="' + esc(on ? TXT.pocket.removeAria : TXT.pocket.addAria) + '">' + heartSvg() + '</button>';
+  }
+  function pkSyncHearts() {
+    Array.prototype.forEach.call(document.querySelectorAll('.heart[data-pn]'), function (b) {
+      var on = pkHas(b.getAttribute('data-pn'));
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? TXT.pocket.removeAria : TXT.pocket.addAria);
+    });
+    var g = $('gHeart'), r = state.gachaResult;
+    if (g) { var gon = !!r && pkHas(r.name); g.classList.toggle('on', gon); g.setAttribute('aria-pressed', gon); g.innerHTML = heartSvg(); }
+  }
+  function fetchPockets() {
+    if (!token || state.pkFetching) return;
+    state.pkFetching = true;
+    api.withSuccessHandler(function (p) {
+      state.pkFetching = false;
+      if (pkAnyBusy()) return;   // 누른 직후의 낙관적 표시를 낡은 응답으로 덮어쓰지 않는다
+      state.pockets = { items: (p && p.items) || [] }; state.pkFetched = true; state.pkAt = Date.now(); state.pkErr = '';
+      pkRebuildSet(); pkSyncHearts();
+      if (tab === 'rec' && state.recView === 'mine' && !state.selection) renderRec();
+    }).withFailureHandler(function (e) {
+      state.pkFetching = false; state.pkErr = (e && e.message) || TXT.pocket.loadFail;
+      if (tab === 'rec' && state.recView === 'mine' && !state.pkFetched) renderRec();
+    }).getPockets(token);
+  }
+  function ensurePockets() { if (!state.pkFetched || Date.now() - state.pkAt > 60000) fetchPockets(); }
+
+  // ♡ 한 번 누름: 즉시 채워짐/비워짐(서버 응답 전 중복 눌림은 무시) → 서버 저장, 실패하면 되돌림
+  function togglePocket(r) {
+    var key = pkKey(r && r.name);
+    if (!token || !key || state.pkBusy[key]) return;
+    var on = !pkHas(r.name), it = pkFind(r.name), created = false;
+    state.pkBusy[key] = true;
+    if (on) {
+      if (it) it._gone = false;
+      else { it = { name: r.name, type: r.type || '', link: r.link || '', added: todayLocal_(), count: 0, last: '' }; state.pockets.items.unshift(it); created = true; }
+    } else if (it) it._gone = true;
+    pkRebuildSet(); pkSyncHearts();
+    if (tab === 'rec' && state.recView === 'mine') renderRec();
+    function revert() {
+      if (on) { if (created) state.pockets.items.splice(state.pockets.items.indexOf(it), 1); else if (it) it._gone = true; }
+      else if (it) it._gone = false;
+      pkRebuildSet(); pkSyncHearts();
+      if (tab === 'rec' && state.recView === 'mine') renderRec();
+    }
+    var h = api.withSuccessHandler(function (res) {
+      state.pkBusy[key] = false;
+      if (res && res.lv) applyLevel(res.lv, false);
+      toast(on ? TXT.pocket.added : TXT.pocket.removed);
+    }).withFailureHandler(function (e) {
+      state.pkBusy[key] = false; revert(); toast((e && e.message) || TXT.pocket.fail, true);
+    });
+    if (on) h.pocketAdd(token, r.name, r.type || '', r.link || ''); else h.pocketRemove(token, r.name);
+  }
+  $('gHeart').addEventListener('click', function (ev) { ev.stopPropagation(); if (state.gachaResult) togglePocket(state.gachaResult); });
+
+  function pkTop() {
+    return state.pockets.items.filter(function (i) { return !i._gone && i.count > 0; }).sort(function (a, b) {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.last < b.last ? 1 : a.last > b.last ? -1 : 0;
+    }).slice(0, 5);
+  }
+  function pocketViewHtml() {
+    var P = state.pockets.items;
+    if (!state.pkFetched) {
+      return state.pkErr ? '<div class="empty">' + esc(TXT.pocket.loadFail) + '：' + esc(state.pkErr) + '</div>' : '<div class="empty">' + esc(TXT.pocket.loading) + '</div>';
+    }
+    if (!P.length) {
+      return '<div class="pkt-empty">' + MASCOT.svg('sulk', { size: 110 }) + '<div>' + esc(TXT.pocket.empty) + '</div>' +
+        '<button class="btn btn-confirm" id="pkGoRec" type="button">' + esc(TXT.pocket.goRec) + '</button></div>';
+    }
+    var top = pkTop();
+    var topHtml = '<div class="pkt-top"><h3>' + esc(TXT.pocket.top5) + '</h3>' + (top.length ? '<ol>' + top.map(function (i, k) {
+      return '<li><span class="rk">' + (k + 1) + '</span><span class="nm">' + esc(i.name) + '</span><span class="ct">' + esc(fmt(TXT.pocket.times, { n: i.count })) + '</span></li>';
+    }).join('') + '</ol>' : '<div class="none">' + esc(TXT.pocket.topNone) + '</div>') + '</div>';
+    var now = Date.now();
+    var cards = P.map(function (i) {
+      var link = safeUrl(i.link) ? ' · <a href="' + esc(i.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
+      var key = pkKey(i.name), busy = !!state.pkBusy[key], undo = i._undo && i._undo > now;
+      var act = undo
+        ? '<button class="pkt-btn undo" type="button" data-pundo="' + esc(i.name) + '"' + (busy ? ' disabled' : '') + '>' + esc(TXT.pocket.undo) + '</button>'
+        : '<button class="pkt-btn' + (i.last === todayLocal_() ? ' dim' : '') + '" type="button" data-pvisit="' + esc(i.name) + '"' + (i._gone ? ' disabled' : '') + '>' + esc(TXT.pocket.again) + '</button>';
+      return '<div class="pkt-card' + (i._gone ? ' gone' : '') + '">' + (i.type ? '<span class="tag">' + esc(i.type) + '</span>' : '') +
+        '<div class="name">' + esc(i.name) + '</div>' +
+        '<div class="meta">' + esc(fmt(TXT.pocket.times, { n: i.count })) + (i.last ? ' · ' + esc(fmt(TXT.pocket.last, { d: i.last })) : '') + link + '</div>' +
+        '<div class="pkt-acts">' + act + heartBtn(i.name, ' inline') + '</div></div>';
+    }).join('');
+    return topHtml + '<div class="grid">' + cards + '</div>';
+  }
+  function pkRerenderMine() { if (tab === 'rec' && state.recView === 'mine' && !state.selection) renderRec(); }
+  // 「又去了」: 즉시 +1(같은 가게 하루 1번). 서버가 확인하면 5초 동안 「取消」가 나온다.
+  function pocketVisit(name) {
+    var it = pkFind(name), key = pkKey(name);
+    if (!it || it._gone || state.pkBusy[key]) return;
+    if (it.last === todayLocal_()) { toast(TXT.pocket.today); return; }
+    var prev = { count: it.count, last: it.last };
+    state.pkBusy[key] = true; it.count += 1; it.last = todayLocal_(); it._undo = Date.now() + 60000; it._prev = prev;
+    pkRerenderMine();
+    api.withSuccessHandler(function (res) {
+      state.pkBusy[key] = false;
+      if (res && res.ok) {
+        it.count = res.count; it.last = res.last || it.last; it._undo = Date.now() + 5000;
+        if (res.lv) applyLevel(res.lv, false);
+        toast(TXT.pocket.visited);
+        setTimeout(function () { if (it._undo && Date.now() >= it._undo - 50) { it._undo = 0; pkRerenderMine(); } }, 5100);
+      } else {   // 다른 기기에서 이미 오늘 기록한 경우
+        it._undo = 0; it.count = res && res.count != null ? res.count : prev.count; it.last = todayLocal_();
+        if (res && res.lv) applyLevel(res.lv, false);
+        toast(TXT.pocket.today);
+      }
+      pkRerenderMine();
+    }).withFailureHandler(function (e) {
+      state.pkBusy[key] = false; it.count = prev.count; it.last = prev.last; it._undo = 0;
+      pkRerenderMine(); toast((e && e.message) || TXT.pocket.fail, true);
+    }).pocketVisit(token, name);
+  }
+  function pocketUndo(name) {
+    var it = pkFind(name), key = pkKey(name);
+    if (!it || !it._undo || it._undo <= Date.now() || state.pkBusy[key]) return;
+    var cur = { count: it.count, last: it.last }, prev = it._prev || { count: Math.max(0, it.count - 1), last: '' };
+    state.pkBusy[key] = true; it._undo = 0; it.count = prev.count; it.last = prev.last;
+    pkRerenderMine();
+    api.withSuccessHandler(function (res) {
+      state.pkBusy[key] = false;
+      if (res && res.ok) { it.count = res.count; it.last = res.last || ''; toast(TXT.pocket.undone); }
+      else { it.count = cur.count; it.last = cur.last; toast(TXT.pocket.undoLate); }
+      if (res && res.lv) applyLevel(res.lv, false);
+      pkRerenderMine();
+    }).withFailureHandler(function (e) {
+      state.pkBusy[key] = false; it.count = cur.count; it.last = cur.last;
+      pkRerenderMine(); toast((e && e.message) || TXT.pocket.fail, true);
+    }).pocketUndo(token, name);
+  }
+  function setRecView(v) {
+    if (state.recView === v) return;
+    state.recView = v;
+    Array.prototype.forEach.call(document.querySelectorAll('#recSeg button'), function (b) { b.classList.toggle('active', b.getAttribute('data-v') === v); });
+    if (v === 'mine') { state.pockets.items.forEach(function (i) { i._undo = 0; }); fetchPockets(); }
+    clearSelection(); renderRec(); scrollToContentTop();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#recSeg button'), function (b) {
+    b.textContent = b.getAttribute('data-v') === 'mine' ? TXT.pocket.mine : TXT.pocket.all;
+    b.addEventListener('click', function () { setRecView(b.getAttribute('data-v')); });
+  });
+
   // ===== 推薦 · 扭蛋 탭 (그 탭을 열 때만 서버에서 받는다) =====
   // 끼니는 지금 시각으로 자동(午 10:00~14:59, 晚 15:00~21:59, 그 밖이면 다음 끼니). 早午餐 類型은 午에만.
   // 서버도 같은 규칙으로 거르지만, 저녁에 낮에 저장해 둔 목록이 보이지 않도록 화면에서도 한 번 더 거른다.
@@ -1450,6 +1815,7 @@
     return (list || []).filter(function (x) { return !(slot === '晚' && String(x.type || '').indexOf('早午餐') >= 0); });
   }
   function ensureRec() {
+    if (token) ensurePockets();
     if (state.recFetched || !token) return;
     state.recFetched = true;
     api.withSuccessHandler(function (list) {
@@ -1478,7 +1844,10 @@
     var closedHtml = stateHtml('sulk', TXT.home.closed);
     $('gachaBtn').disabled = !rec.length || c.closed;
     if (c.closed) { $('recList').innerHTML = closedHtml; $('gachaPage').innerHTML = closedHtml; return; }
-    if (!rec.length && !state.recFetched && !state.recLoadErr) {
+    $('recSeg').style.display = '';
+    if (state.recView === 'mine') {
+      $('recList').innerHTML = pocketViewHtml();
+    } else if (!rec.length && !state.recFetched && !state.recLoadErr) {
       $('recList').innerHTML = loaderHtml(recommendLoadingPhrases);
     } else {
       var RP = 10, pg = state.recPage * RP < rec.length ? state.recPage : 0;
@@ -1486,11 +1855,11 @@
       $('recList').innerHTML = rec.length ? '<div class="grid">' + pageList.map(function (r, k) {
         var i = pg * RP + k;
         var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
-        return '<button class="card" data-kind="rec" data-i="' + i + '">' +
+        return '<div class="card-wrap"><button class="card" data-kind="rec" data-i="' + i + '">' +
           '<span class="tag">' + esc(r.type) + '</span>' +
           '<div class="name">' + esc(r.name) + '</div>' +
           '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link +
-          (r.review ? '<br>' + esc(r.review) : '') + '</div></button>';
+          (r.review ? '<br>' + esc(r.review) : '') + '</div></button>' + heartBtn(r.name) + '</div>';
       }).join('') + '</div><div class="rec-more"><button class="pk-sm' + (state.recMoreBusy ? ' on' : '') + '" id="recMore" type="button"' + (state.recMoreBusy ? ' disabled' : '') + '>' +
         ICON.btn.refresh(16) + esc(state.recMoreBusy ? TXT.rec.moreBusy : TXT.round.refresh) + '</button></div>' : '<div class="empty">' + (state.recLoadErr ? '載入失敗：' + esc(state.recLoadErr) : TXT.rec.empty) + '</div>';
     }
@@ -1502,6 +1871,8 @@
       '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>';
     if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
     renderVarietyBanner();
+    if (state.recView === 'mine') $('varietyBanner').innerHTML = '';
+    pkSyncHearts();
   }
   // 換一批: 서버를 부르지 않고 다음 10개(+맨 위로). 30개를 다 봤을 때만 서버에서 새 30개(본 것은 되도록 제외).
   function recMore() {
@@ -1521,6 +1892,15 @@
   }
   $('recList').addEventListener('click', function (ev) {
     if (ev.target.closest('#recMore')) { recMore(); return; }
+    var hb = ev.target.closest('.heart[data-pn]');
+    if (hb) {
+      ev.stopPropagation();
+      var pn = hb.getAttribute('data-pn'), it = pkFind(pn), src = it || state.recommended.filter(function (x) { return x.name === pn; })[0] || { name: pn };
+      togglePocket(src); return;
+    }
+    var vb = ev.target.closest('[data-pvisit]'); if (vb) { pocketVisit(vb.getAttribute('data-pvisit')); return; }
+    var ub = ev.target.closest('[data-pundo]'); if (ub) { pocketUndo(ub.getAttribute('data-pundo')); return; }
+    if (ev.target.closest('#pkGoRec')) { setRecView('all'); return; }
     if (ev.target.tagName === 'A') return;
     var el = ev.target.closest('.card[data-kind="rec"]'); if (!el) return;
     var r = state.recommended[Number(el.dataset.i)]; if (!r) return;
@@ -1699,7 +2079,7 @@
     }).submitFeedback(token, fbType, text, APP_VERSION);
   });
   // 팝업은 바깥 영역을 눌러도 닫힌다
-  ['liveModal', 'setModal', 'historyModal', 'diagModal'].forEach(function (id) {
+  ['liveModal', 'setModal', 'historyModal', 'diagModal', 'lvModal'].forEach(function (id) {
     $(id).addEventListener('click', function (ev) { if (ev.target === $(id)) $(id).style.display = 'none'; });
   });
   // ===== 固定菜單 승격 제안 배너 (가장 많이 먹은 1개만) =====
@@ -1813,6 +2193,7 @@
       } else {
         state.gachaResult = list[idx];
         cap.className = 'capsule done';
+        pkSyncHearts();
         $('gMascot').innerHTML = MASCOT.svg('happy', { size: 96 });
         $('gActions').style.visibility = 'visible';
       }
@@ -1842,7 +2223,7 @@
     clearSelection();
     Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
     api
-      .withSuccessHandler(function () { state.busy = false; })
+      .withSuccessHandler(function (res) { state.busy = false; if (res && res.lv) applyLevel(res.lv, false); })
       .withFailureHandler(function (e) {
         state.busy = false;
         // 실패 → 화면을 되돌리고 에러 표시
@@ -2001,7 +2382,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.25-d';
+  var APP_VERSION = '2026.11.25-e';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -3038,6 +3419,7 @@
       state.appSig = '';   // 서버 응답과 비교해서 달라지면 다시 그린다
     }
     state.recommended = recFilter(c.rec);
+    if (c.lv) { state.level = c.lv; renderProf(); }
     var now = Date.now();
     state.groups = (c.groups || []).map(function (g) {   // 마감 시각이 이미 지난 진행 중 표시는 뺀다
       if (g.round && g.round.endMs <= now) g.round = null; return g;
