@@ -56,7 +56,16 @@
     }
     .tabs button.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
     .tabs button:disabled { cursor: default; }
-    .now-hint { font-size: 13px; color: var(--muted); margin-left: 10px; }
+    /* 照舊: 아직 끼니 시간이 아닐 때 糰糰 얼굴 + 말풍선 한 줄(가운데) */
+    .peek-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; }
+    .peek-row[hidden] { display: none; }
+    .peek-mc { flex: 0 0 auto; display: inline-flex; width: 30px; height: 30px; }
+    .peek-mc svg { width: 30px; height: 30px; display: block; }
+    .peek-bubble { position: relative; flex: 0 1 auto; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--ink);
+      background: var(--accent-soft); border: 1.5px solid var(--accent); border-radius: 14px; padding: 6px 12px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .peek-bubble::before { content: ''; position: absolute; left: -6px; top: 50%; width: 10px; height: 10px; margin-top: -5px;
+      background: var(--accent-soft); border-left: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); transform: rotate(45deg); }
     section { margin-top: 26px; }
     .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     h2 { margin: 0; font-size: 19px; }
@@ -428,7 +437,6 @@
       #slotBar { display: block; }
       .tabs { display: flex; width: 100%; margin-top: 12px; }
       .tabs button { flex: 1; padding: 11px 0; font-size: 17px; }
-      .now-hint { display: block; margin: 6px 0 0 4px; }
 
       section { margin-top: 10px; }
 
@@ -465,7 +473,7 @@
       /* 扭蛋 탭 */
       .gacha-card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
       .gc-emoji { font-size: 56px; line-height: 1; }
-      .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; }
+      .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; text-wrap: balance; }
       .gacha-card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
       .gc-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 18px; }
       .gc-types .tag { margin-bottom: 0; }
@@ -546,7 +554,8 @@
     .live-empty { color: var(--muted); padding: 22px 0 8px; font-size: 15px; line-height: 1.7; }
     .gacha-card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 6px; }
     .gc-emoji { font-size: 56px; line-height: 1; }
-    .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; }
+    .gacha-card h2 { margin: 12px 0 6px; font-size: 22px; text-wrap: balance; }
+    .nb { display: inline-block; }
     .gacha-card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
     .gc-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 18px; }
     .gc-types .tag { margin-bottom: 0; }
@@ -643,7 +652,7 @@
       <div class="today" id="today" style="margin-top:6px"></div>
       <div id="slotBar" style="display:none">
         <div class="tabs"><button data-slot="午">午餐</button><button data-slot="晚">晚餐</button></div>
-        <span class="now-hint" id="nowHint"></span>
+        <div class="peek-row" id="peekRow" hidden><span class="peek-mc" id="peekMc"></span><span class="peek-bubble" id="nowHint"></span></div>
       </div>
     </div>
 
@@ -1032,7 +1041,7 @@
       "preparing": "糰糰準備中，不要催啦"
     },
     "gacha": {
-      "title": "不知道吃什麼？糰糰扭給你",
+      "title": "不知道吃什麼？|糰糰扭給你",
       "sub": "交給糰糰扭，抽到什麼吃什麼"
     },
     "toast": {
@@ -1322,7 +1331,10 @@
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (t) {
       t.classList.toggle('active', t.dataset.slot === c.slot);
     });
-    $('nowHint').textContent = c.isMealTime ? '' : peekPhrase(c.slot);
+    var peekOn = !c.isMealTime && !c.closed;
+    $('nowHint').textContent = peekOn ? peekPhrase(c.slot) : '';
+    $('peekRow').hidden = !peekOn;
+    if (peekOn && !$('peekMc').firstChild) $('peekMc').innerHTML = MASCOT.svg('base', { size: 30 });
     renderMain();
     renderRec();
   }
@@ -1407,7 +1419,7 @@
     var types = [];
     rec.forEach(function (x) { if (types.indexOf(x.type) < 0) types.push(x.type); });
     $('gachaPage').innerHTML = '<div class="gacha-card"><div class="gc-emoji">' + MASCOT.svg('happy', { size: 120 }) + '</div>' +
-      '<h2>' + esc(TXT.gacha.title) + '</h2><p>' + (rec.length ? TXT.gacha.sub : (state.recFetched || state.recLoadErr ? TXT.rec.empty : TXT.rec.preparing)) + '</p>' +
+      '<h2>' + nbLines(TXT.gacha.title) + '</h2><p>' + (rec.length ? TXT.gacha.sub : (state.recFetched || state.recLoadErr ? TXT.rec.empty : TXT.rec.preparing)) + '</p>' +
       '<div class="gc-types">' + types.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
       '<button class="btn btn-gacha" id="gachaBtn2"' + (rec.length ? '' : ' disabled') + '>扭蛋試試</button></div>';
     if ($('gachaBtn2')) $('gachaBtn2').addEventListener('click', openGacha);
@@ -1421,6 +1433,8 @@
   });
   $('gachaBtn').addEventListener('click', openGacha);
 
+  // 「앞줄|뒷줄」: 줄이 바뀔 때 한 글자만 홀로 떨어지지 않게 덩어리(inline-block)로 묶는다(덩어리 사이에서만 줄바꿈)
+  function nbLines(t) { return String(t).split('|').map(function (x) { return '<span class="nb">' + esc(x) + '</span>'; }).join(''); }
   function scrollToContentTop() { $('scroller').scrollTop = 0; }
 
   // ===== 分類 칩: 누르면 그 分類로 이동, 스크롤하면 현재 分類 칩이 강조됨 =====
@@ -1832,7 +1846,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.20-e';
+  var APP_VERSION = '2026.11.25-a';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
