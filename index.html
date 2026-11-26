@@ -107,6 +107,20 @@
     .rec-more { display: flex; justify-content: center; margin: 14px 0 4px; }
     .rec-more .pk-sm { font-size: 15px; padding: 11px 22px 11px 18px; min-height: 44px; }
     .rec-more .pk-sm.on, .rec-more .pk-sm:disabled { background: var(--accent-soft); color: var(--accent); cursor: default; }
+    /* 今天想吃什麼？ (땡겨): 推薦 탭 위 버튼 + 질문 3장 + 결과 */
+    .crv-entry { display: block; width: 100%; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 17px; font-weight: 700; min-height: 48px; padding: 12px 16px; margin: 2px 0 12px; cursor: pointer; }
+    .crv-entry:active { opacity: .85; }
+    .crv-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 16px 14px; margin: 2px 0 12px; text-align: center; }
+    .crv-card > svg { display: block; margin: 0 auto; }
+    .crv-card .crv-step { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .crv-card h3 { margin: 6px 0 14px; font-size: 20px; }
+    .crv-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .crv-opts button { border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 16px; font-weight: 700; min-height: 52px; border-radius: 12px; cursor: pointer; padding: 8px 6px; }
+    .crv-opts button:active { background: var(--accent-soft); color: var(--accent); }
+    .crv-back, .crv-acts button { border: 0; background: var(--line); color: var(--ink); font: inherit; font-size: 14px; font-weight: 700; min-height: 40px; border-radius: 999px; padding: 8px 18px; cursor: pointer; }
+    .crv-back { margin-top: 14px; }
+    .crv-acts { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 14px 0 4px; }
+    .crv-head { font-size: 15px; font-weight: 700; margin: 2px 0 10px; }
     .card .place { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; }
     button.btn {
       border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer;
@@ -831,6 +845,7 @@
     <div class="pg" id="pgRec">
       <div class="pg-head"><h2>推薦菜單</h2><button class="pg-act txt" id="gachaBtn" type="button" style="background:var(--btn-dark)" disabled>扭蛋試試</button></div>
       <button class="rec-area" id="recArea" type="button" style="display:none"></button>
+      <div id="cravBox"></div>
       <div class="seg" id="recSeg"><button type="button" data-v="all" class="active">全部</button><button type="button" data-v="mine">我的口袋</button></div>
       <div id="varietyBanner"></div>
       <div id="recList"></div>
@@ -1289,6 +1304,25 @@
       "empty": "糰糰的資料庫空空的",
       "preparing": "糰糰準備中，不要催啦"
     },
+    "crv": {
+      "entry": "今天想吃什麼？",
+      "step": "{n} / 3",
+      "q": [
+        { "t": "今天想吃？", "o": [["飯", "飯"], ["麵", "麵"], ["其他", "別的"], ["", "都可以"]] },
+        { "t": "口味？", "o": [["重", "重口味"], ["清", "清爽一點"], ["", "都可以"]] },
+        { "t": "預算？", "o": [["CP", "高CP"], ["好", "吃好一點"], ["", "都可以"]] }
+      ],
+      "back": "上一步",
+      "leave": "返回",
+      "head": "糰糰挑了 {n} 間給你",
+      "relaxed": "條件放寬了一點",
+      "none": "糰糰翻遍了，這個條件找不到店",
+      "noneSub": "換個條件，或先看看一般推薦",
+      "again": "再問一次",
+      "toRec": "看一般推薦",
+      "fail": "糰糰沒聽清楚，再問一次",
+      "retry": "再試一次"
+    },
     "gacha": {
       "title": "不知道吃什麼？|糰糰扭給你",
       "sub": "交給糰糰扭，抽到什麼吃什麼"
@@ -1501,7 +1535,7 @@
 
   var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], promotionCandidates: [], groups: null,
                 selection: null, gachaResult: null, busy: false, varietyNudgeText: null,
-                recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0,
+                crv: null, recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0,
                 level: null, firstSent: {}, unlockOpen: false, area: null, recView: 'all', pockets: { items: [] }, pkSet: {}, pkBusy: {}, pkFetched: false, pkFetching: false, pkAt: 0, pkErr: '' };
   var tab = 'home';
   var bootSeq = 0;
@@ -1722,6 +1756,7 @@
     fgacha: '<circle cx="12" cy="9.2" r="6.2"/><path d="M5.8 9.2h12.4"/><rect x="5.5" y="15.4" width="13" height="5.6" rx="2"/>',
     frefresh: '<path d="M20.5 11.5A8.5 8.5 0 0 0 6 6L3.8 8.2"/><path d="M3.8 3.8v4.4h4.4"/><path d="M3.5 12.5A8.5 8.5 0 0 0 18 18l2.2-2.2"/><path d="M20.2 20.2v-4.4h-4.4"/>',
     fshare: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+    fcraving: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M9 9.5h6M9 12.5h3.5"/>',
     fweek: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2"/>'
   };
   function bIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BADGE_ICON[id] || BADGE_ICON.first) + '</svg>'; }
@@ -1850,7 +1885,7 @@
     clearTimeout(lvupTimer); lvupTimer = setTimeout(closeLevelUp, 3600);
   }
   $('lvupOv').addEventListener('click', closeLevelUp);
-  // 「처음 해 봄」: 서버가 4종류만 받는다. 이미 받은 종류·이번 실행에서 이미 보낸 종류는 다시 안 보냄.
+  // 「처음 해 봄」: 서버가 5종류만 받는다. 이미 받은 종류·이번 실행에서 이미 보낸 종류는 다시 안 보냄.
   function firstOnce(kind) {
     if (!token || isClinic()) return;
     var L = state.level;
@@ -2392,7 +2427,7 @@
     if (!c) return;
     var closedHtml = stateHtml('sulk', TXT.home.closed);
     $('gachaBtn').disabled = !rec.length || c.closed;
-    if (c.closed) { $('recList').innerHTML = closedHtml; $('gachaPage').innerHTML = closedHtml; return; }
+    if (c.closed) { $('recList').innerHTML = closedHtml; $('gachaPage').innerHTML = closedHtml; $('cravBox').innerHTML = ''; return; }
     $('recSeg').style.display = '';
     if (state.recView === 'mine') {
       $('recList').innerHTML = pocketViewHtml();
@@ -2423,8 +2458,83 @@
     renderVarietyBanner();
     renderAreaLabel();
     if (state.recView === 'mine') $('varietyBanner').innerHTML = '';
+    crvSync();
     pkSyncHearts();
   }
+  // ===== 今天想吃什麼？ (땡겨): 질문 3장(뒤로 가기 가능) → 서버에 물어 3~5곳. 문구는 TXT.crv 한 곳 =====
+  var crvSeq = 0;
+  function crvOn() { return !!token && !isClinic(); }
+  function crvSync() {
+    var box = $('cravBox'), c = state.crv;
+    if (!crvOn()) { box.innerHTML = ''; return; }
+    var inCrv = !!c;
+    $('recSeg').style.display = inCrv ? 'none' : '';
+    $('recList').style.display = inCrv ? 'none' : '';
+    $('varietyBanner').style.display = inCrv ? 'none' : '';
+    box.innerHTML = inCrv ? crvHtml(c) : '<button class="crv-entry" id="crvStart" type="button">' + esc(TXT.crv.entry) + '</button>';
+  }
+  function crvHtml(c) {
+    var T = TXT.crv;
+    if (c.phase === 'ask') {
+      var q = T.q[c.step];
+      return '<div class="crv-card">' + MASCOT.svg('happy', { size: 72 }) + '<div class="crv-step">' + esc(fmt(T.step, { n: c.step + 1 })) + '</div><h3>' + esc(q.t) + '</h3>' +
+        '<div class="crv-opts">' + q.o.map(function (o) { return '<button type="button" data-crv-a="' + esc(o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
+        '<button class="crv-back" type="button" data-crv="back">' + esc(c.step ? T.back : T.leave) + '</button></div>';
+    }
+    if (c.phase === 'load') return loaderHtml(recommendLoadingPhrases);
+    if (c.phase === 'fail') return stateHtml('sulk', T.fail) + '<div class="crv-acts"><button type="button" data-crv="retry">' + esc(T.retry) + '</button><button type="button" data-crv="exit">' + esc(T.toRec) + '</button></div>';
+    if (!c.picks.length) return stateHtml('sulk', T.none, esc(T.noneSub)) + '<div class="crv-acts"><button type="button" data-crv="exit">' + esc(T.toRec) + '</button></div>';
+    return (c.relaxed.length ? '<div class="rec-near">' + esc(T.relaxed) + '</div>' : '') +
+      '<div class="crv-head">' + esc(fmt(T.head, { n: c.picks.length })) + '</div><div class="grid">' + c.picks.map(function (r, i) {
+        var link = safeUrl(r.link) ? ' · <a href="' + esc(r.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
+        return '<div class="card-wrap"><button class="card" data-kind="crv" data-i="' + i + '">' +
+          '<span class="tag">' + esc(r.type) + '</span><div class="name">' + esc(r.name) + '</div>' +
+          '<div class="meta">' + (r.rating ? '★ ' + esc(r.rating) : '') + link + (r.review ? '<br>' + esc(r.review) : '') + '</div></button>' + heartBtn(r.name) + '</div>';
+      }).join('') + '</div><div class="crv-acts"><button type="button" data-crv="again">' + esc(T.again) + '</button><button type="button" data-crv="exit">' + esc(T.toRec) + '</button></div>';
+  }
+  function crvAsk() {
+    var c = state.crv; if (!c) return;
+    c.phase = 'load'; crvSync();
+    var seq = ++crvSeq, a = c.a;
+    api.withSuccessHandler(function (res) {
+      if (!state.crv || seq !== crvSeq) return;
+      c.picks = (res && res.picks) || []; c.relaxed = (res && res.relaxed) || []; c.phase = 'res';
+      crvSync(); pkSyncHearts(); scrollToContentTop(); firstOnce('craving');
+    }).withFailureHandler(function () {
+      if (!state.crv || seq !== crvSeq) return;
+      c.phase = 'fail'; crvSync();
+    }).askCraving(token, a[0], a[1], a[2]);
+  }
+  function crvExit() { crvSeq++; state.crv = null; clearSelection(); crvSync(); scrollToContentTop(); }
+  $('cravBox').addEventListener('click', function (ev) {
+    if (ev.target.closest('#crvStart')) { state.crv = { phase: 'ask', step: 0, a: [], picks: [], relaxed: [] }; crvSync(); scrollToContentTop(); return; }
+    var c = state.crv; if (!c) return;
+    var ans = ev.target.closest('[data-crv-a]');
+    if (ans && c.phase === 'ask') {
+      c.a[c.step] = ans.getAttribute('data-crv-a');
+      if (c.step < 2) { c.step++; crvSync(); } else crvAsk();
+      return;
+    }
+    var act = ev.target.closest('[data-crv]');
+    if (act) {
+      var k = act.getAttribute('data-crv');
+      if (k === 'back') { if (c.step > 0) { c.step--; crvSync(); } else crvExit(); }
+      else if (k === 'again') { clearSelection(); crvSeq++; state.crv = { phase: 'ask', step: 0, a: [], picks: [], relaxed: [] }; crvSync(); scrollToContentTop(); }
+      else if (k === 'retry') crvAsk();
+      else if (k === 'exit') crvExit();
+      return;
+    }
+    var hb = ev.target.closest('.heart[data-pn]');
+    if (hb) {
+      ev.stopPropagation();
+      var pn = hb.getAttribute('data-pn'), it = pkFind(pn), src = it || c.picks.filter(function (x) { return x.name === pn; })[0] || { name: pn };
+      togglePocket(src); return;
+    }
+    if (ev.target.tagName === 'A') return;
+    var el = ev.target.closest('.card[data-kind="crv"]'); if (!el) return;
+    var r = c.picks[Number(el.dataset.i)]; if (!r) return;
+    select({ method: '推薦', menu: r.name, note: recNote(r), craving: true }, el);
+  });
   // 換一批: 서버를 부르지 않고 다음 10개(+맨 위로). 30개를 다 봤을 때만 서버에서 새 30개(본 것은 되도록 제외).
   function recMore() {
     if (state.recMoreBusy) return;
@@ -2862,7 +2972,8 @@
         method: s.method,
         menu: s.menu,
         note: [s.note, extra].filter(Boolean).join(' / '),
-        jointDate: state.ctx.date
+        jointDate: state.ctx.date,
+        craving: s.craving === true   // 「今天想吃什麼？」 결과에서 고른 경우(서버가 想吃紀錄 행에 가게 이름을 이어 붙임)
       });
   });
 
@@ -3007,7 +3118,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.26-c';
+  var APP_VERSION = '2026.11.26-d';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
