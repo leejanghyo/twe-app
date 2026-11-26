@@ -555,7 +555,7 @@
     .legal-body::-webkit-scrollbar { display: none; }
     .legal-body h3 { font-size: 14.5px; margin: 14px 0 4px; }
     .legal-body p, .legal-body li { color: var(--ink); margin: 0 0 4px; }
-    .legal-body ul { margin: 0; padding-left: 20px; }
+    .legal-body ul, .legal-body ol { margin: 0 0 4px; padding-left: 22px; }
     .legal-body .lg-note { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
     .fb-box { text-align: left; }
     .fb-box h2 { text-align: center; }
@@ -656,7 +656,6 @@
     .prof-name { font-size: 14px; font-weight: 700; white-space: nowrap; }
     .prof-bar { flex: 1 1 auto; min-width: 36px; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
     .prof-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
-    .prof-tut { font-size: 11px; color: var(--muted); white-space: nowrap; }
     /* 吃貨等級 화면 */
     .lv-box { width: min(380px, 100%); max-height: calc(100vh - 150px); overflow-y: auto; text-align: center; padding-bottom: 18px; }
     .lv-box h2 { padding: 0 34px; }
@@ -665,7 +664,6 @@
     .lv-bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 12px 4px 6px; }
     .lv-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
     .lv-need { font-size: 13px; color: var(--muted); }
-    .lv-tut { margin: 12px 0 0; padding: 8px 12px; border-radius: 12px; background: var(--note-y-bg); border: 1px solid var(--note-y-bd); font-size: 13px; }
     .lv-box h3 { margin: 18px 0 10px; font-size: 16px; text-align: left; }
     .bd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .bd { padding: 10px 4px 8px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); }
@@ -680,6 +678,60 @@
     .ul-b { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
     .ul-b svg { width: 18px; height: 18px; }
     .ul-more { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    /* ===== 本週吃了什麼 · 分享卡片 · +經驗 · 升級 ===== */
+    .wk-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 4px 0 8px; }
+    .wk-range { font-size: 14px; font-weight: 700; }
+    .who-box .wk-nav { display: block; width: 40px; height: 36px; padding: 0 !important; margin: 0 !important; border: 0; border-radius: 12px; background: var(--line); color: var(--ink); font-size: 18px !important; cursor: pointer; }
+    .wk-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .wk-day { display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 92px; padding: 6px 0 5px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); }
+    .wk-day small { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .wk-day i { font-style: normal; font-size: 11px; color: var(--muted); }
+    .wk-day.today { border-color: var(--accent); background: var(--accent-soft); }
+    .wk-day.today small { color: var(--accent); }
+    .wk-day.future { opacity: .5; }
+    .wk-ics { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; flex: 1; color: var(--accent); min-height: 44px; }
+    .wk-ics.empty::after { content: ""; width: 10px; height: 2px; border-radius: 2px; background: var(--line); }
+    .wk-more { font-size: 11px; line-height: 1; color: var(--accent); }
+    .wk-sum { margin: 10px 0 4px; font-size: 14px; font-weight: 700; }
+    .btn.sh-open { display: inline-flex !important; align-items: center; justify-content: center; gap: 6px; width: auto !important; margin: 8px auto 0 !important; padding: 8px 18px !important; font-size: 14px !important; background: var(--card); color: var(--accent); border: 1.5px solid var(--accent); border-radius: 999px; }
+    .btn.sh-open svg { width: 16px; height: 16px; }
+    .lv-share-row, .pkt-share-row { text-align: center; }
+    .pkt-top .sh-open { margin: 8px 0 0 !important; }
+    .xp-fl { position: fixed; right: 14px; z-index: 75; pointer-events: none; font-size: 14px; font-weight: 800; padding: 4px 11px; border-radius: 999px; background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.18); animation: xpUp 1.2s ease-out forwards; }
+    .xp-fl.bonus { background: var(--yolk); color: #2b2420; }
+    @keyframes xpUp { 0% { opacity: 0; transform: translateY(8px) scale(.9); } 15% { opacity: 1; transform: translateY(0) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
+    .lvup { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; background: rgba(43,36,32,.35); }
+    .lvup.on { display: flex; }
+    .lvup-box { position: relative; background: var(--card); color: var(--ink); border-radius: 20px; padding: 18px 26px 20px; text-align: center; width: min(300px, 86vw); box-shadow: 0 10px 34px rgba(0,0,0,.3); animation: lvPop .35s ease-out; }
+    .lvup-box .tm { margin: 0 auto 4px; }
+    .lvup-t { font-size: 22px; font-weight: 800; color: var(--accent); }
+    .lvup-n { font-size: 16px; font-weight: 700; margin-top: 2px; }
+    .lvup-s { font-size: 14px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+    @keyframes lvPop { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .lvup-cf { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .lvup-cf i { position: absolute; top: -12px; width: 8px; height: 14px; border-radius: 2px; opacity: 0; animation: cfFall 1.7s ease-in forwards; }
+    @keyframes cfFall { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--dx), 110vh) rotate(420deg); } }
+    @media (prefers-reduced-motion: reduce) { .lvup-cf i, .xp-fl, .lvup-box { animation: none; } .lvup-cf { display: none; } .xp-fl { opacity: 1; } }
+    .sh-box { width: min(380px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 18px 18px 16px; }
+    .sh-box h2 { padding: 0 34px; margin-bottom: 10px; }
+    .who-box .sh-kinds button, .who-box .sh-chips button { display: inline-block; width: auto; margin: 0; font-size: 14px; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+    .sh-kinds, .sh-chips { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+    .sh-kinds button.on, .sh-chips button.on { border-color: var(--accent) !important; color: var(--accent) !important; background: var(--accent-soft) !important; font-weight: 800; }
+    .sh-prev { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1080 / 1350; margin: 12px auto 8px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #fff5e6; }
+    .sh-prev canvas { width: 100%; height: 100%; display: block; }
+    .sh-load { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 14px; color: #8a7f77; background: #fff5e6; }
+    .sh-lbl { font-size: 12px; color: var(--muted); margin: 8px 0 4px; text-align: left; }
+    .sh-sw { display: flex; gap: 10px; flex-wrap: wrap; }
+    .who-box .sh-sw button { display: block; width: 32px; height: 32px; margin: 0; padding: 0; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; }
+    .who-box .sh-sw button.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+    .sh-nick { margin: 10px 0 4px; }
+    .sh-box .btn-confirm { width: 100%; margin-top: 10px; font-size: 17px; padding: 12px; }
+    .sh-box .btn-confirm:disabled { opacity: .5; }
+    .sh-hint { margin-top: 8px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .sh-img-box { width: min(340px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; }
+    .sh-img-box img { width: 100%; border-radius: 10px; -webkit-touch-callout: default; -webkit-user-select: auto; user-select: auto; }
+    #shModal, #shImgModal { z-index: 70; }
+
     /* ♡ (선 아이콘, 눌리면 채워짐) */
     .heart { position: absolute; top: 6px; right: 6px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%; padding: 0; background: var(--glass); color: var(--muted);
       display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.12); -webkit-tap-highlight-color: transparent; }
@@ -964,6 +1016,31 @@
       <button class="btn btn-confirm" id="unlockOk" type="button" style="margin-top:14px;width:100%">收到</button>
     </div>
   </div>
+
+  <div class="who-modal" id="shModal">
+    <div class="who-box sh-box">
+      <button class="x-btn" id="shClose" type="button" aria-label="關閉">✕</button>
+      <h2 id="shTitle">分享卡片</h2>
+      <div class="sh-kinds" id="shKinds"><button type="button" data-k="top5">我的 Top5</button><button type="button" data-k="level">吃貨等級</button><button type="button" data-k="week">本週</button></div>
+      <div class="sh-prev"><canvas id="shCanvas" width="1080" height="1350"></canvas><div class="sh-load" id="shLoad">糰糰畫卡片中…</div></div>
+      <div class="sh-lbl">樣式</div>
+      <div class="sh-chips" id="shFrames"><button type="button" data-f="0">簡約</button><button type="button" data-f="1">手帳</button><button type="button" data-f="2">糰糰</button></div>
+      <div class="sh-lbl">顏色</div>
+      <div class="sh-sw" id="shColors"></div>
+      <label class="theme-row sh-nick" for="shNick"><span>顯示暱稱</span><input type="checkbox" class="sw" id="shNick" checked></label>
+      <button class="btn btn-confirm" id="shGo" type="button" disabled>分享</button>
+      <div class="sh-hint" id="shHint"></div>
+    </div>
+  </div>
+  <div class="who-modal" id="shImgModal">
+    <div class="who-box sh-img-box">
+      <button class="x-btn" id="shImgClose" type="button" aria-label="關閉">✕</button>
+      <h2>長按圖片儲存</h2>
+      <img id="shImg" alt="分享卡片">
+      <div class="sh-hint">長按圖片儲存，再到 LINE、IG 貼上</div>
+    </div>
+  </div>
+  <div class="lvup" id="lvupOv" role="status" aria-live="polite"></div>
 
   <div class="who-modal" id="historyModal">
     <div class="who-box nick-box history-box">
@@ -1252,8 +1329,11 @@
     },
     "lv": {
       "title": "我的吃貨等級",
-      "tut": "新手期 還有{n}天",
-      "tutLong": "新手期 還有{n}天，這段時間經驗值 ×{m}，糰糰幫你加速",
+      "up": "升到 Lv {n}！",
+      "upSay": ["糰糰為你開心", "", "糰糰：新客報到，歡迎光臨！", "糰糰：常客了，糰糰記得你的口味", "糰糰：開始探險囉，別老吃同一家", "糰糰：偵探上線，口味被糰糰看穿了", "糰糰：夜市都被你逛熟了", "糰糰：老饕等級，糰糰甘拜下風", "糰糰：評審大人，請多指教", "糰糰：大師！糰糰要拜師", "糰糰：傳說誕生，糰糰感動到說不出話"],
+      "firstGot": "解鎖〈{name}〉勳章",
+      "xp": "+{n} 經驗",
+      "bonus": "糰糰加碼 +{n}",
       "exp": "經驗值 {a} / {b}",
       "need": "還差 {n} 升到〈{name}〉",
       "max": "已經是最高等級，糰糰服了",
@@ -1263,6 +1343,37 @@
       "unlock": "恭喜解鎖〈{name}〉，糰糰對你刮目相看",
       "more": "另外還有 {n} 個新勳章",
       "ok": "收到"
+    },
+    "week": {
+      "title": "本週吃了什麼",
+      "thisWeek": "本週",
+      "lastWeek": "上週",
+      "prev": "看上週",
+      "next": "回到本週",
+      "loading": "糰糰翻紀錄中…",
+      "fail": "載入失敗，再開一次試試",
+      "sum": "本週吃了 {t} 種類型 · 連續記錄 {s} 天"
+    },
+    "share": {
+      "btn": "分享",
+      "title": "分享卡片",
+      "app": "今天又吃什麼",
+      "tTop5": "我的 Top5",
+      "tLevel": "我的吃貨等級",
+      "tWeek": "本週吃了什麼",
+      "kTop5": "我的 Top5",
+      "kLevel": "吃貨等級",
+      "kWeek": "本週",
+      "frame": "樣式",
+      "color": "顏色",
+      "nick": "顯示暱稱",
+      "go": "分享",
+      "loading": "糰糰畫卡片中…",
+      "hint": "手機可以直接傳到 LINE、IG。傳不出去的話，會出現圖片，長按圖片就能儲存。",
+      "saveHint": "長按圖片儲存，再到 LINE、IG 貼上",
+      "badges": "勳章 {a} / {b}",
+      "topNoneSub": "去過就按「又去了」，糰糰幫你數",
+      "frames": ["簡約", "手帳", "糰糰"]
     },
     "pocket": {
       "all": "全部",
@@ -1371,7 +1482,7 @@
   var state = { ctx: null, fixed: [], fixedCategories: [], recommended: [], promotionCandidates: [], groups: null,
                 selection: null, gachaResult: null, busy: false, varietyNudgeText: null,
                 recFetched: false, recPage: 0, recMoreBusy: false, catFilter: null, bootAt: 0, appSig: '', skew: 0,
-                level: null, unlockOpen: false, recView: 'all', pockets: { items: [] }, pkSet: {}, pkBusy: {}, pkFetched: false, pkFetching: false, pkAt: 0, pkErr: '' };
+                level: null, firstSent: {}, unlockOpen: false, recView: 'all', pockets: { items: [] }, pkSet: {}, pkBusy: {}, pkFetched: false, pkFetching: false, pkAt: 0, pkErr: '' };
   var tab = 'home';
   var bootSeq = 0;
 
@@ -1586,7 +1697,11 @@
     pocket10: '<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9.5 8.5h5M9.5 11.5h3"/>',
     pocket1: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
     again: '<path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4.6h-4.6"/>',
-    group1: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M8.5 10.5l2.2 2.2 4.3-4.3"/>'
+    group1: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M8.5 10.5l2.2 2.2 4.3-4.3"/>',
+    fgacha: '<circle cx="12" cy="9.2" r="6.2"/><path d="M5.8 9.2h12.4"/><rect x="5.5" y="15.4" width="13" height="5.6" rx="2"/>',
+    frefresh: '<path d="M20.5 11.5A8.5 8.5 0 0 0 6 6L3.8 8.2"/><path d="M3.8 3.8v4.4h4.4"/><path d="M3.5 12.5A8.5 8.5 0 0 0 18 18l2.2-2.2"/><path d="M20.2 20.2v-4.4h-4.4"/>',
+    fshare: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+    fweek: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2"/>'
   };
   function bIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BADGE_ICON[id] || BADGE_ICON.first) + '</svg>'; }
   function heartSvg() { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>'; }
@@ -1594,7 +1709,14 @@
 
   function applyLevel(lv, fromBoot) {
     if (!lv) return;
+    var prev = state.level;
     state.level = lv;
+    if (!fromBoot && prev && typeof prev.xp === 'number') {   // 행동 직후 응답: 올라간 만큼 +N 經驗이 1초 떠오르고, 레벨이 오르면 糰糰 한마디
+      var gain = typeof lv.gain === 'number' ? lv.gain : Math.max(0, lv.xp - prev.xp), bonus = lv.bonus || 0;
+      if (gain - bonus > 0) floatXp(fmt(TXT.lv.xp, { n: gain - bonus }));
+      if (bonus > 0) setTimeout(function () { floatXp(fmt(TXT.lv.bonus, { n: bonus }), 'bonus'); }, 350);
+      if (lv.up || lv.lv > prev.lv) setTimeout(function () { showLevelUp(lv); }, 500);
+    }
     renderProf();
     if ($('lvModal').style.display === 'flex') renderLvTop();
     if (fromBoot) cacheWrite();
@@ -1605,21 +1727,21 @@
     if (!L || !token || isClinic()) { el.hidden = true; return; }
     el.hidden = false;
     el.innerHTML = lvIco(L.lv, 'prof-ico') + '<span class="prof-name">' + esc(L.name) + '</span>' +
-      '<span class="prof-bar"><i style="width:' + L.pct + '%"></i></span>' +
-      (L.tutLeft > 0 ? '<span class="prof-tut">' + esc(fmt(TXT.lv.tut, { n: L.tutLeft })) + '</span>' : '');
+      '<span class="prof-bar"><i style="width:' + L.pct + '%"></i></span>';
   }
   function lvTopHtml(L) {
     return lvIco(L.lv, 'lv-ico') + '<div class="lv-name">' + esc(L.name) + '</div><div class="lv-sub">Lv ' + esc(L.lv) + ' / ' + esc(L.maxLv) + '</div>' +
       '<div class="lv-bar"><i style="width:' + L.pct + '%"></i></div>' +
-      '<div class="lv-need">' + (L.nextMin != null ? esc(fmt(TXT.lv.exp, { a: L.xp, b: L.nextMin })) + '　' + esc(fmt(TXT.lv.need, { n: L.nextMin - L.xp, name: L.nextName })) : esc(TXT.lv.max)) + '</div>' +
-      (L.tutLeft > 0 ? '<div class="lv-tut">' + esc(fmt(TXT.lv.tutLong, { n: L.tutLeft, m: L.tutMult || 2 })) + '</div>' : '');
+      '<div class="lv-need">' + (L.nextMin != null ? esc(fmt(TXT.lv.exp, { a: L.xp, b: L.nextMin })) + '　' + esc(fmt(TXT.lv.need, { n: L.nextMin - L.xp, name: L.nextName })) : esc(TXT.lv.max)) + '</div>';
   }
   function renderLvTop() { var t = $('lvTop'); if (t && state.level) t.innerHTML = lvTopHtml(state.level); }
   function openLevel() {
     if (!state.level || !token) return;
     $('lvTitle').textContent = TXT.lv.title;
-    $('lvBody').innerHTML = '<div id="lvTop">' + lvTopHtml(state.level) + '</div><h3>' + esc(TXT.lv.badges) + '</h3><div id="lvBadges" class="lv-sub">' + esc(TXT.lv.loading) + '</div>';
+    $('lvBody').innerHTML = '<div id="lvTop">' + lvTopHtml(state.level) + '</div><div class="lv-share-row">' + shareBtnHtml('level') + '</div>' +
+      '<h3>' + esc(TXT.week.title) + '</h3><div id="wkBox"></div><h3>' + esc(TXT.lv.badges) + '</h3><div id="lvBadges" class="lv-sub">' + esc(TXT.lv.loading) + '</div>';
     $('lvModal').style.display = 'flex';
+    wk.data = {}; wkLoad(0);
     api.withSuccessHandler(function (d) {
       if ($('lvModal').style.display !== 'flex') return;
       var keep = state.level && state.level.pending;
@@ -1650,6 +1772,332 @@
   }
   function closeUnlock() { $('unlockModal').style.display = 'none'; state.unlockOpen = false; }
   $('unlockOk').addEventListener('click', closeUnlock);
+
+  // ===== 經驗 반응(+N 떠오름) · 레벨업 · 「처음 해 봄」 =====
+  var CAT_ICON = (function () {
+    var bowl = '<path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M8.5 20.5h7"/><path d="M8 8.2q1-1.5 0-3M12 8.2q1-1.5 0-3M16 8.2q1-1.5 0-3"/>';
+    var m = {
+      '麵': '<path d="M3.5 12.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M8.5 21h7"/><path d="M6.5 9.5q1.2-1.6 2.4 0t2.4 0 2.4 0 2.4 0"/><path d="M14 3.5l4.5 5"/>',
+      '速食': '<path d="M4 10.5a8 6 0 0 1 16 0z"/><path d="M3.5 13.5h17"/><path d="M5 16.5h14"/><path d="M5.5 16.5a2.5 3 0 0 0 2.5 3h8a2.5 3 0 0 0 2.5-3"/>',
+      '炒飯': '<path d="M4 15.5h16"/><path d="M6 15.5a6 6.5 0 0 1 12 0"/><path d="M8.5 19.5h7"/><path d="M12 4.5v2"/>',
+      '便當': '<rect x="3.5" y="6" width="17" height="12.5" rx="2.5"/><path d="M10.5 6v12.5"/><path d="M10.5 12.3h10"/>',
+      '日式定食': '<path d="M4 14.5h16a2.5 2.5 0 0 1 0 5H4a2.5 2.5 0 0 1 0-5z"/><path d="M5.5 14.5C7 8.5 17 8.5 18.5 14.5"/>',
+      '冷凍庫・常備': '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/><path d="M9.5 4.5 12 6.5l2.5-2M9.5 19.5l2.5-2 2.5 2"/>',
+      '居酒屋': '<path d="M5.5 8.5h10v11h-10z"/><path d="M15.5 10.5H18a2 2 0 0 1 2 2V15a2 2 0 0 1-2 2h-2.5"/><path d="M5.5 8.5a2.4 2.4 0 0 1 2.4-3.2 2.8 2.8 0 0 1 4.6-.6 2.4 2.4 0 0 1 3 3.8"/>',
+      '熱炒': '<path d="M3.5 11.5h14a7 7 0 0 1-14 0z"/><path d="M17.5 12.5 21 10"/><path d="M8 6.5q1-1.5 0-3M12 6.5q1-1.5 0-3"/>',
+      '早餐・輕食': '<path d="M12 4c3 0 5.2 1.4 6.2 3.6 2 .3 2.8 2.6 1.6 4.5-.7 1.2-2.2 1.7-3.3 1.4-1 3-3.3 5-6.5 5S6.5 17.5 5.6 14.4C3.8 14 3 12.2 3.7 10.6 4.4 9 5.8 8.4 7 8.6 7.6 5.9 9.5 4 12 4z"/><circle cx="12" cy="11" r="2.6"/>',
+      '飲料・甜點': '<path d="M6.5 8.5h11l-1.3 11.5H7.8z"/><path d="M6 8.5h12"/><path d="m13 8.5 2-5.5h3"/>',
+      '鍋物・火鍋': '<path d="M3.5 11.5h17v4a4 4 0 0 1-4 4h-9a4 4 0 0 1-4-4z"/><path d="M2 11.5h20"/><path d="M8 8.5q1-1.6 0-3.2M12 8.5q1-1.6 0-3.2M16 8.5q1-1.6 0-3.2"/>',
+      '日式': '<path d="M4 14.5h16a2.5 2.5 0 0 1 0 5H4a2.5 2.5 0 0 1 0-5z"/><path d="M5.5 14.5C7 8.5 17 8.5 18.5 14.5"/>',
+      '韓式': '<path d="M4 12.5h16a8 7 0 0 1-16 0z"/><path d="M8.5 20.5h7"/><circle cx="12" cy="9" r="2.2"/><path d="M7 9.5h.01M17 9.5h.01"/>',
+      '東南亞': '<path d="M17.5 5.5c2.5 1.5 3 5 .5 8.5C15.5 17.5 9 20 4.5 19.5c3.5-1 6.8-3.8 8.3-7.4 1-2.4 1.7-4.6 4.7-6.6z"/><path d="m17.5 5.5 1.5-2.5"/>',
+      '中式': '<path d="M3.5 16c0-4.5 3.8-8 8.5-8s8.5 3.5 8.5 8z"/><path d="M8 11.5l1 4.5M12 9v7M16 11.5l-1 4.5"/>',
+      '西式': '<path d="M7 3v7a2.5 2.5 0 0 0 2.5 2.5V21M4.5 3v6M9.5 3v6.5M17 21V3c-2.2 1.5-3 4-3 7.5h3"/>',
+      '早午餐': '<path d="M12 4c3 0 5.2 1.4 6.2 3.6 2 .3 2.8 2.6 1.6 4.5-.7 1.2-2.2 1.7-3.3 1.4-1 3-3.3 5-6.5 5S6.5 17.5 5.6 14.4C3.8 14 3 12.2 3.7 10.6 4.4 9 5.8 8.4 7 8.6 7.6 5.9 9.5 4 12 4z"/><circle cx="12" cy="11" r="2.6"/>',
+      '燒肉・海鮮': '<path d="M3 12c3-4.5 8-6 12-3.5L19 6v12l-4-2.5C11 18 6 16.5 3 12z"/><path d="M8.5 11h.01"/>',
+      '素食': '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-4 6-7 10-9"/>',
+      '台式・其他': bowl, '其他': bowl
+    };
+    return { get: function (name) { return m[name] || bowl; }, all: m };
+  })();
+  function catIco(name, size) {
+    return '<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="' + size + '" height="' + size + '" aria-hidden="true">' + CAT_ICON.get(name) + '</svg>';
+  }
+  var SHARE_ICON = '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>';
+  function shareBtnHtml(kind) {
+    return '<button class="btn sh-open" type="button" data-share="' + kind + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SHARE_ICON + '</svg>' + esc(TXT.share.btn) + '</button>';
+  }
+
+  function floatXp(text, cls) {
+    var el = document.createElement('div'); el.className = 'xp-fl' + (cls ? ' ' + cls : ''); el.textContent = text;
+    var top = 70, p = $('prof');
+    try { if (p && !p.hidden) top = Math.round(p.getBoundingClientRect().bottom + 4); } catch (e) {}
+    el.style.top = (top + document.querySelectorAll('.xp-fl').length * 34) + 'px';
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1300);
+  }
+  var lvupTimer = 0;
+  function closeLevelUp() { clearTimeout(lvupTimer); var o = $('lvupOv'); if (o) o.classList.remove('on'); }
+  function showLevelUp(lv) {
+    var o = $('lvupOv'); if (!o) return;
+    var cf = '', cols = ['#e4572e', '#f7b538', '#2f9e6b', '#5aa9e6', '#e87aa6'];
+    for (var i = 0; i < 18; i++) cf += '<i style="left:' + (4 + i * 5.4) + '%;background:' + cols[i % cols.length] + ';animation-delay:' + ((i % 6) * 0.08) + 's;--dx:' + ((i % 2 ? 1 : -1) * (8 + (i % 5) * 4)) + 'px"></i>';
+    o.innerHTML = '<div class="lvup-cf" aria-hidden="true">' + cf + '</div><div class="lvup-box">' + MASCOT.svg('happy', { size: 92 }) +
+      '<div class="lvup-t">' + esc(fmt(TXT.lv.up, { n: lv.lv })) + '</div><div class="lvup-n">' + esc(lv.name) + '</div>' +
+      '<div class="lvup-s">' + esc(TXT.lv.upSay[lv.lv] || TXT.lv.upSay[0]) + '</div></div>';
+    o.classList.add('on');
+    clearTimeout(lvupTimer); lvupTimer = setTimeout(closeLevelUp, 3600);
+  }
+  $('lvupOv').addEventListener('click', closeLevelUp);
+  // 「처음 해 봄」: 서버가 4종류만 받는다. 이미 받은 종류·이번 실행에서 이미 보낸 종류는 다시 안 보냄.
+  function firstOnce(kind) {
+    if (!token || isClinic()) return;
+    var L = state.level;
+    if (L && (L.fs || []).indexOf(kind) >= 0) return;
+    if (state.firstSent[kind]) return;
+    state.firstSent[kind] = 1;
+    api.withSuccessHandler(function (res) {
+      if (!res || res.already) { if (L) { L.fs = (L.fs || []).concat([kind]); } return; }
+      applyLevel(res.lv, false); onFirstGot(kind, res.id, res.name);
+    }).withFailureHandler(function () { state.firstSent[kind] = 0; }).markFirst(token, kind);
+  }
+  function onFirstGot(kind, id, name) {
+    if (state.level) { var fs = state.level.fs || []; if (fs.indexOf(kind) < 0) fs.push(kind); state.level.fs = fs; state.level.pending = (state.level.pending || []).filter(function (b) { return b.id !== id; }); }
+    toast(fmt(TXT.lv.firstGot, { name: name }));
+    api.markBadgesSeen(token, [id]);
+  }
+
+  // ===== 本週吃了什麼 (等級 화면 안) =====
+  var wk = { off: 0, data: {}, busy: false };
+  var WK_DOW = ['一', '二', '三', '四', '五', '六', '日'];
+  function wkRange(d) { var a = d.start.split('-'), b = d.end.split('-'); return Number(a[1]) + '/' + Number(a[2]) + ' – ' + Number(b[1]) + '/' + Number(b[2]); }
+  function wkCellHtml(day, i) {
+    var cats = day.cats || [], ic = '';
+    if (day.n > 0) {
+      var show = cats.slice(0, cats.length > 2 ? 2 : cats.length), rest = cats.length - show.length;
+      ic = '<span class="wk-ics">' + show.map(function (c) { return catIco(c, show.length > 1 ? 20 : 26); }).join('') + (rest > 0 ? '<b class="wk-more">+' + rest + '</b>' : '') + '</span>';
+    } else ic = '<span class="wk-ics empty"></span>';
+    return '<div class="wk-day' + (day.today ? ' today' : '') + (day.future ? ' future' : '') + (day.n > 0 ? ' has' : '') + '" title="' + esc(cats.join('、')) + '"><small>' + WK_DOW[i] + '</small>' + ic + '<i>' + Number(day.date.slice(8)) + '</i></div>';
+  }
+  function renderWeek() {
+    var box = $('wkBox'); if (!box) return;
+    var d = wk.data[wk.off];
+    if (!d) { box.innerHTML = '<div class="lv-sub">' + esc(wk.err || TXT.week.loading) + '</div>'; return; }
+    box.innerHTML = '<div class="wk-head"><button class="wk-nav" type="button" id="wkPrev" aria-label="' + esc(TXT.week.prev) + '"' + (wk.off === 0 ? '' : ' style="visibility:hidden"') + '>←</button>' +
+      '<span class="wk-range">' + esc(wk.off === 0 ? TXT.week.thisWeek : TXT.week.lastWeek) + '　' + esc(wkRange(d)) + '</span>' +
+      '<button class="wk-nav" type="button" id="wkNext" aria-label="' + esc(TXT.week.next) + '"' + (wk.off === 0 ? ' style="visibility:hidden"' : '') + '>→</button></div>' +
+      '<div class="wk-grid">' + d.days.map(wkCellHtml).join('') + '</div>' +
+      '<div class="wk-sum">' + esc(fmt(TXT.week.sum, { t: d.typeN, s: d.streak })) + '</div>' + shareBtnHtml('week');
+    $('wkPrev').addEventListener('click', function () { wkLoad(-1); });
+    $('wkNext').addEventListener('click', function () { wkLoad(0); });
+  }
+  function wkLoad(off) {
+    wk.off = off; wk.err = '';
+    if (wk.data[off]) { renderWeek(); return; }
+    renderWeek();
+    api.withSuccessHandler(function (d) {
+      wk.data[off] = d;
+      if (d.lv) { applyLevel(d.lv, false); if (d.first) onFirstGot('week', d.first.id, d.first.name); }
+      if (wk.off === off) renderWeek();
+    }).withFailureHandler(function (e) { wk.err = (e && e.message) || TXT.week.fail; if (wk.off === off) renderWeek(); }).getWeekMap(token, off);
+  }
+
+  // ===== 공유 카드 (앱 안에서 canvas로 PNG 생성 — 서버 호출·외부 서비스 없음) =====
+  var CARD_W = 1080, CARD_H = 1350;
+  var CARD_COLORS = [
+    { n: '奶油', bg: '#fff5e6' }, { n: '蜜桃', bg: '#ffe3d6' }, { n: '奶黃', bg: '#fdf0bd' },
+    { n: '薄荷', bg: '#e1f3e5' }, { n: '天空', bg: '#e2effb' }, { n: '藕粉', bg: '#f6e4f0' }
+  ];
+  var CARD_FRAMES = ['plain', 'note', 'tm'];
+  var SH = { kind: 'level', frame: 0, color: 0, nick: true, weekOff: 0, data: {}, seq: 0, file: null, url: '' };
+  var CV_FONT = '"PingFang TC", -apple-system, "Microsoft JhengHei", "Noto Sans TC", sans-serif';
+  var imgCache = {};
+  function loadImg(src) {
+    if (imgCache[src]) return imgCache[src];
+    imgCache[src] = new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = src; });
+    return imgCache[src];
+  }
+  function svgImg(inner, color, vb) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + (vb || '0 0 24 24') + '" width="240" height="240" fill="none" stroke="' + color + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+    return loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  }
+  function mascotImg(mood) {
+    var s = MASCOT.svg(mood, { size: 400 }).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="420" ');
+    return loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s));
+  }
+  function rrect(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function fitText(c, text, maxW, size, weight, minSize) {
+    var s = size; text = String(text);
+    c.font = weight + ' ' + s + 'px ' + CV_FONT;
+    while (c.measureText(text).width > maxW && s > (minSize || 28)) { s -= 2; c.font = weight + ' ' + s + 'px ' + CV_FONT; }
+    if (c.measureText(text).width > maxW) { var arr = Array.from(text); while (arr.length > 1 && c.measureText(arr.join('') + '…').width > maxW) arr.pop(); text = arr.join('') + '…'; }
+    return text;
+  }
+  function putText(c, text, x, y, o) {
+    o = o || {}; c.fillStyle = o.color || '#2b2420'; c.textAlign = o.align || 'center'; c.textBaseline = 'middle';
+    var t = o.maxW ? fitText(c, text, o.maxW, o.size || 40, o.weight || 400, o.min) : (c.font = (o.weight || 400) + ' ' + (o.size || 40) + 'px ' + CV_FONT, String(text));
+    c.fillText(t, x, y);
+  }
+  function cardDate() { var d = new Date(); return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0'); }
+  function cardKindTitle(k) { return k === 'top5' ? TXT.share.tTop5 : k === 'level' ? TXT.share.tLevel : TXT.share.tWeek; }
+  // 그리기에 필요한 그림을 먼저 모두 불러온 뒤 한 번에 그린다
+  function cardAssets(kind) {
+    var jobs = { tm: mascotImg('happy') }, D = SH.data;
+    if (kind === 'level' && D.level) {
+      jobs.lvimg = loadImg('img/level/' + D.level.lv + '.png');
+      var earned = (D.level.badges || []).filter(function (b) { return b.earned; }).slice(0, 6);
+      earned.forEach(function (b) { jobs['b_' + b.id] = svgImg(BADGE_ICON[b.id] || BADGE_ICON.first, '#e4572e'); });
+    }
+    if (kind === 'week' && D.week[SH.weekOff]) {
+      D.week[SH.weekOff].days.forEach(function (d) { d.cats.slice(0, 2).forEach(function (c) { jobs['c_' + c] = svgImg(CAT_ICON.get(c), '#e4572e'); }); });
+    }
+    var keys = Object.keys(jobs);
+    return Promise.all(keys.map(function (k) { return jobs[k]; })).then(function (arr) { var o = {}; keys.forEach(function (k, i) { o[k] = arr[i]; }); return o; });
+  }
+  function drawFrame(c, frame, bg, A) {
+    c.fillStyle = bg; c.fillRect(0, 0, CARD_W, CARD_H);
+    if (frame === 0) {   // 簡約
+      c.strokeStyle = 'rgba(228,87,46,.45)'; c.lineWidth = 6; rrect(c, 44, 44, CARD_W - 88, CARD_H - 88, 44); c.stroke();
+    } else if (frame === 1) {   // 手帳
+      c.strokeStyle = 'rgba(43,36,32,.08)'; c.lineWidth = 3;
+      for (var y = 300; y < 1230; y += 62) { c.beginPath(); c.moveTo(60, y); c.lineTo(CARD_W - 60, y); c.stroke(); }
+      c.strokeStyle = 'rgba(228,87,46,.35)'; c.lineWidth = 4; c.beginPath(); c.moveTo(110, 40); c.lineTo(110, CARD_H - 40); c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.9)'; c.strokeStyle = 'rgba(43,36,32,.25)'; c.lineWidth = 3;
+      for (var i = 0; i < 7; i++) { c.beginPath(); c.arc(54, 140 + i * 170, 16, 0, Math.PI * 2); c.fill(); c.stroke(); }
+      c.save(); c.translate(CARD_W / 2, 30); c.rotate(-0.03); c.fillStyle = 'rgba(247,181,56,.55)'; c.fillRect(-120, -24, 240, 70); c.restore();
+    } else {   // 糰糰
+      c.fillStyle = 'rgba(228,87,46,.22)';
+      for (var x = 40; x < CARD_W; x += 60) { c.beginPath(); c.arc(x, 34, 12, 0, 7); c.fill(); c.beginPath(); c.arc(x, CARD_H - 34, 12, 0, 7); c.fill(); }
+      for (var y2 = 100; y2 < CARD_H - 40; y2 += 60) { c.beginPath(); c.arc(34, y2, 12, 0, 7); c.fill(); c.beginPath(); c.arc(CARD_W - 34, y2, 12, 0, 7); c.fill(); }
+      if (A.tm) c.drawImage(A.tm, 770, 1020, 270, 284);
+    }
+  }
+  function drawHeader(c, kind, nick, showNick) {
+    putText(c, cardKindTitle(kind), CARD_W / 2, 175, { size: 92, weight: 800, maxW: 880 });
+    if (showNick && nick) {
+      c.font = '700 44px ' + CV_FONT; var t = fitText(c, nick, 520, 44, 700, 30), w = c.measureText(t).width + 72;
+      c.fillStyle = 'rgba(255,255,255,.78)'; rrect(c, (CARD_W - w) / 2, 232, w, 70, 35); c.fill();
+      putText(c, t, CARD_W / 2, 268, { size: 44, weight: 700, color: '#e4572e' });
+    }
+  }
+  function drawFooter(c) {
+    putText(c, TXT.share.app, 96, 1224, { size: 42, weight: 800, color: '#e4572e', align: 'left' });
+    putText(c, cardDate(), 96, 1270, { size: 32, color: '#8a7f77', align: 'left' });
+  }
+  function drawTop5(c, items) {
+    var rows = 5, y0 = 350, h = 126, gap = 16;
+    if (!items.length) {
+      putText(c, TXT.pocket.topNone.split('，')[0], CARD_W / 2, 640, { size: 52, weight: 700, color: '#8a7f77', maxW: 860 });
+      putText(c, TXT.share.topNoneSub, CARD_W / 2, 720, { size: 40, color: '#8a7f77', maxW: 860 }); return;
+    }
+    for (var i = 0; i < rows; i++) {
+      var y = y0 + i * (h + gap), it = items[i];
+      c.fillStyle = it ? 'rgba(255,255,255,.82)' : 'rgba(255,255,255,.35)'; rrect(c, 96, y, CARD_W - 192, h, 34); c.fill();
+      c.fillStyle = it ? '#e4572e' : 'rgba(228,87,46,.3)'; c.beginPath(); c.arc(170, y + h / 2, 38, 0, 7); c.fill();
+      putText(c, String(i + 1), 170, y + h / 2 + 2, { size: 44, weight: 800, color: '#fff' });
+      if (it) {
+        putText(c, it.name, 240, y + h / 2, { size: 52, weight: 800, align: 'left', maxW: 470 });
+        putText(c, fmt(TXT.pocket.times, { n: it.count }), CARD_W - 130, y + h / 2, { size: 38, color: '#8a7f77', align: 'right' });
+      }
+    }
+  }
+  function drawLevel(c, L, A) {
+    var cx = CARD_W / 2, cy = 560, r = 150;
+    c.fillStyle = '#ffe8de'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.fill();
+    if (A.lvimg) { c.save(); c.beginPath(); c.arc(cx, cy, r, 0, 7); c.clip(); c.drawImage(A.lvimg, cx - r, cy - r, r * 2, r * 2); c.restore(); }
+    else putText(c, String(L.lv), cx, cy + 6, { size: 170, weight: 800, color: '#e4572e' });
+    c.strokeStyle = '#e4572e'; c.lineWidth = 10; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.stroke();
+    putText(c, L.name, cx, 790, { size: 84, weight: 800, maxW: 880 });
+    putText(c, 'Lv ' + L.lv + ' / ' + L.maxLv, cx, 862, { size: 46, color: '#8a7f77' });
+    c.fillStyle = 'rgba(43,36,32,.12)'; rrect(c, 190, 905, 700, 30, 15); c.fill();
+    c.fillStyle = '#e4572e'; rrect(c, 190, 905, Math.max(30, 700 * L.pct / 100), 30, 15); c.fill();
+    putText(c, L.nextMin != null ? fmt(TXT.lv.exp, { a: L.xp, b: L.nextMin }) : TXT.lv.max, cx, 975, { size: 38, color: '#8a7f77', maxW: 860 });
+    var earned = (L.badges || []).filter(function (b) { return b.earned; });
+    if (earned.length) {
+      putText(c, fmt(TXT.share.badges, { a: earned.length, b: (L.badges || []).length }), 96, 1040, { size: 36, weight: 700, align: 'left' });
+      var shown = earned.slice(0, 6);
+      shown.forEach(function (b, i) { var im = A['b_' + b.id]; if (im) c.drawImage(im, 96 + i * 92, 1062, 78, 78); });
+      if (earned.length > shown.length) putText(c, '+' + (earned.length - shown.length), 96 + shown.length * 92 + 10, 1102, { size: 40, weight: 800, color: '#e4572e', align: 'left' });
+    }
+  }
+  function drawWeek(c, d, A) {
+    putText(c, (SH.weekOff === 0 ? TXT.week.thisWeek : TXT.week.lastWeek) + '　' + wkRange(d), CARD_W / 2, 360, { size: 42, color: '#8a7f77' });
+    var cw = 128, gap = 8, x0 = (CARD_W - (cw * 7 + gap * 6)) / 2, y0 = 420, h = 430;
+    d.days.forEach(function (day, i) {
+      var x = x0 + i * (cw + gap);
+      c.fillStyle = day.today ? '#ffe8de' : 'rgba(255,255,255,' + (day.future ? '.35' : '.82') + ')'; rrect(c, x, y0, cw, h, 30); c.fill();
+      if (day.today) { c.strokeStyle = '#e4572e'; c.lineWidth = 6; rrect(c, x, y0, cw, h, 30); c.stroke(); }
+      putText(c, WK_DOW[i], x + cw / 2, y0 + 48, { size: 44, weight: 800, color: day.today ? '#e4572e' : '#2b2420' });
+      var cats = day.cats.slice(0, 2), icy = y0 + 100;
+      cats.forEach(function (cname, k) { var im = A['c_' + cname]; if (im) c.drawImage(im, x + (cw - 82) / 2, icy + k * 88, 82, 82); });
+      if (day.cats.length > 2) putText(c, '+' + (day.cats.length - 2), x + cw / 2, icy + 2 * 88 + 22, { size: 40, weight: 800, color: '#e4572e' });
+      if (!day.cats.length) putText(c, '–', x + cw / 2, icy + 60, { size: 56, color: 'rgba(43,36,32,.25)' });
+      putText(c, String(Number(day.date.slice(8))), x + cw / 2, y0 + h - 40, { size: 40, color: '#8a7f77' });
+    });
+    putText(c, fmt(TXT.week.sum, { t: d.typeN, s: d.streak }), CARD_W / 2, 960, { size: 54, weight: 800, maxW: 920, min: 34 });
+  }
+  function renderCard() {
+    var seq = ++SH.seq, cv = $('shCanvas'), kind = SH.kind, D = SH.data;
+    SH.file = null; $('shGo').disabled = true;
+    var ready = kind === 'top5' ? !!D.pk : kind === 'level' ? !!D.level : !!D.week[SH.weekOff];
+    $('shLoad').style.display = ready ? 'none' : 'flex';
+    if (!ready) return Promise.resolve();
+    return cardAssets(kind).then(function (A) {
+      if (seq !== SH.seq) return;
+      var c = cv.getContext('2d'); c.clearRect(0, 0, CARD_W, CARD_H);
+      drawFrame(c, SH.frame, CARD_COLORS[SH.color].bg, A);
+      drawHeader(c, kind, myNick(), SH.nick);
+      if (kind === 'top5') drawTop5(c, D.pk);
+      else if (kind === 'level') drawLevel(c, D.level, A);
+      else drawWeek(c, D.week[SH.weekOff], A);
+      drawFooter(c);
+      cv.toBlob(function (blob) {
+        if (seq !== SH.seq || !blob) return;
+        try { SH.file = new File([blob], 'twe-card.png', { type: 'image/png' }); } catch (e) { SH.file = blob; }
+        SH.blob = blob; $('shGo').disabled = false;
+      }, 'image/png');
+    });
+  }
+  function shTop5(items) {
+    return (items || []).filter(function (i) { return i.count > 0; }).sort(function (a, b) { return b.count !== a.count ? b.count - a.count : (a.last < b.last ? 1 : a.last > b.last ? -1 : 0); }).slice(0, 5);
+  }
+  function shNeed() {
+    var kind = SH.kind, D = SH.data;
+    if (kind === 'top5' && !D.pk) {
+      api.withSuccessHandler(function (p) { D.pk = shTop5((p && p.items) || []); if (SH.kind === 'top5') renderCard(); }).withFailureHandler(function () { toast(TXT.pocket.loadFail, true); }).getPockets(token);
+    } else if (kind === 'level' && !D.level) {
+      api.withSuccessHandler(function (d) { D.level = d; if (SH.kind === 'level') renderCard(); }).withFailureHandler(function () { toast(TXT.lv.loadFail, true); }).getLevelDetail(token);
+    } else if (kind === 'week' && !D.week[SH.weekOff]) {
+      var off = SH.weekOff;
+      if (wk.data[off]) { D.week[off] = wk.data[off]; renderCard(); }
+      else api.withSuccessHandler(function (d) { D.week[off] = d; wk.data[off] = d; if (SH.kind === 'week' && SH.weekOff === off) renderCard(); }).withFailureHandler(function () { toast(TXT.week.fail, true); }).getWeekMap(token, off);
+    }
+  }
+  function shSync() {
+    Array.prototype.forEach.call(document.querySelectorAll('#shKinds button'), function (b) { b.classList.toggle('on', b.getAttribute('data-k') === SH.kind); });
+    Array.prototype.forEach.call(document.querySelectorAll('#shFrames button'), function (b) { b.classList.toggle('on', Number(b.getAttribute('data-f')) === SH.frame); });
+    Array.prototype.forEach.call(document.querySelectorAll('#shColors button'), function (b) { b.classList.toggle('on', Number(b.getAttribute('data-c')) === SH.color); });
+    $('shNick').checked = SH.nick;
+  }
+  function openShare(kind) {
+    if (!token || isClinic()) return;
+    SH.kind = kind; SH.weekOff = kind === 'week' ? wk.off : 0; SH.data = { pk: null, level: null, week: {} }; SH.seq++;
+    $('shHint').textContent = TXT.share.hint;
+    $('shModal').style.display = 'flex'; shSync();
+    var go = function () { shNeed(); renderCard(); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
+  }
+  function closeShare() { $('shModal').style.display = 'none'; SH.seq++; }
+  function shDone() { firstOnce('share'); }
+  function shGo() {
+    var f = SH.file; if (!f) return;
+    if (navigator.canShare && navigator.share && f instanceof File && navigator.canShare({ files: [f] })) {
+      navigator.share({ files: [f], title: TXT.share.app }).then(shDone).catch(function (e) { if (e && e.name === 'AbortError') return; shShowImg(); });
+    } else shShowImg();
+  }
+  function shShowImg() {
+    if (!SH.blob) return;
+    try { if (SH.url) URL.revokeObjectURL(SH.url); } catch (e) {}
+    SH.url = URL.createObjectURL(SH.blob);
+    $('shImg').src = SH.url; $('shImgModal').style.display = 'flex'; shDone();
+  }
+  $('shColors').innerHTML = CARD_COLORS.map(function (c, i) { return '<button type="button" data-c="' + i + '" aria-label="' + c.n + '" style="background:' + c.bg + '"></button>'; }).join('');
+  $('shClose').addEventListener('click', closeShare);
+  $('shImgClose').addEventListener('click', function () { $('shImgModal').style.display = 'none'; });
+  $('shGo').addEventListener('click', shGo);
+  $('shKinds').addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('button[data-k]') : null; if (!b) return;
+    SH.kind = b.getAttribute('data-k'); shSync(); shNeed(); renderCard();
+  });
+  $('shFrames').addEventListener('click', function (ev) { var b = ev.target.closest ? ev.target.closest('button[data-f]') : null; if (!b) return; SH.frame = Number(b.getAttribute('data-f')); shSync(); renderCard(); });
+  $('shColors').addEventListener('click', function (ev) { var b = ev.target.closest ? ev.target.closest('button[data-c]') : null; if (!b) return; SH.color = Number(b.getAttribute('data-c')); shSync(); renderCard(); });
+  $('shNick').addEventListener('change', function () { SH.nick = this.checked; renderCard(); });
+  document.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-share]') : null;
+    if (b) openShare(b.getAttribute('data-share'));
+  });
 
   // ----- 口袋名單 -----
   function pkKey(n) { return String(n || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
@@ -1732,7 +2180,7 @@
     var top = pkTop();
     var topHtml = '<div class="pkt-top"><h3>' + esc(TXT.pocket.top5) + '</h3>' + (top.length ? '<ol>' + top.map(function (i, k) {
       return '<li><span class="rk">' + (k + 1) + '</span><span class="nm">' + esc(i.name) + '</span><span class="ct">' + esc(fmt(TXT.pocket.times, { n: i.count })) + '</span></li>';
-    }).join('') + '</ol>' : '<div class="none">' + esc(TXT.pocket.topNone) + '</div>') + '</div>';
+    }).join('') + '</ol>' : '<div class="none">' + esc(TXT.pocket.topNone) + '</div>') + shareBtnHtml('top5') + '</div>';
     var now = Date.now();
     var cards = P.map(function (i) {
       var link = safeUrl(i.link) ? ' · <a href="' + esc(i.link) + '" target="_blank" rel="noopener">地圖</a>' : '';
@@ -1878,6 +2326,7 @@
   function recMore() {
     if (state.recMoreBusy) return;
     var rec = state.recommended, next = state.recPage + 1;
+    firstOnce('refresh');
     if (next * 10 < rec.length) { state.recPage = next; renderRec(); scrollToContentTop(); return; }
     state.recMoreBusy = true; renderRec();   // 눌린 모양을 즉시 보여 주고 중복 눌림 막기(전체 화면 載入中 없음)
     var seen = rec.map(function (x) { return x.name; });
@@ -2002,28 +2451,102 @@
   $('setNick').addEventListener('click', function () { $('setModal').style.display = 'none'; openNickEditor(); });
   $('setOut').addEventListener('click', function () { $('setModal').style.display = 'none'; doLogout(); });
 
-  // ===== 服務條款 · 隱私權政策 (測試階段草稿 — 法律審閱前的版本, 最終文字由老闆確定) =====
+  // ===== 服務條款 · 隱私權政策 v1 (測試版, 2026-11-26. 「（待填）」은 운영자 연락 이메일 자리 — 원장님이 채움) =====
   var LEGAL = {
     terms: { title: '服務條款', html: [
-      '<p class="lg-note">測試階段版本 · 最後更新 2026-11-25</p>',
-      '<h3>1. 這是什麼</h3><p>「今天吃什麼」（糰糰）是幫你決定每餐吃什麼的小工具，目前為少數人試用的測試階段。</p>',
-      '<h3>2. 測試階段說明</h3><p>服務內容、功能與資料可能不經預告就修改、暫停或重置，也可能隨時結束測試。重要的事請自行另外記下，我們不保證資料永久保存。</p>',
-      '<h3>3. 推薦的公平性</h3><p>推薦與扭蛋的結果不會因為廣告費或任何付費而改變順序。餐廳資料來自公開資訊，營業時間、價位等可能與實際不同，出門前請自行確認。</p>',
-      '<h3>4. 帳號與 PIN 碼</h3><p>請自行保管帳號與 4 位數 PIN 碼。連續輸入錯誤太多次，帳號會暫時鎖定 15 分鐘。請勿冒用他人帳號，或做出干擾服務運作的行為。</p>',
-      '<h3>5. 你的內容</h3><p>你輸入的暱稱、固定菜單、備註與意見，僅用於提供服務與改善服務。請勿輸入違法或侵害他人的內容。</p>',
-      '<h3>6. 責任範圍</h3><p>本服務依現況提供，不保證不中斷或沒有錯誤。因使用推薦結果而產生的用餐決定與花費，由使用者自行負責。</p>',
-      '<h3>7. 聯絡</h3><p>營運者聯絡方式：（待填）。也可以在「設定 → 意見回饋」留言。</p>'
+      "<p class=\"lg-note\">測試版 v1 · 最後更新：2026年11月26日</p>",
+      "<h3>第1條 適用範圍</h3>",
+      "<p>歡迎使用「今天又吃什麼」（以下稱「本服務」）。本服務由「今天又吃什麼」營運團隊（以下稱「我們」）提供。你註冊或使用本服務，即表示你已閱讀、了解並同意本條款與《隱私權政策》。若不同意，請停止使用。</p>",
+      "<h3>第2條 服務內容與測試階段</h3>",
+      "<p>本服務提供用餐選擇的建議、紀錄、飯團一起決定、口袋名單、吃貨等級等功能。目前為邀請制測試階段，功能、介面與資料可能不經預告而修改、暫停、重置或終止。我們會盡力保存資料，但不保證資料永久保存，重要內容請自行另外記錄。</p>",
+      "<h3>第3條 帳號與安全</h3>",
+      "<ol>",
+      "<li>你應提供真實可用的暱稱與帳號，並自行妥善保管帳號與 PIN 碼。</li>",
+      "<li>使用你的帳號所進行的行為，視為你本人的行為。發現帳號遭他人使用時，請立即透過「設定 → 意見回饋」通知我們。</li>",
+      "<li>為保護帳號，連續輸入錯誤 PIN 碼達一定次數時，帳號會暫時鎖定。</li>",
+      "</ol>",
+      "<h3>第4條 使用規範</h3>",
+      "<p>你不得從事下列行為：</p>",
+      "<ol>",
+      "<li>冒用他人身分或帳號；</li>",
+      "<li>輸入違法、不實、侵害他人權利或令人反感的內容；</li>",
+      "<li>以程式、大量請求等方式干擾、破壞或試圖未經授權存取本服務；</li>",
+      "<li>將本服務用於商業推銷或其他非本服務預期的用途。</li>",
+      "</ol>",
+      "<p>違反上述規定時，我們得不經通知刪除相關內容、暫停或終止你的帳號。</p>",
+      "<h3>第5條 推薦內容與餐廳資訊</h3>",
+      "<ol>",
+      "<li>推薦與扭蛋的結果及順序，不會因為廣告費或任何付費而改變。未來若出現廣告或合作內容，會清楚標示為「廣告」或「合作」。</li>",
+      "<li>餐廳名稱、地址、評分、營業時間、價位等資訊來自公開資料（如 Google 地圖），可能與實際情況不同。出發前請自行確認，我們不保證其正確性與即時性。</li>",
+      "<li>點選「地圖」會開啟第三方服務（如 Google 地圖），其使用適用該第三方的條款與隱私政策。</li>",
+      "</ol>",
+      "<h3>第6條 你的內容</h3>",
+      "<p>你輸入的暱稱、固定菜單、備註、口袋名單與意見回饋等內容，權利仍屬於你。你同意我們為了提供、維護與改善本服務，在必要範圍內儲存、顯示與處理這些內容。</p>",
+      "<h3>第7條 智慧財產權</h3>",
+      "<p>本服務的程式、介面設計、角色「糰糰」、文字與圖像等，權利屬於我們或合法權利人。未經同意，不得重製、改作或用於其他用途。</p>",
+      "<h3>第8條 免責聲明</h3>",
+      "<ol>",
+      "<li>本服務依「現況」提供，我們不保證服務不中斷、無錯誤或完全符合你的需求。</li>",
+      "<li>用餐選擇、交通與消費等決定，由你自行判斷並負責。若有食物過敏或特殊飲食需求，請以店家實際資訊為準。</li>",
+      "<li>因不可抗力、第三方服務（如 Google）異常或你自身因素造成的損失，我們不負賠償責任；在法律允許範圍內，我們的責任以你為使用本服務實際支付的金額為上限（測試階段為免費）。</li>",
+      "</ol>",
+      "<h3>第9條 未成年人</h3>",
+      "<p>未滿18歲者，應在法定代理人閱讀並同意本條款與《隱私權政策》後使用本服務。</p>",
+      "<h3>第10條 條款修改</h3>",
+      "<p>我們可能修改本條款。重大變更會在本服務內公告；修改後你仍繼續使用，視為同意修改後的內容。</p>",
+      "<h3>第11條 帳號終止</h3>",
+      "<p>你可以隨時透過「設定 → 意見回饋」要求刪除帳號。測試結束時，我們得終止所有測試帳號並依《隱私權政策》處理資料。</p>",
+      "<h3>第12條 準據法與管轄</h3>",
+      "<p>本條款以中華民國法律為準據法。因本服務發生爭議時，雙方同意以臺灣臺北地方法院為第一審管轄法院。</p>",
+      "<h3>第13條 聯絡我們</h3>",
+      "<p>Email：（待填）</p>",
+      "<p>或於本服務「設定 → 意見回饋」留言。</p>"
     ].join('') },
     privacy: { title: '隱私權政策', html: [
-      '<p class="lg-note">測試階段版本 · 最後更新 2026-11-25</p>',
-      '<h3>1. 我們收集什麼</h3><ul><li>暱稱與帳號</li><li>PIN 碼的雜湊值（不保存 PIN 碼本身）</li><li>你按下「確定」的用餐紀錄（日期、時段、選擇方式、菜單、備註）</li><li>你建立的固定菜單</li><li>你加入或建立的飯團與成員資料、一起決定的回答</li><li>你送出的意見回饋</li><li>開啟本程式的日期（最後開啟日、累計開啟天數，每天最多記一次）</li></ul>',
-      '<h3>2. 為什麼收集</h3><p>用來登入、顯示你的紀錄與固定菜單、讓飯團一起決定、避免連續推薦相同的食物、處理你的意見，以及了解測試期間有沒有人在用。</p>',
-      '<h3>3. 存放在哪裡</h3><p>資料存放在營運者的 Google 試算表（Google 雲端硬碟）。你的裝置上也會保存登入憑證與暫存資料，登出後會清除。</p>',
-      '<h3>4. 保存多久</h3><p>帳號存在期間會持續保存。測試結束或你要求刪除時，會一併刪除或匿名化。測試階段也可能整批清除測試資料。</p>',
-      '<h3>5. 位置資訊</h3><p>目前不收集你的位置資訊。</p>',
-      '<h3>6. 分享給誰</h3><p>不會出售或提供給第三方做廣告。同一個飯團的成員看得到你的暱稱與你在一起決定中的回答。</p>',
-      '<h3>7. 刪除與查詢</h3><p>想刪除帳號與資料，請到「設定 → 意見回饋」留言，營運者確認後會刪除。</p>',
-      '<h3>8. 聯絡</h3><p>營運者聯絡方式：（待填）。</p>'
+      "<p class=\"lg-note\">測試版 v1 · 最後更新：2026年11月26日</p>",
+      "<p>依《個人資料保護法》第8條，我們在蒐集你的個人資料前，向你說明以下事項。</p>",
+      "<h3>一、蒐集者</h3>",
+      "<p>「今天又吃什麼」營運團隊。聯絡方式：（待填），或「設定 → 意見回饋」。</p>",
+      "<h3>二、蒐集目的</h3>",
+      "<p>提供與維護本服務（登入、紀錄、推薦、飯團一起決定、口袋名單、吃貨等級與勳章）、帳號安全、客服與意見處理、服務改善與使用情形統計分析。</p>",
+      "<p>（法定特定目的：〇六九 契約、類似契約或其他法律關係事務；〇九〇 消費者、客戶管理與服務；一五七 調查、統計與研究分析。）</p>",
+      "<h3>三、蒐集的個人資料類別</h3>",
+      "<ol>",
+      "<li>帳號資料：暱稱、帳號、PIN 碼的雜湊值（我們不保存 PIN 碼本身）。</li>",
+      "<li>使用紀錄：用餐紀錄（日期、時段、選擇方式、菜單、備註）、固定菜單、口袋名單與「又去了」次數、吃貨等級、經驗值與勳章。</li>",
+      "<li>互動資料：你加入或建立的飯團、成員關係、一起決定中的回答。</li>",
+      "<li>意見回饋：你送出的內容、類型與當時的程式版本。</li>",
+      "<li>使用情形：最後開啟日期、累計開啟天數（每天最多記一次）。</li>",
+      "</ol>",
+      "<p>我們目前<b>不蒐集</b>你的位置資訊、通訊錄、照片、電話號碼或身分證字號。</p>",
+      "<h3>四、利用期間、地區、對象及方式</h3>",
+      "<ol>",
+      "<li>期間：帳號存續期間；你要求刪除、或測試結束後，將於合理期間內刪除或匿名化。為防止資料遺失而建立的備份，最多保留14天後自動刪除。</li>",
+      "<li>地區：資料存放於 Google 提供的雲端服務（Google 試算表／Apps Script），伺服器可能位於臺灣以外地區。</li>",
+      "<li>對象：營運團隊；同一飯團的成員可以看到你的暱稱與你在一起決定中的回答。我們不會出售你的個人資料，也不會提供給第三方作為廣告用途。除非依法令要求，不會提供給其他第三方。</li>",
+      "<li>方式：以電子方式自動或人工處理、利用及保存。</li>",
+      "</ol>",
+      "<h3>五、你的權利</h3>",
+      "<p>依《個人資料保護法》第3條，你可以對你的個人資料：</p>",
+      "<ol>",
+      "<li>查詢或請求閱覽；</li>",
+      "<li>請求製給複製本；</li>",
+      "<li>請求補充或更正；</li>",
+      "<li>請求停止蒐集、處理或利用；</li>",
+      "<li>請求刪除。</li>",
+      "</ol>",
+      "<p>請透過「設定 → 意見回饋」或上述聯絡方式提出，我們會在確認是你本人後盡快處理。</p>",
+      "<h3>六、不提供資料的影響</h3>",
+      "<p>你可以選擇不提供個人資料，但沒有帳號資料將無法登入與使用本服務；不使用某項功能（例如飯團、口袋名單）則不會產生該功能的資料。</p>",
+      "<h3>七、裝置上的資料</h3>",
+      "<p>為了讓你保持登入與加快顯示，本服務會在你的裝置上保存登入憑證與暫存資料。登出後會清除登入憑證。</p>",
+      "<h3>八、資料安全</h3>",
+      "<p>我們以合理的技術與管理措施保護你的資料（例如只保存 PIN 碼雜湊值、限制錯誤登入次數、依帳號區分資料存取）。但網路傳輸無法保證百分之百安全。</p>",
+      "<h3>九、政策修改</h3>",
+      "<p>本政策若有修改，會在本服務內公告並更新日期。</p>",
+      "<h3>十、聯絡我們</h3>",
+      "<p>Email：（待填）</p>",
+      "<p>或於本服務「設定 → 意見回饋」留言。</p>"
     ].join('') }
   };
   function openLegal(kind) {
@@ -2194,6 +2717,7 @@
         state.gachaResult = list[idx];
         cap.className = 'capsule done';
         pkSyncHearts();
+        firstOnce('gacha');
         $('gMascot').innerHTML = MASCOT.svg('happy', { size: 96 });
         $('gActions').style.visibility = 'visible';
       }
@@ -2382,7 +2906,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.25-e';
+  var APP_VERSION = '2026.11.26-a';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -3058,7 +3582,17 @@
     rnd.timer = setInterval(function () { rndLoad(false); }, 4000);
     rnd.tick = setInterval(rndTick, 1000);
   }
+  var grpXp = { open: {}, done: {} };
+  function rndXp(r) {   // 一起決定 참여 직후 +經驗: 열려 있는 걸 본 라운드가 「記錄됨」이 되면 한 번만
+    var v = r.round; if (!v || !v.id) return;
+    if (v.status === 'open') { grpXp.open[v.id] = 1; return; }
+    if (!(v.result && v.result.recorded) || !grpXp.open[v.id] || grpXp.done[v.id]) return;
+    grpXp.done[v.id] = 1;
+    if (r.lv) applyLevel(r.lv, false);
+    else api.withSuccessHandler(function (lv) { applyLevel(lv, false); }).getLevelSummary(token);
+  }
   function rndSet(r) {
+    rndXp(r);
     rnd.view = r.round; rnd.serverNow = r.serverNowMs; rnd.fetchedAt = Date.now();
     // 飯團 탭의 🍱 n/N 배지·🔔 목록을 방에서 본 최신 값으로 바로 맞춘다
     var g = (state.groups || []).filter(function (x) { return x.id === rnd.gid; })[0], v = r.round;
