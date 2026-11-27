@@ -650,6 +650,9 @@
     .inst-arrow { position: fixed; left: 50%; z-index: 71; display: none; width: 34px; height: 34px; margin-left: -17px; color: var(--accent); pointer-events: none;
       bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); animation: instBob 1s ease-in-out infinite; }
     .inst-arrow.on { display: block; }
+    .inst-arrow.br { left: auto; right: 16px; margin-left: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
+    .inst-veil { position: fixed; inset: 0; z-index: 69; display: none; background: rgba(0,0,0,.45); }
+    .inst-veil.on { display: block; }
     .inst-arrow.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 6px); left: auto; right: 22px; margin-left: 0; transform: rotate(180deg); animation: instBobUp 1s ease-in-out infinite; }
     .inst-arrow svg { width: 100%; height: 100%; display: block; }
     @keyframes instBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
@@ -1137,6 +1140,7 @@
   <div class="upd-banner" id="updBanner" style="display:none" role="button">有新版本，點一下更新</div>
   <div class="toast" id="toast"></div>
   <div class="inst" id="inst" role="dialog" aria-label="安裝說明"></div>
+  <div class="inst-veil" id="instVeil" aria-hidden="true"></div>
   <div class="inst-arrow" id="instArrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5.5 13 12 19.5 18.5 13"/></svg></div>
 
 <script>
@@ -3145,7 +3149,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.27-a';
+  var APP_VERSION = '2026.11.27-b';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -3228,6 +3232,7 @@
   function introClose() { $('intro').classList.remove('on'); try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {} }
   function introOpen() {
     try { if (localStorage.getItem(INTRO_KEY)) return; } catch (e) {}
+    if ($('inst').classList.contains('on')) { instIntroWait = true; return; }   // 설치 안내 카드가 떠 있으면 닫은 뒤에
     introIdx = 0; introRender(); $('intro').classList.add('on');
   }
   $('introNext').addEventListener('click', function () {
@@ -4222,22 +4227,23 @@
   function installHideKey(kind) { return 'ttwhat.inst.' + (kind === 'inapp' ? 'inapp' : kind === 'android-chrome' ? 'android' : 'ios'); }
   // @install-env-end
   var INSTALL_TXT = {
-    inappIos: { title: '糰糰說：請改用 Safari 打開', note: 'LINE 裡面不能加到主畫面。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Safari 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Safari 就好' },
-    inappAndroid: { title: '糰糰說：請改用 Chrome 打開', note: 'LINE 裡面不能安裝。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Chrome 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Chrome 就好' },
-    ios: { title: '把糰糰放到主畫面', steps: ['點畫面下面的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
+    inappIos: { title: '糰糰說：請改用 Safari 打開', note: '在這個 App 裡面不能加到主畫面。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Safari 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Safari 就好' },
+    inappAndroid: { title: '糰糰說：請改用 Chrome 打開', note: '在這個 App 裡面不能安裝。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Chrome 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Chrome 就好' },
+    ios: { title: '把糰糰放到主畫面', steps: ['點右下角的「⋯」', '選「分享」，再點「檢視更多」', '滑到最下面選「加入主畫面」，按「新增」'], note: '有些手機下面直接就有「分享」' },
     iosIpad: { title: '把糰糰放到主畫面', steps: ['點畫面右上角的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
     android: { title: '把糰糰裝到手機', install: '安裝' },
     never: '不要再提醒', close: '關閉'
   };
-  var instDeferred = null;
+  var instDeferred = null, instIntroWait = false;
   var instEnv = { ua: navigator.userAgent || '', platform: navigator.platform || '', maxTouchPoints: navigator.maxTouchPoints || 0 };
   function instEnvNow() {
     var mq = false; try { mq = !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches); } catch (e) {}
     return { ua: instEnv.ua, platform: instEnv.platform, maxTouchPoints: instEnv.maxTouchPoints, navStandalone: window.navigator.standalone === true, mqStandalone: mq };
   }
   function instHide(kind, forever) {
-    $('inst').classList.remove('on'); $('instArrow').classList.remove('on');
+    $('inst').classList.remove('on'); $('instArrow').classList.remove('on'); $('instVeil').classList.remove('on');
     if (forever) lsSet(installHideKey(kind), '1');
+    if (instIntroWait) { instIntroWait = false; introOpen(); }   // 카드를 닫은 뒤에 첫 소개 화면
   }
   function instCopyLink(done) {
     var url = location.origin + location.pathname;
@@ -4261,13 +4267,16 @@
       var t2 = ipad ? T.iosIpad : T.ios;
       h = '<div class="inst-head">' + mc + '<div class="inst-title">' + t2.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
         '<ol class="inst-steps">' + t2.steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+        (t2.note ? '<p class="inst-note" style="font-size:12px;margin-top:6px">' + t2.note + '</p>' : '') +
         '<div class="inst-act"><span></span><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
-      $('instArrow').classList.toggle('top', ipad); $('instArrow').classList.add('on');
+      $('instArrow').classList.toggle('top', ipad); $('instArrow').classList.toggle('br', !ipad); $('instArrow').classList.add('on');
     } else if (kind === 'android-chrome') {
       h = '<div class="inst-head">' + mc + '<div class="inst-title">' + T.android.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
         '<div class="inst-act"><button class="btn n-save" type="button" data-inst="install">' + T.android.install + '</button><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
     } else return;
     box.innerHTML = h; box.classList.toggle('top', kind === 'ios-safari' && ipad); box.classList.add('on'); box.dataset.kind = kind;
+    $('instVeil').classList.toggle('on', kind === 'inapp' || kind === 'ios-safari');
+    window.__instShownMs = Math.round(performance.now());
   }
   $('inst').addEventListener('click', function (ev) {
     var b = ev.target.closest ? ev.target.closest('[data-inst]') : null; if (!b) return;
@@ -4289,11 +4298,11 @@
       var kind = detectInstallEnv(instEnvNow());
       if (kind === 'standalone' || kind === 'other' || kind === 'ios-other') return;
       if (lsGet(installHideKey(kind))) return;
-      if ($('intro').classList.contains('on') && tries++ < 20) { setTimeout(go, 3000); return; }   // 처음 소개 화면이 끝난 뒤에
+      if (kind === 'android-chrome' && $('intro').classList.contains('on') && tries++ < 20) { setTimeout(go, 3000); return; }   // (안드로이드만) 처음 소개 화면이 끝난 뒤에
       if (kind === 'android-chrome' && !instDeferred) { if (tries++ < 6) setTimeout(go, 2500); return; }   // 브라우저가 설치를 허용할 때만
       instShow(kind);
     }
-    setTimeout(go, 1500);
+    if (detectInstallEnv(instEnvNow()) === 'android-chrome') setTimeout(go, 1500); else go();   // iOS Safari·앱 안 브라우저는 열리자마자
   })();
 
   bootstrapIdentity(onIdentityReady);
