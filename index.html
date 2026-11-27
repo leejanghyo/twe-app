@@ -724,6 +724,18 @@
     .bd small { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
     .bd.off { opacity: .5; filter: grayscale(1); }
     .bd.off svg { color: var(--muted); }
+    .qs-sub { font-size: 12px; color: var(--muted); margin: -4px 0 8px; text-align: left; }
+    .qs-list { display: flex; flex-direction: column; gap: 6px; }
+    .qs { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); text-align: left; }
+    .qs-t { flex: 1; min-width: 0; }
+    .qs-t b { display: block; font-size: 14px; }
+    .qs-t small { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 1px; }
+    .qs-n { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .qs-ok { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+    .qs-ok svg { width: 15px; height: 15px; }
+    .qs.done { border-color: var(--accent); background: var(--accent-soft); }
+    .qs.done .qs-n { display: none; }
+    .qs-weeks { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: left; }
     .ul-box { width: min(320px, 100%); text-align: center; }
     .ul-say { font-size: 18px; font-weight: 800; margin: 8px 0 10px; line-height: 1.4; }
     .ul-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 4px; }
@@ -1423,6 +1435,11 @@
       "need": "還差 {n} 升到〈{name}〉",
       "max": "已經是最高等級，糰糰服了",
       "badges": "勳章",
+      "questTitle": "本週任務",
+      "questSub": "週一到週日，完成一個就加經驗",
+      "questDone": "糰糰：「{name}」達成！+{xp} 經驗",
+      "questAll": "糰糰：本週任務全完成！+{xp} 經驗",
+      "questWeeks": "完成週任務 {n} 次",
       "loading": "糰糰翻勳章中…",
       "loadFail": "勳章載入失敗，再開一次試試",
       "unlock": "恭喜解鎖〈{name}〉，糰糰對你刮目相看",
@@ -1787,6 +1804,7 @@
     fgacha: '<circle cx="12" cy="9.2" r="6.2"/><path d="M5.8 9.2h12.4"/><rect x="5.5" y="15.4" width="13" height="5.6" rx="2"/>',
     frefresh: '<path d="M20.5 11.5A8.5 8.5 0 0 0 6 6L3.8 8.2"/><path d="M3.8 3.8v4.4h4.4"/><path d="M3.5 12.5A8.5 8.5 0 0 0 18 18l2.2-2.2"/><path d="M20.2 20.2v-4.4h-4.4"/>',
     fshare: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+    fquest: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6M8.5 11l2.3 2.3 4.7-4.7M9 17h6"/>',
     fcraving: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M9 9.5h6M9 12.5h3.5"/>',
     fweek: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2"/>'
   };
@@ -1804,10 +1822,27 @@
       if (bonus > 0) setTimeout(function () { floatXp(fmt(TXT.lv.bonus, { n: bonus }), 'bonus'); }, 350);
       if (lv.up || lv.lv > prev.lv) setTimeout(function () { showLevelUp(lv); }, 500);
     }
+    if (!fromBoot && lv.quest) setTimeout(function () { questToast(lv.quest); }, 1000);
     renderProf();
     if ($('lvModal').style.display === 'flex') renderLvTop();
     if (fromBoot) cacheWrite();
     if (fromBoot && lv.pending && lv.pending.length) showUnlock(lv.pending);
+  }
+  /** 주간 퀘스트를 방금 달성했을 때 糰糰 말투 토스트 1줄 */
+  function questToast(q) {
+    if (!q || (!(q.done && q.done.length) && !q.all)) return;
+    var n = (q.done || []).length, msg = q.all
+      ? fmt(TXT.lv.questAll, { xp: n * 15 + 30 })
+      : fmt(TXT.lv.questDone, { name: q.done.join('、'), xp: n * 15 });
+    toast(msg);
+  }
+  function questHtml(Q) {
+    if (!Q || !Q.items) return '';
+    return '<h3>' + esc(TXT.lv.questTitle) + '</h3><div class="qs-sub">' + esc(TXT.lv.questSub) + '</div><div class="qs-list">' + Q.items.map(function (x) {
+      return '<div class="qs' + (x.done ? ' done' : '') + '"><div class="qs-t"><b>' + esc(x.name) + '</b><small>' + esc(x.desc) + '</small></div>' +
+        (x.done ? '<span class="qs-ok" aria-label="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>'
+                  : '<span class="qs-n">' + esc(x.n) + ' / ' + esc(x.need) + '</span>') + '</div>';
+    }).join('') + '</div>' + (Q.weeks > 0 ? '<div class="qs-weeks">' + esc(fmt(TXT.lv.questWeeks, { n: Q.weeks })) + '</div>' : '');
   }
   function renderProf() {
     var L = state.level, el = $('prof');
@@ -1825,7 +1860,7 @@
   function openLevel() {
     if (!state.level || !token) return;
     $('lvTitle').textContent = TXT.lv.title;
-    $('lvBody').innerHTML = '<div id="lvTop">' + lvTopHtml(state.level) + '</div><div class="lv-share-row">' + shareBtnHtml('level') + '</div>' +
+    $('lvBody').innerHTML = '<div id="lvTop">' + lvTopHtml(state.level) + '</div><div class="lv-share-row">' + shareBtnHtml('level') + '</div><div id="lvQuest"></div>' +
       '<h3>' + esc(TXT.week.title) + '</h3><div id="wkBox"></div><h3>' + esc(TXT.lv.badges) + '</h3><div id="lvBadges" class="lv-sub">' + esc(TXT.lv.loading) + '</div>';
     $('lvModal').style.display = 'flex';
     wk.data = {}; wkLoad(0);
@@ -1833,6 +1868,8 @@
       if ($('lvModal').style.display !== 'flex') return;
       var keep = state.level && state.level.pending;
       d.pending = keep || d.pending; state.level = d; renderProf(); renderLvTop();
+      if ($('lvQuest')) $('lvQuest').innerHTML = questHtml(d.quests);
+      if (d.quest) questToast(d.quest);
       $('lvBadges').className = 'bd-grid';
       $('lvBadges').innerHTML = d.badges.map(function (b) {
         return '<div class="bd' + (b.earned ? '' : ' off') + '">' + bIcon(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
@@ -2531,6 +2568,7 @@
       if (!state.crv || seq !== crvSeq) return;
       c.picks = (res && res.picks) || []; c.relaxed = (res && res.relaxed) || []; c.phase = 'res';
       crvSync(); pkSyncHearts(); scrollToContentTop(); firstOnce('craving');
+      if (res && res.lv) applyLevel(res.lv, false);   // 주간 퀘스트(問糰糰三次) 달성 때만 서버가 lv를 실어 보냄
     }).withFailureHandler(function () {
       if (!state.crv || seq !== crvSeq) return;
       c.phase = 'fail'; crvSync();
@@ -3149,7 +3187,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.27-b';
+  var APP_VERSION = '2026.11.27-c';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
