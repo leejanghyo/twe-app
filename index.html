@@ -629,6 +629,31 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.err { background: var(--danger); }
+    /* ===== 설치 안내(홈 화면에 추가) — 환경이 맞을 때만 한 번, 닫으면 다시 안 뜸 ===== */
+    .inst { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 64px); z-index: 70; display: none;
+      max-width: 420px; margin: 0 auto; background: var(--card); border: 2px solid var(--note-y-bd); border-radius: 18px; padding: 14px 14px 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.25); }
+    .inst.on { display: block; }
+    .inst.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 56px); }
+    .inst-head { display: flex; align-items: center; gap: 10px; }
+    .inst-head .tm { width: 46px; flex: none; }
+    .inst-title { font-weight: 800; font-size: 16px; line-height: 1.35; flex: 1 1 auto; text-wrap: balance; }
+    .inst-x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--line); color: var(--muted); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; padding: 0; }
+    .inst-steps { margin: 10px 0 0; padding: 0; list-style: none; counter-reset: st; }
+    .inst-steps li { counter-increment: st; display: flex; gap: 8px; align-items: baseline; font-size: 15px; line-height: 1.55; font-weight: 600; }
+    .inst-steps li::before { content: counter(st); flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; text-align: center; line-height: 20px; transform: translateY(-1px); }
+    .inst-note { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--muted); }
+    .inst-act { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+    .inst-act .btn { flex: 1 1 auto; font-size: 15px; padding: 10px 12px; }
+    .inst .btn.n-save { background: var(--accent); color: #fff; border: 0; }
+    .inst-never { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 8px 4px; cursor: pointer; text-decoration: underline; flex: none; }
+    .inst-arrow { position: fixed; left: 50%; z-index: 71; display: none; width: 34px; height: 34px; margin-left: -17px; color: var(--accent); pointer-events: none;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); animation: instBob 1s ease-in-out infinite; }
+    .inst-arrow.on { display: block; }
+    .inst-arrow.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 6px); left: auto; right: 22px; margin-left: 0; transform: rotate(180deg); animation: instBobUp 1s ease-in-out infinite; }
+    .inst-arrow svg { width: 100%; height: 100%; display: block; }
+    @keyframes instBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+    @keyframes instBobUp { 0%, 100% { transform: rotate(180deg) translateY(0); } 50% { transform: rotate(180deg) translateY(6px); } }
 
     /* ===== 糰糰(마스코트) · 말풍선 · 처음 안내 · 설정 스위치 ===== */
     .tm { display: block; height: auto; overflow: visible; }
@@ -1111,6 +1136,8 @@
 
   <div class="upd-banner" id="updBanner" style="display:none" role="button">有新版本，點一下更新</div>
   <div class="toast" id="toast"></div>
+  <div class="inst" id="inst" role="dialog" aria-label="安裝說明"></div>
+  <div class="inst-arrow" id="instArrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5.5 13 12 19.5 18.5 13"/></svg></div>
 
 <script>
 
@@ -3118,7 +3145,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.26-d';
+  var APP_VERSION = '2026.11.27-a';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -4176,6 +4203,99 @@
     if (state.ctx) renderHome();
     renderGroupsUI();
   })();
+  // ===== 설치 안내(홈 화면에 추가) =====
+  // 환경 판별은 순수 함수(detectInstallEnv)로 분리 — tests/t_install_env.js가 이 구간(@install-env)만 잘라서 시험한다.
+  // 종류: standalone(이미 홈 화면 앱 → 안내 없음) / inapp(LINE·FB·IG 등 앱 안 브라우저) / ios-safari / android-chrome / ios-other·other(안내 없음)
+  // @install-env-begin
+  function detectInstallEnv(env) {
+    var ua = env.ua || '';
+    if (env.navStandalone === true || env.mqStandalone === true) return 'standalone';
+    var ios = /iPhone|iPad|iPod/.test(ua) || (env.platform === 'MacIntel' && env.maxTouchPoints > 1);
+    var android = /Android/i.test(ua);
+    if (!ios && !android) return 'other';
+    if (/\bLine\/|FBAN|FBAV|FB_IAB|Instagram|MicroMessenger|KAKAOTALK/i.test(ua)) return 'inapp';
+    if (ios) return (/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/.test(ua) || !/Safari/.test(ua) && !/Macintosh/.test(ua)) ? 'ios-other' : 'ios-safari';
+    var chrome = /Chrome\//.test(ua) && !/EdgA|OPR\/|SamsungBrowser|Firefox|UCBrowser|Whale|DuckDuckGo|; wv\)/.test(ua);
+    return chrome ? 'android-chrome' : 'other';
+  }
+  function installIsIpad(env) { return /iPad/.test(env.ua || '') || (env.platform === 'MacIntel' && env.maxTouchPoints > 1); }
+  function installHideKey(kind) { return 'ttwhat.inst.' + (kind === 'inapp' ? 'inapp' : kind === 'android-chrome' ? 'android' : 'ios'); }
+  // @install-env-end
+  var INSTALL_TXT = {
+    inappIos: { title: '糰糰說：請改用 Safari 打開', note: 'LINE 裡面不能加到主畫面。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Safari 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Safari 就好' },
+    inappAndroid: { title: '糰糰說：請改用 Chrome 打開', note: 'LINE 裡面不能安裝。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Chrome 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Chrome 就好' },
+    ios: { title: '把糰糰放到主畫面', steps: ['點畫面下面的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
+    iosIpad: { title: '把糰糰放到主畫面', steps: ['點畫面右上角的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
+    android: { title: '把糰糰裝到手機', install: '安裝' },
+    never: '不要再提醒', close: '關閉'
+  };
+  var instDeferred = null;
+  var instEnv = { ua: navigator.userAgent || '', platform: navigator.platform || '', maxTouchPoints: navigator.maxTouchPoints || 0 };
+  function instEnvNow() {
+    var mq = false; try { mq = !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches); } catch (e) {}
+    return { ua: instEnv.ua, platform: instEnv.platform, maxTouchPoints: instEnv.maxTouchPoints, navStandalone: window.navigator.standalone === true, mqStandalone: mq };
+  }
+  function instHide(kind, forever) {
+    $('inst').classList.remove('on'); $('instArrow').classList.remove('on');
+    if (forever) lsSet(installHideKey(kind), '1');
+  }
+  function instCopyLink(done) {
+    var url = location.origin + location.pathname;
+    function fallback() {
+      try { var ta = document.createElement('textarea'); ta.value = url; ta.style.cssText = 'position:fixed;opacity:0;top:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(true); }
+      catch (e) { done(false); }
+    }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(url).then(function () { done(true); }, fallback); return; } } catch (e) {}
+    fallback();
+  }
+  function instShow(kind) {
+    var box = $('inst'), ipad = installIsIpad(instEnv), T = INSTALL_TXT, h = '';
+    var isIos = /iPhone|iPad|iPod/.test(instEnv.ua) || ipad;
+    var mc = MASCOT.svg('base', { size: 46 });
+    if (kind === 'inapp') {
+      var tt = isIos ? T.inappIos : T.inappAndroid;
+      h = '<div class="inst-head">' + mc + '<div class="inst-title">' + tt.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
+        '<p class="inst-note">' + tt.note + '</p>' +
+        '<div class="inst-act"><button class="btn n-save" type="button" data-inst="copy">' + tt.copy + '</button><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
+    } else if (kind === 'ios-safari') {
+      var t2 = ipad ? T.iosIpad : T.ios;
+      h = '<div class="inst-head">' + mc + '<div class="inst-title">' + t2.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
+        '<ol class="inst-steps">' + t2.steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+        '<div class="inst-act"><span></span><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
+      $('instArrow').classList.toggle('top', ipad); $('instArrow').classList.add('on');
+    } else if (kind === 'android-chrome') {
+      h = '<div class="inst-head">' + mc + '<div class="inst-title">' + T.android.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
+        '<div class="inst-act"><button class="btn n-save" type="button" data-inst="install">' + T.android.install + '</button><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
+    } else return;
+    box.innerHTML = h; box.classList.toggle('top', kind === 'ios-safari' && ipad); box.classList.add('on'); box.dataset.kind = kind;
+  }
+  $('inst').addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('[data-inst]') : null; if (!b) return;
+    var kind = this.dataset.kind, act = b.dataset.inst;
+    if (act === 'copy') {
+      var isIos = /iPhone|iPad|iPod/.test(instEnv.ua) || installIsIpad(instEnv);
+      instCopyLink(function (ok) { toast(ok ? (isIos ? INSTALL_TXT.inappIos : INSTALL_TXT.inappAndroid).copied : '複製失敗，請長按網址手動複製', !ok); });
+    } else if (act === 'install') {
+      if (!instDeferred) { instHide(kind, false); return; }
+      var d = instDeferred; instDeferred = null;
+      try { d.prompt(); d.userChoice.then(function () { instHide(kind, true); }, function () {}); } catch (e) { instHide(kind, false); }
+    } else instHide(kind, true);   // 닫기·不要再提醒 모두 다시 안 뜸
+  });
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); instDeferred = e; });
+  window.addEventListener('appinstalled', function () { instHide('android-chrome', true); });
+  (function installGuide() {
+    var tries = 0;
+    function go() {
+      var kind = detectInstallEnv(instEnvNow());
+      if (kind === 'standalone' || kind === 'other' || kind === 'ios-other') return;
+      if (lsGet(installHideKey(kind))) return;
+      if ($('intro').classList.contains('on') && tries++ < 20) { setTimeout(go, 3000); return; }   // 처음 소개 화면이 끝난 뒤에
+      if (kind === 'android-chrome' && !instDeferred) { if (tries++ < 6) setTimeout(go, 2500); return; }   // 브라우저가 설치를 허용할 때만
+      instShow(kind);
+    }
+    setTimeout(go, 1500);
+  })();
+
   bootstrapIdentity(onIdentityReady);
 </script>
 </body>
