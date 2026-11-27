@@ -623,18 +623,25 @@
       padding: 12px 14px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.25); cursor: pointer;
     }
     .toast {
-      position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-120px);
-      background: var(--ok); color: #fff; padding: 12px 26px; border-radius: 999px; font-weight: 700;
-      transition: transform .3s; z-index: 60;
+      position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box;
+      top: calc(env(safe-area-inset-top, 0px) + 24px); transform: translateY(-200px); pointer-events: none;
+      background: var(--ok); color: #fff; padding: 12px 22px; border-radius: 22px; font-weight: 700; line-height: 1.45; text-align: center;
+      text-wrap: balance; overflow-wrap: anywhere; cursor: pointer;
+      transition: transform .3s; z-index: 80;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.show { transform: translateY(0); pointer-events: auto; }
     .toast.err { background: var(--danger); }
     /* ===== 설치 안내(홈 화면에 추가) — 환경이 맞을 때만 한 번, 닫으면 다시 안 뜸 ===== */
     .inst { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 64px); z-index: 70; display: none;
       max-width: 420px; margin: 0 auto; background: var(--card); border: 2px solid var(--note-y-bd); border-radius: 18px; padding: 14px 14px 10px;
       box-shadow: 0 8px 28px rgba(0,0,0,.25); }
     .inst.on { display: block; }
-    .inst.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 56px); }
+    .inst.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+    .inst.top.pad { top: calc(env(safe-area-inset-top, 0px) + 56px); }
+    .inst-st { flex: 1 1 auto; min-width: 0; }
+    .inst-steps li { align-items: flex-start; }
+    .inst-pill { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; margin: 1px 1px; padding: 3px 10px 3px 6px; border-radius: 999px; background: #48484a; color: #fff; font-size: 14px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+    .inst-pill svg { width: 18px; height: 18px; flex: none; display: block; }
     .inst-head { display: flex; align-items: center; gap: 10px; }
     .inst-head .tm { width: 46px; flex: none; }
     .inst-title { font-weight: 800; font-size: 16px; line-height: 1.35; flex: 1 1 auto; text-wrap: balance; }
@@ -647,15 +654,15 @@
     .inst-act .btn { flex: 1 1 auto; font-size: 15px; padding: 10px 12px; }
     .inst .btn.n-save { background: var(--accent); color: #fff; border: 0; }
     .inst-never { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 8px 4px; cursor: pointer; text-decoration: underline; flex: none; }
-    .inst-arrow { position: fixed; left: 50%; z-index: 71; display: none; width: 34px; height: 34px; margin-left: -17px; color: var(--accent); pointer-events: none;
+    .inst-arrow { position: fixed; left: 50%; z-index: 71; display: none; width: 51px; height: 51px; margin-left: -25px; color: var(--accent); pointer-events: none;
       bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); animation: instBob 1s ease-in-out infinite; }
     .inst-arrow.on { display: block; }
-    .inst-arrow.br { left: auto; right: 16px; margin-left: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
+    .inst-arrow.br { left: 84%; right: auto; margin-left: -25px; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
     .inst-veil { position: fixed; inset: 0; z-index: 69; display: none; background: rgba(0,0,0,.45); }
     .inst-veil.on { display: block; }
     .inst-arrow.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 6px); left: auto; right: 22px; margin-left: 0; transform: rotate(180deg); animation: instBobUp 1s ease-in-out infinite; }
     .inst-arrow svg { width: 100%; height: 100%; display: block; }
-    @keyframes instBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+    @keyframes instBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
     @keyframes instBobUp { 0%, 100% { transform: rotate(180deg) translateY(0); } 50% { transform: rotate(180deg) translateY(6px); } }
 
     /* ===== 糰糰(마스코트) · 말풍선 · 처음 안내 · 설정 스위치 ===== */
@@ -724,6 +731,7 @@
     .bd small { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
     .bd.off { opacity: .5; filter: grayscale(1); }
     .bd.off svg { color: var(--muted); }
+    .qs, .bd { cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .qs-sub { font-size: 12px; color: var(--muted); margin: -4px 0 8px; text-align: left; }
     .qs-list { display: flex; flex-direction: column; gap: 6px; }
     .qs { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); text-align: left; }
@@ -1153,7 +1161,7 @@
   <div class="toast" id="toast"></div>
   <div class="inst" id="inst" role="dialog" aria-label="安裝說明"></div>
   <div class="inst-veil" id="instVeil" aria-hidden="true"></div>
-  <div class="inst-arrow" id="instArrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5.5 13 12 19.5 18.5 13"/></svg></div>
+  <div class="inst-arrow" id="instArrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5.5 13 12 19.5 18.5 13"/></svg></div>
 
 <script>
 
@@ -1547,13 +1555,19 @@
   }
   function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
 
+  // @toast-begin
+  /** 토스트 표시 시간(ms): 짧은 문장 약 3.6초, 글자 수에 비례해 늘고 상한 6초 */
+  function toastMs(msg) { var n = Array.from(String(msg == null ? '' : msg)).length; return Math.min(6000, Math.max(3600, 2400 + n * 110)); }
+  // @toast-end
   function toast(msg, isErr) {
     var t = $('toast');
     t.textContent = msg;
     t.className = 'toast show' + (isErr ? ' err' : '');
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.className = 'toast' + (isErr ? ' err' : ''); }, 2200);
+    toast._t = setTimeout(toastHide, toastMs(msg));
   }
+  function toastHide() { var t = $('toast'); clearTimeout(toast._t); t.className = 'toast' + (t.classList.contains('err') ? ' err' : ''); }
+  $('toast').addEventListener('click', toastHide);   // 누르면 바로 닫힘
 
   // ===== 상태 · 로컬 캐시 =====
   // 지난 데이터(메뉴·飯團 목록·暱稱 등, 비밀값 제외)를 localStorage에 저장해 두었다가, 앱을 열면 먼저 보여 주고
@@ -1836,10 +1850,50 @@
       : fmt(TXT.lv.questDone, { name: q.done.join('、'), xp: n * 15 });
     toast(msg);
   }
+  // @explain-begin
+  // 本週任務·勳章을 누르면 뜨는 설명 토스트 문구(糰糰 말투). 새 서버 호출 없이 이미 받은 응답(quests.items·badges·visitN·pocketN)으로만 만든다.
+  var EXPLAIN_Q = {
+    'new':     { todo: function (x) { return '本週吃一間第一次記錄的店。還沒有喔，糰糰等你去冒險'; }, done: function (x) { return '你這週吃了新的店，糰糰記下來了'; } },
+    group:     { todo: function (x) { return '本週用「一起決定」吃一次。一個人也很好，但大家一起更香～'; }, done: function (x) { return '這週有人陪你一起決定，糰糰也想去'; } },
+    craving:   { todo: function (x) { return '這週問我 ' + x.n + '/' + x.need + ' 次，再問 ' + Math.max(0, x.need - x.n) + ' 次我就不煩惱了'; }, done: function (x) { return '這週問了 ' + x.need + ' 次，糰糰的腦袋冒煙了'; } },
+    pocket:    { todo: function (x) { return '本週把三間店放進口袋名單，目前 ' + x.n + '/' + x.need + ' 間，口袋空空的好冷～'; }, done: function (x) { return '三間店都進口袋了，糰糰幫你守著'; } }
+  };
+  function questExplain(x) {
+    if (!x) return '';
+    var e = EXPLAIN_Q[x.id];
+    if (!e) return x.name + '：' + x.desc;
+    return x.done ? x.name + ' ✔ 達成！' + e.done(x) : x.name + '：' + e.todo(x);
+  }
+  var EXPLAIN_B = {
+    first:    { more: '一切從這口開始', hint: function (c) { return '先記下一筆吧，糰糰在旁邊等' } },
+    streak3:  { more: '連著三天都記，糰糰感動', hint: function (c) { return '連續3天都有紀錄就拿得到，加油～' } },
+    explore:  { more: '什麼都敢吃，糰糰佩服', hint: function (c) { return '吃過5種不同類型就拿得到，換個口味吧～' } },
+    regular:  { more: '這家一定很好吃吧', hint: function (c) { return '同一家吃到第5次就拿得到，有愛店了嗎？' } },
+    group3:   { more: '你人緣真好', hint: function (c) { return '參與3次一起決定就拿得到，揪朋友吧～' } },
+    pocket10: { more: '口袋鼓鼓的', hint: function (c) { return '口袋名單收藏10間就拿得到。' + (c.pocketN != null ? '目前 ' + Math.min(c.pocketN, 10) + ' 間，' : '') + '再多收一點～' } },
+    pocket1:  { more: '口袋有第一個家了', hint: function (c) { return '收藏第一間店就拿得到，點店旁的愛心就好' } },
+    again:    { more: '這家你是真的愛', hint: function (c) { return '在口袋名單按一次「又去了」就拿得到' } },
+    group1:   { more: '第一次一起決定，糰糰在旁邊看', hint: function (c) { return '第一次參與一起決定就拿得到，去飯團逛逛吧' } },
+    fgacha:   { more: '手氣如何呢', hint: function (c) { return '第一次扭扭蛋就拿得到，試試手氣～' } },
+    frefresh: { more: '不滿意就換，不用客氣', hint: function (c) { return '第一次按「換一批」就拿得到，不喜歡就換～' } },
+    fshare:   { more: '糰糰害羞但開心', hint: function (c) { return '第一次做分享卡片就拿得到，炫耀一下吧' } },
+    fweek:    { more: '回頭看看吃了什麼', hint: function (c) { return '第一次看「本週吃了什麼」就拿得到' } },
+    fcraving: { more: '糰糰很高興你來問', hint: function (c) { return '第一次用「今天想吃什麼？」就拿得到，問問糰糰吧' } },
+    fquest:   { more: '四個任務一次搞定，太強了', hint: function (c) { return '一週的四個任務全部完成就拿得到' } }
+  };
+  function badgeDateText(d) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(d || '')); return m ? (+m[2]) + '/' + (+m[3]) : ''; }
+  function badgeExplain(b, ctx) {
+    if (!b) return '';
+    var e = EXPLAIN_B[b.id];
+    if (!e) return b.name + '：' + b.desc;
+    if (b.earned) { var dt = badgeDateText(b.date); return b.name + '：' + (dt ? dt + ' 拿到的，' : '拿到了，') + e.more; }
+    return b.name + '：' + e.hint(ctx || {});
+  }
+  // @explain-end
   function questHtml(Q) {
     if (!Q || !Q.items) return '';
     return '<h3>' + esc(TXT.lv.questTitle) + '</h3><div class="qs-sub">' + esc(TXT.lv.questSub) + '</div><div class="qs-list">' + Q.items.map(function (x) {
-      return '<div class="qs' + (x.done ? ' done' : '') + '"><div class="qs-t"><b>' + esc(x.name) + '</b><small>' + esc(x.desc) + '</small></div>' +
+      return '<div class="qs' + (x.done ? ' done' : '') + '" data-q="' + esc(x.id) + '" role="button" tabindex="0"><div class="qs-t"><b>' + esc(x.name) + '</b><small>' + esc(x.desc) + '</small></div>' +
         (x.done ? '<span class="qs-ok" aria-label="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>'
                   : '<span class="qs-n">' + esc(x.n) + ' / ' + esc(x.need) + '</span>') + '</div>';
     }).join('') + '</div>' + (Q.weeks > 0 ? '<div class="qs-weeks">' + esc(fmt(TXT.lv.questWeeks, { n: Q.weeks })) + '</div>' : '');
@@ -1872,10 +1926,23 @@
       if (d.quest) questToast(d.quest);
       $('lvBadges').className = 'bd-grid';
       $('lvBadges').innerHTML = d.badges.map(function (b) {
-        return '<div class="bd' + (b.earned ? '' : ' off') + '">' + bIcon(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
+        return '<div class="bd' + (b.earned ? '' : ' off') + '" data-b="' + esc(b.id) + '" role="button" tabindex="0">' + bIcon(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
       }).join('');
     }).withFailureHandler(function () { if ($('lvBadges')) $('lvBadges').textContent = TXT.lv.loadFail; }).getLevelDetail(token);
   }
+  function lvExplainTap(ev) {
+    var el = ev.target.closest ? ev.target.closest('[data-q],[data-b]') : null, L = state.level; if (!el || !L) return;
+    if (ev.type === 'keydown') { if (ev.key !== 'Enter' && ev.key !== ' ') return; ev.preventDefault(); }
+    if (el.dataset.q) {
+      var x = ((L.quests && L.quests.items) || []).filter(function (i) { return i.id === el.dataset.q; })[0];
+      if (x) toast(questExplain(x));
+    } else {
+      var b = (L.badges || []).filter(function (i) { return i.id === el.dataset.b; })[0];
+      if (b) toast(badgeExplain(b, { visitN: L.visitN, pocketN: L.pocketN }));
+    }
+  }
+  $('lvBody').addEventListener('click', lvExplainTap);
+  $('lvBody').addEventListener('keydown', lvExplainTap);
   $('prof').addEventListener('click', openLevel);
   $('prof').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openLevel(); } });
   $('lvClose').addEventListener('click', function () { $('lvModal').style.display = 'none'; });
@@ -3187,7 +3254,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.27-c';
+  var APP_VERSION = '2026.11.27-d';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -4264,10 +4331,22 @@
   function installIsIpad(env) { return /iPad/.test(env.ua || '') || (env.platform === 'MacIntel' && env.maxTouchPoints > 1); }
   function installHideKey(kind) { return 'ttwhat.inst.' + (kind === 'inapp' ? 'inapp' : kind === 'android-chrome' ? 'android' : 'ios'); }
   // @install-env-end
+  // 직접 그린 단순 아이콘(애플 이미지 아님): Safari 알약처럼 어두운 회색 바탕에 흰 선
+  var INST_SVG = {
+    dots: '<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7.5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="16.5" cy="12" r="1.5" fill="currentColor"/>',
+    share: '<path d="M8.5 10H7a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 7 20h10a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 17 10h-1.5M12 3.5v11M8.6 7 12 3.5 15.4 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    more: '<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.8 10.2 12 14.4l4.2-4.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+    add: '<rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>'
+  };
+  var INST_PILL = {
+    dots: ['dots', ''], share: ['share', '分享'], more: ['more', '檢視較多'], add: ['add', '加入主畫面']
+  };
+  function instPill(k) { var d = INST_PILL[k]; return '<span class="inst-pill"><svg viewBox="0 0 24 24" aria-hidden="true">' + INST_SVG[d[0]] + '</svg>' + d[1] + '</span>'; }
+  function instStepHtml(t) { return t.replace(/\{(\w+)\}/g, function (_, k) { return INST_PILL[k] ? instPill(k) : ''; }); }
   var INSTALL_TXT = {
     inappIos: { title: '糰糰說：請改用 Safari 打開', note: '在這個 App 裡面不能加到主畫面。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Safari 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Safari 就好' },
     inappAndroid: { title: '糰糰說：請改用 Chrome 打開', note: '在這個 App 裡面不能安裝。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Chrome 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Chrome 就好' },
-    ios: { title: '把糰糰放到主畫面', steps: ['點右下角的「⋯」', '選「分享」，再點「檢視更多」', '滑到最下面選「加入主畫面」，按「新增」'], note: '有些手機下面直接就有「分享」' },
+    ios: { title: '把糰糰放到主畫面', steps: ['點右下角的 {dots}', '選 {share}，再點 {more}', '滑到最下面選 {add}，按「新增」'], note: '有些手機下面直接就有「分享」' },
     iosIpad: { title: '把糰糰放到主畫面', steps: ['點畫面右上角的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
     android: { title: '把糰糰裝到手機', install: '安裝' },
     never: '不要再提醒', close: '關閉'
@@ -4304,7 +4383,7 @@
     } else if (kind === 'ios-safari') {
       var t2 = ipad ? T.iosIpad : T.ios;
       h = '<div class="inst-head">' + mc + '<div class="inst-title">' + t2.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
-        '<ol class="inst-steps">' + t2.steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+        '<ol class="inst-steps">' + t2.steps.map(function (x) { return '<li><span class="inst-st">' + instStepHtml(x) + '</span></li>'; }).join('') + '</ol>' +
         (t2.note ? '<p class="inst-note" style="font-size:12px;margin-top:6px">' + t2.note + '</p>' : '') +
         '<div class="inst-act"><span></span><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
       $('instArrow').classList.toggle('top', ipad); $('instArrow').classList.toggle('br', !ipad); $('instArrow').classList.add('on');
@@ -4312,7 +4391,7 @@
       h = '<div class="inst-head">' + mc + '<div class="inst-title">' + T.android.title + '</div><button class="inst-x" type="button" data-inst="x" aria-label="' + T.close + '">✕</button></div>' +
         '<div class="inst-act"><button class="btn n-save" type="button" data-inst="install">' + T.android.install + '</button><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>';
     } else return;
-    box.innerHTML = h; box.classList.toggle('top', kind === 'ios-safari' && ipad); box.classList.add('on'); box.dataset.kind = kind;
+    box.innerHTML = h; box.classList.toggle('top', kind === 'ios-safari'); box.classList.toggle('pad', kind === 'ios-safari' && ipad); box.classList.add('on'); box.dataset.kind = kind;
     $('instVeil').classList.toggle('on', kind === 'inapp' || kind === 'ios-safari');
     window.__instShownMs = Math.round(performance.now());
   }
