@@ -56,7 +56,7 @@
     }
     .tabs button.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
     .tabs button:disabled { cursor: default; }
-    /* 照舊: 아직 끼니 시간이 아닐 때 糰糰 얼굴 + 말풍선 한 줄(가운데) */
+    /* 常備: 아직 끼니 시간이 아닐 때 糰糰 얼굴 + 말풍선 한 줄(가운데) */
     .peek-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; }
     .peek-row[hidden] { display: none; }
     .peek-mc { flex: 0 0 auto; display: inline-flex; width: 30px; height: 30px; }
@@ -732,6 +732,17 @@
     .bd b { display: block; font-size: 13px; margin-top: 4px; }
     .bd small { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
     .bd.off { opacity: .5; filter: grayscale(1); }
+    /* 단계형 勳章 테두리(코드): 銅·銀·金. 그림(badges/<id>.png)이 있으면 아이콘 자리에 그림 */
+    .bd.t1 { border: 2.5px solid #b87333; }
+    .bd.t2 { border: 2.5px solid #a7adb4; }
+    .bd.t3 { border: 2.5px solid #d4a017; box-shadow: 0 0 0 2px rgba(212,160,23,.18); }
+    .bd .bd-tier { display: inline-block; font-size: 10px; font-weight: 700; padding: 0 6px; border-radius: 999px; margin-left: 2px; vertical-align: 1px; color: #fff; }
+    .bd.t1 .bd-tier { background: #b87333; } .bd.t2 .bd-tier { background: #8d949c; } .bd.t3 .bd-tier { background: #c99410; }
+    .bpic { position: relative; display: inline-block; width: 34px; height: 34px; }
+    .bpic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    .bpic.has svg { visibility: hidden; }
+    .ul-b .bpic { width: 18px; height: 18px; }
+    .fx-head { font-size: 15px; font-weight: 700; margin: 2px 2px 8px; }
     .bd.off svg { color: var(--muted); }
     .qs, .bd { cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .qs-sub { font-size: 12px; color: var(--muted); margin: -4px 0 8px; text-align: left; }
@@ -868,7 +879,7 @@
     <div class="scroller" id="scroller">
     <div class="promo home-only" id="promo" style="display:none">
       <span class="promo-text" id="promoText"></span>
-      <button class="p-add" id="promoAdd">加入固定菜單</button>
+      <button class="p-add" id="promoAdd">加入常備菜單</button>
       <button class="p-later" id="promoLater">之後再說</button>
     </div>
     <div class="nick-banner home-only" id="nickBanner" style="display:none">
@@ -910,7 +921,7 @@
 
   <nav class="tabbar" id="tabbar" aria-label="功能">
     <div class="tabbar-in">
-      <button class="tb on" type="button" data-tab="home"><span class="ti ti-svg" id="tabHomeIcon"></span><span class="tl">照舊</span></button>
+      <button class="tb on" type="button" data-tab="home"><span class="ti ti-svg" id="tabHomeIcon"></span><span class="tl">常備</span></button>
       <button class="tb" type="button" data-tab="groups"><span class="ti ti-svg" id="tabGroupIcon"></span><span class="tl">飯團</span><i class="tb-badge" id="tbBadge"></i></button>
       <button class="tb" type="button" data-tab="rec"><span class="ti ti-svg" id="tabRecIcon"></span><span class="tl">推薦</span></button>
       <button class="tb" type="button" data-tab="gacha"><span class="ti ti-svg" id="tabGachaIcon"></span><span class="tl">扭蛋</span></button>
@@ -1058,7 +1069,7 @@
 
   <div class="who-modal" id="fixedModal">
     <div class="who-box nick-box fixed-box">
-      <h2 id="fxTitle">新增固定菜單</h2>
+      <h2 id="fxTitle">新增常備菜單</h2>
       <input id="fxName" maxlength="40" placeholder="名稱，例如：牛肉麵" autocomplete="off">
       <select id="fxCategory"></select>
       <select id="fxSlot">
@@ -1083,7 +1094,7 @@
         <button class="btn n-cancel" id="fxCancel">取消</button>
         <button class="btn n-save" id="fxSave">新增</button>
       </div>
-      <button class="btn fx-delete" id="fxDelete" style="display:none">刪除這項固定菜單</button>
+      <button class="btn fx-delete" id="fxDelete" style="display:none">刪除這項常備菜單</button>
     </div>
   </div>
 
@@ -1269,7 +1280,7 @@
         '<path d="M' + (cx - 2.4) + ' 21V16.8H' + (cx + 2.4) + 'V21" stroke-width="1.4"/>';
     }
     var tab = {
-      // 照舊: 김이 나는 밥그릇(늘 먹던 그 한 그릇)
+      // 常備: 김이 나는 밥그릇(늘 먹던 그 한 그릇)
       home: function () { return tabSq('<path d="M4 12.5h16Q20 19.5 12 19.5T4 12.5Z"/><path d="M8.5 21h7"/><path d="M6.6 12.5Q7 7 12 7t5.4 5.5"/><path d="M10 3.2q-.9 1 0 2M14 3.2q-.9 1 0 2"/>'); },
       groups: function () { return wrap('0 0 40 24', 40, 24, onigiri(7) + onigiri(20) + onigiri(33) + '<path d="M11.6 11.2Q13.5 9.4 15.4 11.2M24.6 11.2Q26.5 9.4 28.4 11.2"/>'); },
       // 推薦: 반짝이
@@ -1345,8 +1356,9 @@
       "糰糰覺得%s可以先放一邊"
     ],
     "home": {
-      "noFixed": "這餐沒有固定菜單，糰糰也沒轍",
-      "firstEmpty": "還沒有固定菜單？先加一個常吃的吧",
+      "listTitle": "我的常備菜單",
+      "noFixed": "這餐沒有常備菜單，糰糰也沒轍",
+      "firstEmpty": "還沒有常備菜單？先加一個常吃的吧",
       "firstAdd": "新增",
       "firstRec": "或先去推薦看看",
       "closed": "今天公休，糰糰也要休息"
@@ -1386,7 +1398,7 @@
       "already": "早就記好了啦",
       "sent": "糰糰收到了！",
       "sendFail": "沒送出去，糰糰再等你一次",
-      "promoAdded": "加進固定菜單了，糰糰記住",
+      "promoAdded": "加進常備菜單了，糰糰記住",
       "addFail": "加不進去，再試一次",
       "fxEdited": "改好了，糰糰記住了",
       "fxAdded": "新增好了，糰糰記上了",
@@ -1445,6 +1457,7 @@
       "need": "還差 {n} 升到〈{name}〉",
       "max": "已經是最高等級，糰糰服了",
       "badges": "勳章",
+      "tierMax": "全部拿到了",
       "questTitle": "本週任務",
       "questSub": "週一到週日，完成一個就加經驗",
       "questDone": "糰糰：「{name}」達成！+{xp} 經驗",
@@ -1517,8 +1530,8 @@
       "slides": [
         {
           "mood": "happy",
-          "tag": "一個人 → 照舊",
-          "say": "一個人吃？照舊就好，糰糰幫你記"
+          "tag": "一個人 → 常備",
+          "say": "一個人吃？吃常備就好，糰糰幫你記"
         },
         {
           "mood": "base",
@@ -1555,11 +1568,13 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  /** 화면 표시만: 시트 값 「固定」은 「常備」로 보여 준다(시트·서버 값은 그대로) */
+  function methodLabel(m) { return m === '固定' ? '常備' : m; }
   function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
 
   // @toast-begin
-  /** 토스트 표시 시간(ms): 짧은 문장 약 3.6초, 글자 수에 비례해 늘고 상한 6초 */
-  function toastMs(msg) { var n = Array.from(String(msg == null ? '' : msg)).length; return Math.min(6000, Math.max(3600, 2400 + n * 110)); }
+  /** 토스트 표시 시간(ms): 3초 고정(누르면 바로 닫힘) */
+  function toastMs(msg) { return 3000; }
   // @toast-end
   function toast(msg, isErr) {
     var t = $('toast');
@@ -1607,7 +1622,7 @@
   // 오늘 날짜(기기 시계, 대만 기준 사용자용 앱이라 기기 날짜로 충분) — 캐시가 어제 것이면 메뉴(요일별)는 쓰지 않는다
   function todayLocal_() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
-  // ===== 첫 화면 데이터: getBootstrap 1회(신원 + 照舊 + 飯團 목록·진행 중 라운드) =====
+  // ===== 첫 화면 데이터: getBootstrap 1회(신원 + 常備 + 飯團 목록·진행 중 라운드) =====
   function applyBoot(boot) {
     var app = boot.app;
     state.skew = (boot.serverNowMs || Date.now()) - Date.now();
@@ -1732,7 +1747,7 @@
   }, { passive: true });
   document.addEventListener('touchcancel', function () { swipe = null; }, { passive: true });
 
-  // ===== 照舊(홈) =====
+  // ===== 常備(홈) =====
   // 식사 시간 전에 미리 볼 때 🍙가 하는 말 (끼니별로 앱을 연 동안 한 번만 뽑아 다시 그려도 안 바뀜)
   var PEEK = TXT.peek;
   var peekPick = {};
@@ -1771,8 +1786,9 @@
         '<button class="btn fe-add" id="feAdd" type="button">' + esc(TXT.home.firstAdd) + '</button>' +
         '<button class="fe-rec" id="feRec" type="button">' + esc(TXT.home.firstRec) + '</button></div>';
     } else {
+      html += '<h2 class="fx-head">' + esc(TXT.home.listTitle) + '</h2>';
       html += noneNow ? stateHtml('sulk', TXT.home.noFixed) : renderFixedGroups();
-      html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增固定菜單" aria-label="新增固定菜單">+</button></div>';
+      html += '<div class="add-fixed-wrap"><button class="add-fixed-fab" id="addFixedBtn" type="button" title="新增常備菜單" aria-label="新增常備菜單">+</button></div>';
     }
     html += '</section>';
     $('main').innerHTML = html;
@@ -1799,13 +1815,13 @@
   }
 
   // ===== 吃貨等級(첫 화면 프로필 줄 + 等級 화면 + 勳章) · 口袋名單(♡·我的口袋) =====
-  // 레벨 이미지: img/level/{레벨숫자}.png (예: img/level/1.png). 파일이 있으면 숫자 자리 표시 대신 그 이미지가 보인다.
+  // 레벨 그림(糰糰): mascot/lv{레벨숫자}.png (예: mascot/lv1.png). 파일이 있으면 숫자 자리 표시 대신 그 그림이 보인다(없으면 지금 모양).
   var LV_IMG_MISS = {};
   window.lvImgMiss = function (img) { LV_IMG_MISS[img.getAttribute('data-n')] = 1; img.remove(); };
   window.lvImgHit = function (img) { if (img.parentNode) img.parentNode.classList.add('has'); };
   function lvIco(n, cls) {
     return '<span class="' + cls + '"><span class="n">' + esc(n) + '</span>' + (LV_IMG_MISS[n] ? '' :
-      '<img src="img/level/' + esc(n) + '.png" data-n="' + esc(n) + '" alt="" onload="lvImgHit(this)" onerror="lvImgMiss(this)">') + '</span>';
+      '<img src="mascot/lv' + esc(n) + '.png" data-n="' + esc(n) + '" alt="" onload="lvImgHit(this)" onerror="lvImgMiss(this)">') + '</span>';
   }
   var BADGE_ICON = {
     first: '<path d="M12 3c-2.2 0-3.6 2-3.6 4.3S9.8 11.5 12 11.5s3.6-1.9 3.6-4.2S14.2 3 12 3z"/><path d="M12 11.5V21"/>',
@@ -1824,7 +1840,26 @@
     fcraving: '<path d="M4 5h16v11h-9.5L4 20z"/><path d="M9 9.5h6M9 12.5h3.5"/>',
     fweek: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2"/>'
   };
-  function bIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BADGE_ICON[id] || BADGE_ICON.first) + '</svg>'; }
+  // 단계형 勳章 13계열: 옛 1단계 勳章과 같은 그림을 쓰는 계열은 그 아이콘을 빌린다
+  BADGE_ICON.types = BADGE_ICON.explore; BADGE_ICON.loyal = BADGE_ICON.regular; BADGE_ICON.buddy = BADGE_ICON.group3;
+  BADGE_ICON.pocket = BADGE_ICON.pocket10; BADGE_ICON.streak = BADGE_ICON.streak3; BADGE_ICON.quest = BADGE_ICON.fquest;
+  BADGE_ICON.craving = BADGE_ICON.fcraving; BADGE_ICON.gacha = BADGE_ICON.fgacha;
+  BADGE_ICON.shops = '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>';
+  BADGE_ICON.logs = '<path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15 3.5V7.5h4"/><path d="M9 11.5h6.5M9 14.5h6.5M9 17.5h4"/>';
+  BADGE_ICON.areas = '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5l-5.5 2.5-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>';
+  BADGE_ICON.meals = '<circle cx="8" cy="12" r="4.5"/><circle cx="16.5" cy="12" r="4.5"/><path d="M8 9.5V12l1.5 1.5M16.5 9.5V12l1.5 1.5"/>';
+  BADGE_ICON.fixed = '<path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M8.5 20.5h7"/><path d="M8 8.2q1-1.5 0-3M12 8.2q1-1.5 0-3M16 8.2q1-1.5 0-3"/>';
+  /** 'types:2' 같은 단계 키 → 계열 id */
+  function bKey(id) { return String(id || '').split(':')[0]; }
+  function bIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BADGE_ICON[bKey(id)] || BADGE_ICON.first) + '</svg>'; }
+  // 勳章 그림: badges/<계열id>.png(1회성 勳章은 badges/<id>.png). 파일이 있으면 그림, 없으면 아이콘(지금 모양)
+  var B_IMG_MISS = {};
+  window.bImgMiss = function (img) { B_IMG_MISS[img.getAttribute('data-k')] = 1; img.remove(); };
+  window.bImgHit = function (img) { if (img.parentNode) img.parentNode.classList.add('has'); };
+  function bPic(id) {
+    var k = bKey(id);
+    return '<span class="bpic">' + bIcon(k) + (B_IMG_MISS[k] ? '' : '<img src="badges/' + esc(k) + '.png" data-k="' + esc(k) + '" alt="" onload="bImgHit(this)" onerror="bImgMiss(this)">') + '</span>';
+  }
   function heartSvg() { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>'; }
   function fmt(t, o) { return String(t).replace(/\{(\w+)\}/g, function (_, k) { return o[k] == null ? '' : o[k]; }); }
 
@@ -1884,8 +1919,18 @@
     fquest:   { more: '四個任務一次搞定，太強了', hint: function (c) { return '一週的四個任務全部完成就拿得到' } }
   };
   function badgeDateText(d) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(d || '')); return m ? (+m[2]) + '/' + (+m[3]) : ''; }
+  var TIER_NAME = ['銅', '銀', '金'];
+  /** 단계형 勳章 설명: 지금 단계 + 다음 단계까지 n/목표(糰糰 말투) */
+  function seriesExplain(b) {
+    var t = Number(b.tier) || 0, n = Number(b.n) || 0;
+    if (t >= 3) return b.name + '・金：全部拿到了，糰糰甘拜下風';
+    var goal = b.next != null ? b.next : (b.goals || [])[t], nx = TIER_NAME[t];
+    var head = t > 0 ? b.name + '・' + TIER_NAME[t - 1] + '：' : b.name + '：';
+    return head + b.desc + '就拿得到' + nx + '，目前 ' + n + '/' + goal + '，糰糰幫你數著';
+  }
   function badgeExplain(b, ctx) {
     if (!b) return '';
+    if (b.series) return seriesExplain(b);
     var e = EXPLAIN_B[b.id];
     if (!e) return b.name + '：' + b.desc;
     if (b.earned) { var dt = badgeDateText(b.date); return b.name + '：' + (dt ? dt + ' 拿到的，' : '拿到了，') + e.more; }
@@ -1928,7 +1973,12 @@
       if (d.quest) questToast(d.quest);
       $('lvBadges').className = 'bd-grid';
       $('lvBadges').innerHTML = d.badges.map(function (b) {
-        return '<div class="bd' + (b.earned ? '' : ' off') + '" data-b="' + esc(b.id) + '" role="button" tabindex="0">' + bIcon(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
+        if (b.series) {
+          return '<div class="bd' + (b.tier ? ' t' + b.tier : ' off') + '" data-b="' + esc(b.id) + '" role="button" tabindex="0">' + bPic(b.id) + '<b>' + esc(b.name) +
+            (b.tier ? '<span class="bd-tier">' + esc(TIER_NAME[b.tier - 1]) + '</span>' : '') + '</b><small>' +
+            esc(b.next != null ? b.n + ' / ' + b.next : TXT.lv.tierMax) + '</small></div>';
+        }
+        return '<div class="bd' + (b.earned ? '' : ' off') + '" data-b="' + esc(b.id) + '" role="button" tabindex="0">' + bPic(b.id) + '<b>' + esc(b.name) + '</b><small>' + esc(b.desc) + '</small></div>';
       }).join('');
     }).withFailureHandler(function () { if ($('lvBadges')) $('lvBadges').textContent = TXT.lv.loadFail; }).getLevelDetail(token);
   }
@@ -1956,7 +2006,7 @@
     var ids = list.map(function (b) { return b.id; });
     $('unlockBody').innerHTML = MASCOT.svg('happy', { size: 96 }) +
       '<div class="ul-say">' + esc(fmt(TXT.lv.unlock, { name: list[0].name })) + '</div>' +
-      '<div class="ul-list">' + list.map(function (b) { return '<span class="ul-b">' + bIcon(b.id) + esc(b.name) + '</span>'; }).join('') + '</div>' +
+      '<div class="ul-list">' + list.map(function (b) { return '<span class="ul-b">' + bPic(b.id) + esc(b.name) + '</span>'; }).join('') + '</div>' +
       (list.length > 1 ? '<div class="ul-more">' + esc(fmt(TXT.lv.more, { n: list.length - 1 })) + '</div>' : '');
     $('unlockOk').textContent = TXT.lv.ok;
     $('unlockModal').style.display = 'flex';
@@ -2119,9 +2169,9 @@
   function cardAssets(kind) {
     var jobs = { tm: mascotImg('happy') }, D = SH.data;
     if (kind === 'level' && D.level) {
-      jobs.lvimg = loadImg('img/level/' + D.level.lv + '.png');
+      jobs.lvimg = loadImg('mascot/lv' + D.level.lv + '.png');
       var earned = (D.level.badges || []).filter(function (b) { return b.earned; }).slice(0, 6);
-      earned.forEach(function (b) { jobs['b_' + b.id] = svgImg(BADGE_ICON[b.id] || BADGE_ICON.first, '#e4572e'); });
+      earned.forEach(function (b) { jobs['b_' + b.id] = svgImg(BADGE_ICON[bKey(b.id)] || BADGE_ICON.first, '#e4572e'); });
     }
     if (kind === 'week' && D.week[SH.weekOff]) {
       D.week[SH.weekOff].days.forEach(function (d) { d.cats.slice(0, 2).forEach(function (c) { jobs['c_' + c] = svgImg(CAT_ICON.get(c), '#e4572e'); }); });
@@ -2962,7 +3012,7 @@
     promoCurrent = cands.filter(function (c) { return !promoDismissed[c.name]; })[0] || null;
     if (!promoCurrent) { $('promo').style.display = 'none'; return; }
     $('promoText').textContent = '最近常吃：' + promoCurrent.name +
-      '（28天內 ' + promoCurrent.count + ' 次）— 要加入固定菜單嗎？';
+      '（28天內 ' + promoCurrent.count + ' 次）— 要加入常備菜單嗎？';
     $('promoAdd').disabled = false;
     $('promo').style.display = 'flex';
   }
@@ -3022,7 +3072,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.card'), function (c) { c.classList.remove('selected'); });
     if (el) el.classList.add('selected');
     $('pickedName').textContent = sel.menu;
-    $('pickedMethod').textContent = '選擇方式：' + sel.method;
+    $('pickedMethod').textContent = '選擇方式：' + methodLabel(sel.method);
     $('note').value = '';
     $('bar').classList.remove('note-open');   // 모바일: 備註는 접어 둔다
     $('bar').style.display = 'block';
@@ -3256,7 +3306,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.28-b';
+  var APP_VERSION = '2026.11.28-c';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -3513,7 +3563,7 @@
 
   function openFixedAdd() {
     fxEditId = null;
-    $('fxTitle').textContent = '新增固定菜單';
+    $('fxTitle').textContent = '新增常備菜單';
     $('fxName').value = '';
     $('fxCategory').value = FIXED_CATS[0];
     $('fxSlot').value = '';
@@ -3528,7 +3578,7 @@
 
   function openFixedEdit(item) {
     fxEditId = item.id;
-    $('fxTitle').textContent = '修改固定菜單';
+    $('fxTitle').textContent = '修改常備菜單';
     $('fxName').value = item.name;
     $('fxCategory').value = item.category;
     $('fxSlot').value = item.slot || '';
@@ -3576,7 +3626,7 @@
   });
   $('fxDelete').addEventListener('click', function () {
     if (!fxEditId) return;
-    if (!confirm('確定要刪除這項固定菜單嗎？')) return;
+    if (!confirm('確定要刪除這項常備菜單嗎？')) return;
     $('fxDelete').disabled = true;
     api
       .withSuccessHandler(function () {
@@ -3658,7 +3708,7 @@
       return '<div class="history-day"><h4>' + esc(d) + '</h4>' + map[d].map(function (r) {
         return '<div class="history-row' + (r.note ? ' has-note' : '') + '"' + (r.note ? ' data-note="' + esc(r.note) + '" tabindex="0" role="button"' : '') + '><span class="h-slot">' + esc(r.slot) + '</span>' +
           '<span class="h-menu">' + esc(r.menu) + '</span>' +
-          '<span class="h-method">' + esc(r.method) + '</span></div>';
+          '<span class="h-method">' + esc(methodLabel(r.method)) + '</span></div>';
       }).join('') + '</div>';
     }).join('');
   }
