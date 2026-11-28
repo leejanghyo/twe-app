@@ -641,6 +641,8 @@
     .inst-st { flex: 1 1 auto; min-width: 0; }
     .inst-steps li { align-items: flex-start; }
     .inst-pill { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; margin: 1px 1px; padding: 3px 10px 3px 6px; border-radius: 999px; background: #48484a; color: #fff; font-size: 14px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+    .inst-nw { white-space: nowrap; }
+    .inst-sub { display: block; margin-top: 2px; font-size: 13px; line-height: 1.6; font-weight: 600; color: var(--muted); }
     .inst-pill svg { width: 18px; height: 18px; flex: none; display: block; }
     .inst-head { display: flex; align-items: center; gap: 10px; }
     .inst-head .tm { width: 46px; flex: none; }
@@ -3254,7 +3256,7 @@
   // 홈화면 앱은 백그라운드에서 돌아와도 페이지를 다시 읽지 않고, GitHub Pages는 cache-control: max-age=600 이라
   // 옛 index.html이 남을 수 있다. version.json(캐시 무시)과 이 값이 다르면 「有新版本」 배너로 알린다.
   // 배포할 때 이 값과 version.json 의 version 을 같이 올린다.
-  var APP_VERSION = '2026.11.28-a';
+  var APP_VERSION = '2026.11.28-b';
   $('verTag').textContent = $('verTop').textContent = $('setVer').textContent = 'v' + APP_VERSION;
   var latestVersion = '', lastVerCheck = 0;
   function checkVersion_(force) {
@@ -4344,13 +4346,16 @@
     dots: ['dots', ''], menu: ['menu', ''], vdots: ['vdots', ''], share: ['share', '分享'], more: ['more', '檢視較多'], add: ['add', '加入主畫面']
   };
   function instPill(k) { var d = INST_PILL[k]; return '<span class="inst-pill"><svg viewBox="0 0 24 24" aria-hidden="true">' + INST_SVG[d[0]] + '</svg>' + d[1] + '</span>'; }
-  function instStepHtml(t) { return t.replace(/\{(\w+)\}/g, function (_, k) { return INST_PILL[k] ? instPill(k) : ''; }); }
+  function instStepHtml(t) {   // '\n' 뒤는 작은 보조 줄(알약만 혼자 떨어지지 않게 줄을 나눔)
+    var f = function (x) { return x.replace(/「[^」]{4,}」/g, '<span class="inst-nw">$&</span>').replace(/\{(\w+)\}/g, function (_, k) { return INST_PILL[k] ? instPill(k) : ''; }); };   // 4글자 이상 「…」 안에서 줄이 끊기지 않게(짧은 「新增」은 그대로 둬야 375px에서 한 줄 유지)
+    var p = t.split('\n'); return f(p[0]) + (p[1] ? '<span class="inst-sub">' + f(p[1]) + '</span>' : '');
+  }
   var INSTALL_TXT = {
     inappIos: { title: '糰糰說：請改用 Safari 打開', note: '在這個 App 裡面不能加到主畫面。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Safari 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Safari 就好' },
     inappAndroid: { title: '糰糰說：請改用 Chrome 打開', note: '在這個 App 裡面不能安裝。點右上角選單選「用瀏覽器開啟」，或按下面「複製連結」，貼到 Chrome 的網址列就好。', copy: '複製連結', copied: '已複製，貼到 Chrome 就好' },
-    ios: { title: '把糰糰放到主畫面', steps: ['點右下角的 {dots}，沒有的話點網址列左邊的 {menu}', '選 {share}，再點 {more}', '滑到最下面選 {add}，按「新增」'], note: '有些手機下面直接就有「分享」' },
+    ios: { title: '把糰糰放到主畫面', steps: ['點右下角的 {dots}\n沒有的話，點網址列左邊的 {menu}', '選 {share}，再點 {more}', '滑到最下面選 {add}，按「新增」'], note: '有些手機下面直接就有「分享」' },
     iosIpad: { title: '把糰糰放到主畫面', steps: ['點畫面右上角的「分享」', '往下滑，選「加入主畫面」', '按右上角的「新增」'] },
-    android: { title: '把糰糰裝到手機', install: '安裝', manual: '點右上角的 {vdots}，選「加到主畫面」或「安裝應用程式」' },
+    android: { title: '把糰糰裝到手機', install: '安裝', manual: '點網址列右邊的 {vdots}，選「加到主畫面」或「安裝應用程式」' },
     never: '不要再提醒', close: '關閉'
   };
   var instDeferred = null, instIntroWait = false;
@@ -4394,10 +4399,9 @@
         (manual
           ? '<ol class="inst-steps"><li><span class="inst-st">' + instStepHtml(T.android.manual) + '</span></li></ol><div class="inst-act"><span></span><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>'
           : '<div class="inst-act"><button class="btn n-save" type="button" data-inst="install">' + T.android.install + '</button><button class="inst-never" type="button" data-inst="never">' + T.never + '</button></div>');
-      if (manual) { $('instArrow').classList.remove('br'); $('instArrow').classList.add('top', 'on'); }
     } else return;
     box.innerHTML = h; box.classList.toggle('top', kind === 'ios-safari'); box.classList.toggle('pad', kind === 'ios-safari' && ipad); box.classList.add('on'); box.dataset.kind = kind;
-    $('instVeil').classList.toggle('on', kind === 'inapp' || kind === 'ios-safari');
+    $('instVeil').classList.toggle('on', kind === 'inapp' || kind === 'ios-safari' || (kind === 'android-chrome' && !!manual));   // 1.4: 안드로이드 대체 카드도 뒤 어둡게(화살표 없음)
     window.__instShownMs = Math.round(performance.now());
   }
   $('inst').addEventListener('click', function (ev) {
